@@ -1,4 +1,5 @@
 # mounir1.github.io
-this is my website readme file !
+this is my CV  !
 
-well no much to say here but maybe thanks for reading :D
+I'll try update it using jekyll soon
+
