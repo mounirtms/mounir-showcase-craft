@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<svg class="icon icon-skype" version="1.1" id="Layer_1" 
-xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
- width="32" height="32" viewBox="0 0 400.932 400.932" style="enable-background:new 0 0 400.932 400.932;"
- xml:space="preserve">
+<svg class="icon icon-skype" version="1.1" id="Layer_1" width="32" height="32"
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" 
+viewBox="0 0 400.932 400.932" style="enable-background:new 0 0 400.932 400.932;" xml:space="preserve">
 <path class="foreground" 
   d="M384.762,231.039c-6.361-8.792-9.309-19.53-9.297-30.382c0.001-0.063,0.001-0.126,0.001-0.19
 	c0-96.649-78.35-174.999-174.999-174.999c-21.143,0-41.402,3.763-60.162,10.64c-10.149,3.72-21.267,4.435-31.672,1.504
