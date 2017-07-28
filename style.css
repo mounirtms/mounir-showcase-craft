@@ -1,0 +1,255 @@
+ html {
+     height: 100%;
+     box-sizing: border-box;
+     background-color: #AE2
+ }
+
+ #header {
+     position: fixed;
+     z-index: 1;
+     height: 40px;
+     width: 99%;
+     background-color: #668284;
+     margin-bottom: 50px
+ }
+
+ p {
+     max-width: 70%;
+ }
+
+ #name {
+     float: left;
+     margin-left: 20px;
+     padding-bottom: 15px;
+     font-size: 16px;
+     font-family: Verdana, sans-serif;
+     color: #ffffff;
+ }
+
+ #email {
+     float: right;
+     margin-right: 20px;
+     padding-bottom: 15px;
+     font-size: 16px;
+     font-family: Verdana, sans-serif;
+     color: #ffffff;
+ }
+
+ #contact {
+     margin-left: 45%;
+     padding-bottom: 15px;
+     font-size: 16px;
+     font-family: Verdana, sans-serif;
+     color: #ffffff;
+ }
+
+ a:hover {
+     font-weight: bold;
+ }
+
+ .right {
+     padding-top: 50px;
+     height: 100%;
+     padding-left: 5px;
+     width: 100%;
+     background-color: #FEFAE2
+ }
+
+ #footer {
+     position: fixed;
+     width: 99%;
+     bottom: 0;
+     height: 40px;
+     text-align: center;
+     background-color: #668284;
+ }
+
+ h3 {
+     text-decoration: underline;
+ }
+
+ #job-responsibilities {
+     padding: 1px;
+ }
+
+ .job-title {
+     font-weight: bold;
+ }
+
+ table {
+     border: 1px dashed black;
+ }
+
+ td {
+     padding: 2px;
+     border: 1px solid #E88741;
+ }
+
+ #course-name {
+     font-weight: bold;
+ }
+
+ #company-name {
+     height: 2px;
+     text-decoration: underline;
+ }
+
+ #job-title {
+     height: 5px;
+ }
+
+ .job-duration {
+     float: right;
+ }
+
+ #heading {
+     font-weight: bold;
+ }
+
+ body {
+     background-color: #333;
+ }
+
+ *,
+ *:before,
+ *:after {
+     box-sizing: inherit;
+ }
+
+ #declaration {
+     margin-bottom: 100px;
+ }
+
+ #redessociales {
+     width: 64px;
+     height: 64px;
+     position: absolute;
+     bottom: 10px;
+     border-radius: 75px;
+     border: 5px solid #fff;
+     background: url(https://4.bp.blogspot.com/-gKMIOgeaEBY/UWHsOA382oI/AAAAAAAABpI/5GdyRTAeKII/s1600/share_core_square.jpg)
+ }
+
+ .smedia {
+     position: absolute;
+     -webkit-transition: left 0.5s cubic-bezier(0.1, 0.8, 0.9, 1), opacity 1s linear;
+     -moz-transition: left 0.5s cubic-bezier(0.1, 0.8, 0.9, 1), opacity 1s linear;
+     -o-transition: left 0.5s cubic-bezier(0.1, 0.8, 0.9, 1), opacity 1s linear;
+     display: inline;
+     opacity: 0;
+     width: 46px;
+     height: 46px;
+     z-index: 100;
+     margin: 10px 0px 0px 20px;
+     text-indent: -9999px;
+     background: no-repeat;
+     left: 3px;
+ }
+
+ #redessociales:hover .smedia {
+     opacity: 1;
+     transform: translate(0px, 0);
+     -webkit-transform: translate(0px, 0);
+     -o-transform: translate(0px, 0);
+     -moz-transform: translate(0px, 0);
+     margin: 10px 0px 0px 20px;
+     position: absolute;
+ }
+
+ #redessociales:hover .smedia:nth-child(1) {
+     position: absolute;
+     left: 65px;
+ }
+
+ #redessociales:hover .smedia:nth-child(2) {
+     position: absolute;
+     left: 110px;
+ }
+
+ #redessociales:hover .smedia:nth-child(3) {
+     position: absolute;
+     left: 155px;
+ }
+
+ #redessociales:hover .smedia:nth-child(4) {
+     position: absolute;
+     left: 200px;
+ }
+
+ #redessociales:hover .smedia:nth-child(5) {
+     position: absolute;
+     left: 245px;
+ }
+
+ #redessociales:hover .smedia:nth-child(6) {
+     position: absolute;
+     left: 290px;
+ }
+
+ .smedia.facebook {
+     background: url(https://4.bp.blogspot.com/-49s_0_9mdVo/UWHsMIvJBNI/AAAAAAAABn8/6bVMlN4Qz7Y/s1600/bubble_facebook_share_button.png);
+ }
+
+ .smedia.twitter {
+     background: url(https://2.bp.blogspot.com/-3r8sHe1Qy5M/UWHsNMDDzHI/AAAAAAAABog/q3V7mYirmOY/s1600/bubble_twitter_share_button.png);
+ }
+
+ .smedia.email {
+     background: url(https://3.bp.blogspot.com/-ZhFqBhp79cA/UWHsMBmPxsI/AAAAAAAABn4/O8k_pGf1oCU/s1600/bubble_email_share_button.png);
+ }
+
+ .smedia.google {
+     background: url(https://i.imgur.com/EXSY2Vb.png);
+ }
+
+ .smedia.youtube {
+     background: url(https://4.bp.blogspot.com/-x2oyT1dBzwA/UWHsNtcWXVI/AAAAAAAABo8/8kCXTVMbM6Y/s1600/bubble_youtube_share_button.png);
+ }
+
+ .smedia.vimeo {
+     background: url(https://2.bp.blogspot.com/-01SWPeX-584/UWHsNim9CAI/AAAAAAAABo4/Z9jMox_9UrE/s1600/bubble_vimeo_share_button.png);
+ }
+
+ .smedia:hover {
+     background-position: 0 -46px;
+ }
+    .icon { width: 32px; height: 32px }
+
+      .icon .foreground, .icon .background { transition: fill .2s ease-in }
+
+
+      /* .colors-on-hover */
+      .colors-on-hover .icon-twitter .foreground { fill: black }
+      .colors-on-hover .icon-twitter:hover .foreground { fill: #2aa9e0 }
+
+      .colors-on-hover .icon-facebook .background { fill: black }
+      .colors-on-hover .icon-facebook .foreground { fill: transparent }
+      .colors-on-hover .icon-facebook:hover .background { fill: #3b5999 }
+      .colors-on-hover .icon-facebook:hover .foreground { fill: white }
+
+      .colors-on-hover .icon-googleplus .background { fill: black }
+      .colors-on-hover .icon-googleplus .foreground { fill: transparent }
+      .colors-on-hover .icon-googleplus:hover .background { fill: #dd4b39 }
+      .colors-on-hover .icon-googleplus:hover .foreground { fill: white }
+
+      .colors-on-hover .icon-linkedin .background { fill: black }
+      .colors-on-hover .icon-linkedin .foreground { fill: transparent }
+      .colors-on-hover .icon-linkedin:hover .background { fill: #0077b5 }
+      .colors-on-hover .icon-linkedin:hover .foreground { fill: white }
+      
+      
+      .colors-on-hover .icon-instagram:hover .insta1 { fill: url(#SVGID_1_);}
+      .colors-on-hover .icon-instagram:hover .insta2 { fill: url(#SVGID_2_); }
+      .colors-on-hover .icon-instagram:hover .insta3 { fill: url(#SVGID_3_); }
+ 
+      .colors-on-hover .icon-skype:hover .foreground { fill: #00AAF2 }
+
+      .colors-on-hover .icon-rss .background { fill: black }
+      .colors-on-hover .icon-rss .foreground { fill: transparent }
+      .colors-on-hover .icon-rss:hover .background { fill: #f28c36 }
+      .colors-on-hover .icon-rss:hover .foreground { fill: white }
+
+      .colors-on-hover .icon-envelope .background { fill: transparent }
+      .colors-on-hover .icon-envelope .foreground { fill: black }
+      .colors-on-hover .icon-envelope:hover .foreground { fill: #fdf5e8 }
+
