@@ -121,13 +121,13 @@
  }
 
  #redessociales {
-     width: 64px;
-     height: 64px;
+     width: 44px;
+     height: 44px;
      position: absolute;
-     bottom: 10px;
+     bottom: 20px;
      border-radius: 75px;
-     border: 5px solid #fff;
-     background: url(https://4.bp.blogspot.com/-gKMIOgeaEBY/UWHsOA382oI/AAAAAAAABpI/5GdyRTAeKII/s1600/share_core_square.jpg)
+     border: 5px solid red;
+     background: url(https://www.herroom.com/images/filters-share-icon.png)
  }
 
  .smedia {
