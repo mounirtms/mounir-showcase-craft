@@ -271,7 +271,10 @@
       
       .colors-on-hover .icon-plunker:hover .hplnkr { fill: #fdf5e8 }
 
-
+      .colors-on-hover .icon-vk .hvk1 { fill: transparent }
+      .colors-on-hover .icon-vk:hover .hvk1 { fill: #44678D }
+      .colors-on-hover .icon-vk:hover .hvk2 { fill: #FFFFFF }
+ 
       .colors-on-hover .icon-slack:hover .slack1 { fill: #DFA22F }
       .colors-on-hover .icon-slack:hover .slack2 { fill: #3CB187 }
       .colors-on-hover .icon-slack:hover .slack3 { fill: #CE1E5B }
@@ -280,3 +283,10 @@
       .colors-on-hover .icon-slack:hover .slack6 { fill: #72C5CD }
       .colors-on-hover .icon-slack:hover .slack7 { fill: #248C73 }
       .colors-on-hover .icon-slack:hover .slack8 { fill: #62803A }
+
+       .colors-on-hover .icon-line .hline1 { fill: transparent }
+      .colors-on-hover .icon-line .hline2 { fill: black }
+      .colors-on-hover .icon-line .line0 { fill: transparent }
+      .colors-on-hover .icon-line:hover .hline1 { fill: #00C200 }
+      .colors-on-hover .icon-line:hover .hline2 { fill: #00C500 }
+      .colors-on-hover .icon-line:hover .line0 { fill: #FFFFFF }
