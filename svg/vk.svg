@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg class="icon icon-vk" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 455.731 455.731" style="enable-background:new 0 0 455.731 455.731;" xml:space="preserve">
+<svg class="icon icon-vk" version="1.1" id="Capa_1" width="32" height="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 455.731 455.731" style="enable-background:new 0 0 455.731 455.731;" 
+	 xml:space="preserve">
 <g>
 	<rect x="0" y="0" class="hvk1"  width="455.731" height="455.731"/>
 	<path class="hvk2" d="M118.06,138.69c10.922,26.972,24.764,52.402,42.995,75.231c2.418,3.038,5.466,5.739,8.677,7.938
