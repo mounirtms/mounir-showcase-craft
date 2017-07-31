@@ -268,3 +268,12 @@
       .colors-on-hover .icon-envelope .background { fill: transparent }
       .colors-on-hover .icon-envelope .foreground { fill: black }
       .colors-on-hover .icon-envelope:hover .foreground { fill: #fdf5e8 }
+
+      .colors-on-hover .icon-slack:hover .slack1 { fill: #DFA22F }
+      .colors-on-hover .icon-slack:hover .slack2 { fill: #3CB187 }
+      .colors-on-hover .icon-slack:hover .slack3 { fill: #CE1E5B }
+      .colors-on-hover .icon-slack:hover .slack4 { fill: #392538 }
+      .colors-on-hover .icon-slack:hover .slack5 { fill: #BB242A }
+      .colors-on-hover .icon-slack:hover .slack6 { fill: #72C5CD }
+      .colors-on-hover .icon-slack:hover .slack7 { fill: #248C73 }
+      .colors-on-hover .icon-slack:hover .slack8 { fill: #62803A }
