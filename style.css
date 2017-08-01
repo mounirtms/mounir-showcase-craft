@@ -378,6 +378,9 @@
  .colors-on-hover .icon-line:hover .line0 {
      fill: #FFFFFF
  }
+ .colors-on-hover .icon-messenger:hover .hmessenger {
+     fill: #0084ff
+ }
 .overlay {
   position: fixed;
   top: 0;
