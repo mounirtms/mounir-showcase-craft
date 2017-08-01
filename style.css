@@ -347,13 +347,18 @@
      fill: #72C5CD
  }
 
- .colors-on-hover .icon-slack:hover .slack7 {
-     fill: #248C73
- }
+ .colors-on-hover .icon-slack:hover .slack7 {fill: #248C73}
 
- .colors-on-hover .icon-slack:hover .slack8 {
-     fill: #62803A
- }
+ .colors-on-hover .icon-slack:hover .slack8 { fill: #62803A }
+
+  .colors-on-hover .icon-hangout .fil2 {fill:transparent}
+
+  .colors-on-hover .icon-hangout:hover .fil0 {fill:#212121;fill-rule:nonzero}
+  .colors-on-hover .icon-hangout:hover .fil1 {fill:#139A58}
+  .colors-on-hover .icon-hangout:hover .fil2 {fill:#FFFFFE}
+  .colors-on-hover .icon-hangout:hover .fil3 {fill:none}
+
+
 
  .colors-on-hover .icon-line .hline1 {
      fill: transparent
