@@ -199,7 +199,7 @@
  }
 
  .smedia.google {
-     background: url(https://i.imgur.com/EXSY2Vb.png);
+     background: url(https://image.ibb.co/hZoM7F/goo.png);
  }
 
  .smedia.youtube {
@@ -358,7 +358,16 @@
   .colors-on-hover .icon-hangout:hover .fil2 {fill:#FFFFFE}
   .colors-on-hover .icon-hangout:hover .fil3 {fill:none}
 
+  
+  .colors-on-hover .icon-hangout .hg1 {fill:black}
+  .colors-on-hover .icon-hangout .hg2 {fill:transparent}
+  .colors-on-hover .icon-hangout .hg3 {fill:black}
+  .colors-on-hover .icon-hangout .hg4 {fill:black}
 
+  .colors-on-hover .icon-hangout:hover  .hg1 {fill:url(#a)}
+  .colors-on-hover .icon-hangout:hover  .hg2 {fill:white}
+  .colors-on-hover .icon-hangout:hover  .hg3 {fill:#6fa14d}
+  .colors-on-hover .icon-hangout:hover  .hg4 {fill:#77ab50}
 
  .colors-on-hover .icon-line .hline1 {
      fill: transparent
