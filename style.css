@@ -369,32 +369,39 @@
   .colors-on-hover .icon-hangout:hover  .hg3 {fill:#6fa14d}
   .colors-on-hover .icon-hangout:hover  .hg4 {fill:#77ab50}
 
- .colors-on-hover .icon-line .hline1 {
-     fill: transparent
- }
+ .colors-on-hover .icon-line .hline1 {  fill: transparent }
 
- .colors-on-hover .icon-line .hline2 {
-     fill: black
- }
+ .colors-on-hover .icon-line .hline2 { fill: black }
 
- .colors-on-hover .icon-line .line0 {
-     fill: transparent
- }
+ .colors-on-hover .icon-line .line0 { fill: transparent }
 
- .colors-on-hover .icon-line:hover .hline1 {
-     fill: #00C200
- }
+ .colors-on-hover .icon-line:hover .hline1 {  fill: #00C200 }
 
- .colors-on-hover .icon-line:hover .hline2 {
-     fill: #00C500
- }
+ .colors-on-hover .icon-line:hover .hline2 { fill: #00C500 }
 
- .colors-on-hover .icon-line:hover .line0 {
-     fill: #FFFFFF
- }
- .colors-on-hover .icon-messenger:hover .hmessenger {
-     fill: #0084ff
- }
+ .colors-on-hover .icon-line:hover .line0 {  fill: #FFFFFF }
+ .colors-on-hover .icon-messenger:hover .hmessenger { fill: #0084ff }
+
+ 
+ .colors-on-hover .icon-telegram .telegram1 { fill: black }
+ .colors-on-hover .icon-telegram .telegram2 { fill: black }
+ .colors-on-hover .icon-telegram .telegram3 { fill: white }
+ .colors-on-hover .icon-telegram .telegram4 { fill: transparent }
+ .colors-on-hover .icon-telegram .telegram5 { fill: transparent }
+ .colors-on-hover .icon-telegram .telegram6 { fill: transparent }
+ .colors-on-hover .icon-telegram .telegram7 { fill: transparent }
+
+ .colors-on-hover .icon-telegram:hover .telegram1 { fill: #FFFFFF }
+ .colors-on-hover .icon-telegram:hover .telegram2 { fill: #D1D1D1 }
+ .colors-on-hover .icon-telegram:hover .telegram3 { fill: #DADDE0 }
+ .colors-on-hover .icon-telegram:hover .telegram4 { fill: #7AA5DA }
+ .colors-on-hover .icon-telegram:hover .telegram5 { fill: #5786B5 }
+ .colors-on-hover .icon-telegram:hover .telegram6 { fill: #9EC2E5 }
+ .colors-on-hover .icon-telegram:hover .telegram7 { fill: #ADBCC9 }
+
+ /* style="fill:#7AA5DA;"
+ style="fill:\#DADDE0;"
+ style="fill:#5786B5;" */
 .overlay {
   position: fixed;
   top: 0;
