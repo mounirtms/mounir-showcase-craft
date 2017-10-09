@@ -399,9 +399,15 @@
  .colors-on-hover .icon-telegram:hover .telegram6 { fill: #9EC2E5 }
  .colors-on-hover .icon-telegram:hover .telegram7 { fill: #ADBCC9 }
 
- /* style="fill:#7AA5DA;"
- style="fill:\#DADDE0;"
- style="fill:#5786B5;" */
+ .colors-on-hover .icon-snapchat .snap1 { fill: transparent }
+ .colors-on-hover .icon-telegram .snap2 { fill: transparent }
+
+ .colors-on-hover .icon-snapchat:hover .snap1 { fill: #fffc00 }
+ .colors-on-hover .icon-telegram:hover .snap2 { fill: #fff }
+ .colors-on-hover .icon-telegram:hover .snap3 { fill: #020202 }
+ /* snap 1 fill="#fffc00" 
+ fill="#fff"
+ fill="#020202" */
 .overlay {
   position: fixed;
   top: 0;
