@@ -12,7 +12,9 @@
      background-color: #668284;
      margin-bottom: 50px
  }
-
+ .container {
+    position: relative;
+}
  p {
      max-width: 70%;
  }
