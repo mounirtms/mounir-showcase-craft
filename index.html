@@ -10,11 +10,11 @@
     <meta name="author" content="Educaper.com , Mounir Abderrahmani">
 
     <title>Mounir Abderrahmani CV</title>
-    <link rel="shortcut icon" href="https://image.ibb.co/dQjnGv/pict.jpg" />
+    <link rel="shortcut icon" src="https://image.ibb.co/dQjnGv/pict.jpg" />
     <link rel="stylesheet" href="style.css">
     <link rel="canonical" href="http://mounir1.github.io" />
-    <script src="https://apis.google.com/js/platform.js" async defer>
-    </script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer> </script>
 
 </head>
 <title>Mounir CV</title>
@@ -30,7 +30,7 @@
 
     <div class="right">
         <h3>CV Highlights</h3>
-        <img style="position: absolute; top: 50px; right: 16px; width: 100px; height:120px;" src="img/pict.jpg">
+        <img style="position: absolute; top: 50px; right: 16px; width: 100px; height:120px;" src="https://image.ibb.co/dQjnGv/pict.jpg">
         <p>
         </p>
         <ul>
@@ -326,48 +326,21 @@
             </a>
 
         </div>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-
+       
+        
         <script>
             $('img').each(function () {
                 var $img = $(this);
                 var imgURL = $img.attr('src');
 
-                $.get(imgURL, function (data) {
-                    // Get the SVG tag, ignore the rest
-                    var $svg = $(data).find('svg');
-                    // Replace image with new SVG
+                $.get(imgURL, function (data) { 
+                    var $svg = $(data).find('svg'); 
                     $img.replaceWith($svg);
                 });
             });
         </script>
-        <script>
-            window.twttr = (function (d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0],
-                    t = window.twttr || {};
-                if (d.getElementById(id)) return t;
-                js = d.createElement(s);
-                js.id = id;
-                js.src = "https://platform.twitter.com/widgets.js";
-                fjs.parentNode.insertBefore(js, fjs);
-                t._e = [];
-                t.ready = function (f) {
-                    t._e.push(f);
-                };
-
-                return t;
-            }(document, "script", "twitter-wjs"));
-        </script>
-        <script>
-            (function (d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) return;
-                js = d.createElement(s);
-                js.id = id;
-                js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.10&appId=1243935258966670";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
-        </script>
+       
+        
         <div id="wechatqr" class="overlay">
             <div class="popup">
 
@@ -413,16 +386,7 @@
                 </div>
             </div>
         </div>
-
-        <script type="text/javascript" src="http://cdn.dev.skype.com/uri/skype-uri.js"></script>
-        <script type="text/javascript">
-            Skype.ui({
-                "name": "chat",
-                "element": "skypeme",
-                "participants": ["mounir1badi1"],
-                "imageSize": 0
-            });
-        </script>
+ 
     </div>
 </body>
 
