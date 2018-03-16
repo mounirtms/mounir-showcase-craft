@@ -1,0 +1,30 @@
+{
+  "name": "mounir1.github.io",
+  "version": "1.0.0",
+  "description": "<a href=\"http://mounir1.github.io\" >click here</a>",
+  "main": "index.js",
+  "scripts": {
+    "serve" :" http-server index.html",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mounir1/mounir1.github.io.git"
+  },
+  "keywords": [
+    "Mounir",
+    "Abderrahmani",
+    "CV"
+  ],
+  "author": "Mounir Abderrahmani",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mounir1/mounir1.github.io/issues"
+  },
+  "homepage": "https://github.com/mounir1/mounir1.github.io#readme",
+  "dependencies": {
+    "http-server": "^0.11.1",
+    "json-server": "^0.12.1",
+    "minifier": "^0.8.1"
+  }
+}
