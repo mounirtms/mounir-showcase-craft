@@ -1,1 +1,438 @@
-<p>Movies !!<p>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Top Recent Movies</title>
+    <meta charset="utf-8" />
+    <style>
+        #header {
+            padding: 5px 0;
+            float: left;
+            background-color: rgb(255, 194, 130);
+            width: 100%;
+        }
+
+        #header:after {
+            /* Needed because of the border hover effects. Height here must match height of "nav-links li:after"  */
+            content: '';
+            display: block;
+            height: 5px;
+        }
+
+        #header h1 {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: white;
+        }
+
+        #header img {
+            width: 120px;
+            margin: auto;
+            padding: auto;
+            display: inherit;
+            position: absolute;
+            top: 0px;
+            right: 16px;
+        }
+
+        @media (min-width: 0px) {
+            .rowx[class*="three column mobile"]>.columnx {
+                background: green;
+                width: 33.33333333333333%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .rowx[class*="six column tablet"]>.columnx {
+                background: blue;
+                width: 16.66666666666667%;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .rowx[class*="twelve column desktop"]>.columnx {
+                background: orange;
+                width: 8.33333333333333%;
+            }
+        }
+
+        .ui.grid * {
+            font-size: 14px !important
+        }
+
+        /* Styles go here */
+
+        .gallery {
+            padding: auto;
+            margin: auto;
+        }
+
+        .lightbox-nav {
+            position: relative;
+            margin-bottom: 12px;
+            /* the font-size of .btn-xs */
+            height: 22px;
+            text-align: center;
+            font-size: 0;
+            /* prevent the otherwise inherited font-size and line-height from adding extra space to the bottom of this div */
+        }
+
+        .lightbox-nav .btn-group {
+            vertical-align: top;
+        }
+
+        .lightbox-nav .close {
+            /* absolutely position this in order to center the nav buttons */
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .lightbox-image-container {
+            position: relative;
+            text-align: center;
+            /* center the image */
+        }
+
+        /* the caption overlays the top left corner of the image */
+
+        .lightbox-image-caption {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 0.5em 0.9em;
+            /* the left and right margins are offset by 0.4em for the span box-shadow */
+            color: #000;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: left;
+            text-shadow: 0.1em 0.1em 0.2em rgba(255, 255, 255, 0.5);
+        }
+
+        .lightbox-image-caption span {
+            padding-top: 0.1em;
+            padding-bottom: 0.1em;
+            background-color: rgba(255, 255, 255, 0.75);
+            /* pad the left and right of each line of text */
+            box-shadow: 0.4em 0 0 rgba(255, 255, 255, 0.75), -0.4em 0 0 rgba(255, 255, 255, 0.75);
+        }
+
+        body {
+            width: 100wh;
+            height: 90vh;
+            color: #fff;
+            background: linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+            background-size: 400% 400%;
+            -webkit-animation: Gradient 15s ease infinite;
+            -moz-animation: Gradient 15s ease infinite;
+            animation: Gradient 15s ease infinite;
+        }
+
+        @-webkit-keyframes Gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        @-moz-keyframes Gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        @keyframes Gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .card {
+            float: left;
+            padding: 0 1.7rem;
+            width: 40%;
+            max-width: 400px;
+            min-width: 200px;
+            margin: 20px;
+        }
+
+        .card .menu-content {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .card .menu-content::before,
+        .card .menu-content::after {
+            content: '';
+            display: table;
+        }
+
+        .card .menu-content::after {
+            clear: both;
+        }
+
+        .card .menu-content li {
+            display: inline-block;
+        }
+
+        .card .menu-content a {
+            color: #fff;
+        }
+
+        .card .menu-content span {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Open Sans';
+            -webkit-transform: translate(-50%, 0);
+            transform: translate(-50%, 0);
+        }
+
+        .card .wrapper {
+            background-color: #fff;
+            min-height: 540px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card .wrapper:hover .data {
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+        }
+
+        .card .data {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            -webkit-transform: translateY(calc(70px + 1em));
+            transform: translateY(calc(70px + 1em));
+            -webkit-transition: -webkit-transform 0.3s;
+            transition: -webkit-transform 0.3s;
+            transition: transform 0.3s;
+            transition: transform 0.3s, -webkit-transform 0.3s;
+        }
+
+        .card .data .content {
+            padding: 1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card .author {
+            font-size: 12px;
+        }
+
+        .card .title {
+            margin-top: 10px;
+        }
+
+        .card .text {
+            height: 70px;
+            margin: 0;
+        }
+
+        .card input[type='checkbox'] {
+            display: none;
+        }
+
+        .card input[type='checkbox']:checked+.menu-content {
+            -webkit-transform: translateY(-60px);
+            transform: translateY(-60px);
+        }
+
+        .wrapper {
+            /* background: url(https://tvseriescritic.files.wordpress.com/2016/10/stranger-things-bicycle-lights-children.jpg) center/cover no-repeat; */
+        }
+
+        .example-2 .wrapper:hover .menu-content span {
+            -webkit-transform: translate(-50%, -10px);
+            transform: translate(-50%, -10px);
+            opacity: 1;
+        }
+
+        .example-2 .header {
+            color: #fff;
+            padding: 1em;
+        }
+
+        .example-2 .header::before,
+        .example-2 .header::after {
+            content: '';
+            display: table;
+        }
+
+        .example-2 .header::after {
+            clear: both;
+        }
+
+        .example-2 .header .date {
+            float: left;
+            font-size: 12px;
+        }
+
+        .example-2 .menu-content {
+            float: right;
+        }
+
+        .example-2 .menu-content li {
+            margin: 0 5px;
+            position: relative;
+        }
+
+        .example-2 .menu-content span {
+            -webkit-transition: all 0.3s;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .example-2 .data {
+            color: #fff;
+            -webkit-transform: translateY(calc(70px + 4em));
+            transform: translateY(calc(70px + 4em));
+        }
+
+        .example-2 .title a {
+            color: #fff;
+        }
+
+        .example-2 .button {
+            display: block;
+            width: 100px;
+            margin: 2em auto 1em;
+            text-align: center;
+            font-size: 12px;
+            color: #fff;
+            line-height: 1;
+            position: relative;
+            font-weight: 700;
+        }
+
+        .example-2 .button::after {
+            content: '\2192';
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            -webkit-transform: translate(0, -50%);
+            transform: translate(0, -50%);
+            -webkit-transition: all 0.3s;
+            transition: all 0.3s;
+        }
+
+        .example-2 .button:hover::after {
+            -webkit-transform: translate(5px, -50%);
+            transform: translate(5px, -50%);
+            opacity: 1;
+        }
+    </style>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css'>
+    <link rel="shortcut icon" href="https://image.ibb.co/huQAa9/Screen_Shot_2018_01_02_at_10_01_42_AM.png">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.3.2.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/angularfire/2.3.0/angularfire.min.js"></script>
+
+    <script>
+        (function () {
+            var config = {
+                apiKey: "AIzaSyBLVf84SaTreu6fKZMpUnNsgiH9koIrPEg",
+                authDomain: "recent-top-movies.firebaseapp.com",
+                databaseURL: "https://recent-top-movies.firebaseio.com",
+                projectId: "recent-top-movies",
+                storageBucket: "recent-top-movies.appspot.com",
+                messagingSenderId: "623683303968"
+            };
+            firebase.initializeApp(config)
+
+            angular.module('app', ['firebase'])
+                .factory('DB', function () {
+                    var root = firebase.database().ref();
+                    ref = {
+                        Movies: root.child('Movies')
+                    }
+                    return ref;
+                })
+                .controller('homectrl', function ($scope, DB, $sce, $firebaseArray) {
+                    $scope.Movies = $firebaseArray(DB.Movies);
+                })
+        }());
+    </script>
+</head>
+
+<body ng-app="app" ng-controller="homectrl">
+    <div id="header">
+        <h1>Download Top Recent Movies </h1>
+        <img src="https://image.ibb.co/huQAa9/Screen_Shot_2018_01_02_at_10_01_42_AM.png">
+    </div>
+
+
+    <div ng-repeat="item in Movies track by $index">
+        <div class="example-2 card">
+            <div class="wrapper" ng-style="{'background-image':'url('+item.imageUrl+')','background-position': 'center center','background-size' : 'cover','background-repeat':'no-repeat'  }">
+                <div class="header">
+                    <div class="date">
+                        <span>{{item.publishDate}}</span>
+                    </div>
+                    <ul class="menu-content">
+                        <li>
+                            <a href="#" class="fa fa-bookmark-o"></a>
+                        </li>
+                        <li>
+                            <a href="#" class="fa fa-heart-o">
+                                <span>{{item.likesNo}}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="fa fa-comment-o">
+                                <span>{{item.commentsNo}}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href={{item.link}} class="fa fa-download">
+                                <span>{{item.downloadsNo}}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="data">
+                    <div class="content">
+                        <span class="author">Smart1</span>
+                        <h1 class="title">
+                            <a href={{item.link}}>{{item.title}}</a>
+                        </h1>
+                        <p class="text">{{item.description}}</p>
+                        <a href="#" class="button">Read more</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

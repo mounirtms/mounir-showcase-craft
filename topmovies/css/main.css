@@ -1,0 +1,32 @@
+ 
+#header {
+    padding: 5px 0;
+    float: left;
+    background-color: rgb(255, 194, 130);
+    width: 100%;
+}
+
+#header:after {
+    /* Needed because of the border hover effects. Height here must match height of "nav-links li:after"  */
+    content: '';
+    display: block;
+    height: 5px;
+}
+
+#header h1 {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    color: white;
+}
+
+#header img {
+    width: 120px;
+    margin: auto;
+    padding: auto;
+    display: inherit;
+    position: absolute;
+    top: 0px;
+    right: 16px;
+}
+ 
