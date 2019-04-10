@@ -20,5 +20,4 @@
         .controller('homectrl', function ($scope, DB, $sce, $firebaseArray) {
             $scope.Movies = $firebaseArray(DB.Movies);
         })
-
 }());
