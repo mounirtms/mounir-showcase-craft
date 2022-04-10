@@ -1,326 +1,271 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="Mounir Abderrahmani CV ">
-    <meta name="keywords" content="Mounir Abderrahmani CV teaching,personal educaper Software Developer">
-    <meta name="author" content="Educaper.com , hotech.com.tr , Mounir Abderrahmani">
-    <title>Mounir Abderrahmani CV</title>
-    <link rel="shortcut icon" href="https://image.ibb.co/dQjnGv/pict.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Mounir Abderrahmani .</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa:700" rel="stylesheet">
     <script src="js/jQuery.js"></script>
-    <link href="css/style.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<title>Mounir CV</title>
+
 <body>
-<div id="header"><a><p id="name" class="showhim">Mounir Abderrahmani</p>
-    <div class="showme">mounir</div>
-</a><a href="mailto:mounir.webdev@gmail.com" target="_blank"><p id="email">mounir.webdev@gmail.com</p></a><a><p id="contact">
-</p></a>
-</div>
-<div class="right"><h3>CV Highlights</h3>
-    <a href="#profile"><img style="position:absolute;top:50px;right:16px;width:100px;height:120px" src="https://image.ibb.co/dQjnGv/pict.jpg"></a>
-    <p></p>
-    <ul>
-        <li>Front-End Developer at <a target="_blanck" href="http://hotech.com.tr">Hotech</a></li>
-        <li>Front-End Software Executive at <a target="_blanck" href="http://cloud.hotech.systems/pms/">Otello Cloud Systems</a></li>
-        <li>Senior mobile app and Full Stack software developer</li>
-        <li>Learning Solidity and Decentralized applications</li>
+    <div id="loading">
+        <div id="spinner"></div>
+    </div>
+    <div id="particles-js"></div>
+    <div id="box">
+        <div class="box1 onlywide animated bounceOutLeft" style="animation-delay:1.7s;"></div>
+        <div class="box2 onlywide animated bounceOutLeft" style="animation-delay:1.8s;"></div>
+        <div class="box2 onlywide animated bounceOutLeft" style="animation-delay:1.9s;"></div>
+        <div class="box2 animated bounceOutRight" style="animation-delay:1.9s;"></div>
+        <div class="box2 onlywide animated bounceOutRight" style="animation-delay:1.8s;"></div>
+        <div class="box2 onlywide animated bounceOutRight" style="animation-delay:1.7s;"></div>
+    </div>
+    <a id="about" onclick="showabout()" class="animated fadeIn" style="animation-delay:2.2s;">about</a>
+    <a id="work" onclick="showwork()" class="animated fadeIn" style="animation-delay:2.2s;">work</a>
+    <a id="contact" onclick="showcontact()" class="animated fadeIn" style="animation-delay:2.2s;">contact</a>
+    <a id="resume" onclick="showresume()" class="animated fadeIn" style="animation-delay:2.2s;">resume</a>
+    <div id="middle" class="animated slideInDown" style="animation-delay:2.0s;">
+        <h1>Mounir Abderrahmani </h1>
+        <!-- <h2> I am a Web Developer </h2> -->
+        <div id="menu">
+            <a onclick="showabout()">about</a>
+            <a onclick="showwork()">work</a>
+            <a onclick="showcontact()">contact</a>
+            <a onclick="showresume()">resume</a>
+        </div>
 
-        <p></p>
-        <section><h3>General Achievements:</h3>
+    </div>
+    <div id="work_container" class="container">
+        <div onclick="closework()"><i class="fas fa-angle-right"></i></div>
+    
+        <section id="work_section">
+            <h2 class="animated pulse">Web & Software Developer</h2>
+            
+        </section>
+    </div>
+    <div id="about_container" class="container">
+        <div onclick="closeabout()"><i class="fas fa-angle-left"></i></div>
+
+        <section>
+            <h2><i class="fas fa-circle"></i>about me</h2>
+            <p>self motivated student, easy fast learner, reliable, open minded, positive. Has the required
+                communication skills and has ability to work as a part of a team or independently.</p>
+            <p>Possesses a friendly and cheerful personality. Is eager to be challenged in order to grow and improve.
+            <p>energetic, ambitious person who has developed a mature and responsible approach to any task that
+                undertake.</p>
             <ul>
-                <li>Interact with engineering teams to get software issues and bugs resolved (via slack)..</li>
-                <li>Active member at AIUCode Club <a target="_blank" href="http://codeclubaiu.blogspot.com.tr/">Blog</a> .</li>
-                <li>Engaged in many events, exhilarating the youth to keep up the education spirit <a target="_blank" href="http://www.algerianstudentsinturkey.org/">ASUT</a>.</li>
-                <li>Participated in International debate championship, (English and Arabic).</li>
-                <li>I have done humble IT work at the university website <a target="_blank" href="http://ipo.antalya.edu.tr/">(Ipo Office)</a>.</li>
-                <li><b>Recent deployed Projects :</b></li>
+                <li>Good Communication Skills, Presentation Skills, attitude towards leadership, authorisation and
+                    delegation, conflict resolution and negotiation and a very good team worker.</li>
+                <li>A young, determined and smart working person. .</li>
+                <li>I believe in task based roles and complete ownership of work .</li>
+
+            </ul>
+            <li>
+                <span><i class="fas fa-circle"></i>Hobbies:</span> Cycling Cooking, watching Movies reading magazines,
+                swimming,
+                cycling ,surfing the Internet, self-learning through e-courses.
+            </li>
+            <li><span><i class="fas fa-circle"></i>Area of Interest:</span> Software Development, Programming, Coding,
+                App Development, Support Engineer, Customer Happiness, Client service.</li>
+
+        </section>
+        <section>
+           
+            <p>
+                i do eveything ;)
+            </p>
+        </section>
+        <iframe width="450" height="260" src="https://www.youtube.com/embed/lW5w5Rr8kWc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe width="450" height="260" src="https://www.youtube.com/embed/tNruNhGEyRY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div id="contact_container" class="container">
+        <div onclick="closecontact()"><i class="fas fa-angle-up"></i></div>
+        <h2>Contact Me.</h2>
+       
+       
+            <!-- <p>
+            <form>
+                <input type="text" placeholder="name" required>
+                <input type="email" placeholder="email" required><br>
+                <textarea placeholder="your message" required rows="5"></textarea><br>
+                <button class="btn_one">send</button>
+            </form>
+            </p> -->
+           <div id="social-svg">
+            <div class="colors-on-hover">
+                <a target="_blank" href="https://www.linkedin.com/in/mounir1badi/">
+                    <png src="svg/linkedin.svg"></png>
+                </a>
+                <a target="_blank" href="https://twitter.com/Mounir1badi">
+                    <png src="svg/twitter.svg"></png>
+                </a>
+                <a target="_blank" href="https://www.facebook.com/Abderrahmani.Mounir">
+                    <png src="svg/facebook.svg"></png>
+                </a>
+                <a target="_blank" href="https://plus.google.com/u/0/+MounirAbderrahmani">
+                    <png src="svg/googleplus.svg"></png>
+                </a>
+                       <a target="_blank" href="https://vk.com/id212224498">
+                           <png src="svg/vk.svg"></png>
+                       </a>
+                <a target="_blank" href="https://www.youtube.com/user/SmartBadi1/">
+                    <png src="svg/youtube.svg"></png>
+                </a>
+                <a target="_blank" href="https://www.instagram.com/mounir_abderrahmani/">
+                    <png src="svg/instagram.svg"></png>
+                </a>
+                <a target="_blank" href="https://www.rss.com/mounir1badi">
+                    <png src="svg/rss.svg"></png>
+                </a>
+                <a target="_blank"
+                    href="https://join.slack.com/t/mounironslack/shared_invite/MjE5MjMxOTQxNTI1LTE1MDEyNTExMzQtY2E3MzZjNjE5ZA">
+                    <png src="svg/slack.svg"></png>
+                </a>
+                <a target="_blank" href="http://plnkr.co/users/mounir1">
+                    <png src="svg/plunker.svg"></png>
+                </a>
+                <a target="_blank" href="https://www.sencha.com/forum/member.php?847081-mounir1">
+                    <png src="svg/sencha.svg"></png>
+                </a>
+                <a target="_blank" href="https://codepen.io/mounir1/">
+                    <png src="svg/codepen.svg"></png>
+                </a>
+                <a target="_blank" href="https://jsfiddle.net/user/mounir1/fiddles/">
+                    <png src="svg/jsfiddle.svg"></png>
+                </a>
+                <a target="_blank" href="https://github.com/mounir1">
+                    <png src="svg/github.svg"></png>
+                </a>
+                <a target="_blank" href="https://t.me/Mounir_Abderrahmani">
+                    <png src="svg/telegram.svg"></png>
+                </a>
+                <a target="_blank" href="https://chat.whatsapp.com/1wlNnJU7i5Y9z14EytdBx0">
+                    <png src="svg/whatsapp.svg"></png>
+                </a>
+                <a target="_blank" href="https://hangouts.google.com/call/qwng2udlufhu3esyxdob3gn3u4y">
+                    <png src="svg/hangout.svg"></png>
+                </a>
+                <a target="_blank" href="">
+                    <png src="svg/skype.svg"></png>
+                </a>
+                <a href="#wechatqr">
+                    <png src="svg/wechat.svg"></png>
+                </a>
+                <a href="#alloqr">
+                    <png src="svg/allo.svg"></png>
+                </a>
+                <a href="#lineqr">
+                    <png src="svg/line.svg"></png>
+                </a>
+                <a href="#messengerqr">
+                    <png src="svg/messenger.svg"></png>
+                </a>
+                <a href="#snapqr">
+                    <png src="svg/snapchat.svg"></png>
+                </a><a target="_blank" href="mailto:mounir1badi@gmail.com">
+                    <png src="svg/envelope.svg"></png>
+                </a>
+                <a style="position:absolute;right:50px" target="_blank" href="https://jskit-app.web.app">
+                    <png src="svg/note.svg"></png>
+                </a>
+            </div>
+            <div id="wechatqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/wechatme.jpg" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+            <div id="lineqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/lineme.jpeg" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+            <div id="messengerqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/messenger.jpg" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+            <div id="snapqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/snap.png" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+            <div id="skypeqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"></div>
+                </div>
+            </div>
+            <div id="profile" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/profile.png" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+            <div id="alloqr" class="overlay">
+                <div class="popup"><a class="close" href="#">&times;</a>
+                    <div class="content"><img src="qr/allo.png" style="width:100%;height:100%"></div>
+                </div>
+            </div>
+           </div>
+          
+ 
+    </div>
+
+    <div id="resume_container" class="container">
+        <div onclick="closeresume()"><i class="fas fa-angle-down"></i></div>
+        <h2>CV Highlights.</h1>
+            <section>
                 <ul>
-                    <li>Learn Chinese 101 WebApp <a target="_blank" href="https://chinese101-app.firebaseapp.com">Chinese 101</a></li>
-                    <li>Educaper StartUp Project <a target="_blank" href="">link</a></li>
-                    <li>ABS-INTER Global Services <a target="_blank" href="https://abs-inter.com/">link</a></li>
-                    <li>Trimarko limited business services advertisement and data analytics <a target="_blank" href="https://trimarko.com/">link</a></li>
-                    <li>Building an Ecommerce app for ordering and styling Tshirts <a target="_blank" href="http://custom-printing.firebaseapp.com">link</a></li>
-                </ul>
-            </ul>
-        </section>
-        <section><h3>Professional Experience :</h3>
-            <h4 id="company-name">Currently</h4>
-            <ul>
-                <li>Full Time Front-End Developer at Hotech <a target="_blank" href="https://cloud.hotech.systems/otello/">OTLLO</a></li>
-                <li>Freelancer work installing open source applications on Azure cloud services, Amazon aws and DigitalOcean.</li>
-                <li>Dealing with many private and public repositories on Github and Bitbucket.</li>
-            </ul>
-<!--            <h4 id="company-name">CGO-Import/Export</h4>-->
-<!--            <p id="job-title"><strong>Online Sales man (Technical Support)</strong><a href="http://cgo-dz.com/" target="_blank">CGO-DZ</a></p>-->
-<!--            <p id="job-responsibilities">Support assist update develope</p>-->
+                    <li>Front-End Developer at <a target="_blanck" href="http://hotech.com.tr">Hotech</a></li>
+                    <li>Front-End Software Executive at <a target="_blanck" href="http://cloud.hotech.systems/pms/">Otello Cloud Systems</a></li>
+                    <li>Senior mobile app and Full Stack software developer</li>
+                    <li>Learning Solidity and Decentralized applications (smart contracts and web3)</li>
+                    <section>
+                        <h3>General Achievements:</h3>
+                        <ul>
+                            <li>Interact with engineering teams to get software issues and bugs resolved (via slack)..
+                            </li>
+                            <li>Active member at AIUCode Club <a target="_blank"
+                                    href="http://codeclubaiu.blogspot.com.tr/">Blog</a> .</li>
+                            <li>Engaged in many events, exhilarating the youth to keep up the education spirit
+                            <li>Participated in International debate championship, (English and Arabic).</li>
+                            <li>I have done humble IT work at the university website <a target="_blank"
+                                    href="http://antalya.edu.tr/">(Ipo Office)</a>.</li>
+                            <li><b>Recent deployed Projects :</b></li>
+                            <ul>
+                                <li>Learn Chinese 101 WebApp <a target="_blank"
+                                        href="https://chinese101-app.firebaseapp.com">Chinese 101</a></li>
+                                <li>Educaper StartUp Project
+                                <li>ABS-INTER Global Services
+                                <li>Trimarko limited business services advertisement on facebook and Instagram
+                                <li>Building an Ecommerce app for ordering and styling Tshirts <a target="_blank"
+                                        href="http://custom-printing.firebaseapp.com">link</a></li>
+                            </ul>
+                        </ul>
 
-<!--            <ul>-->
-<!--                <li>Answer customer queries over email</li>-->
-<!--                <li>Interact with our engineering team to get software issues and bugs resolved</li>-->
-<!--                <li>Occasionally interact with customers over Skype or telephone</li>-->
-<!--                <li>Contribute ideas to the team on how customers can be delighted</li>-->
-<!--            </ul>-->
-<!--            <h4 id="company-name">Educaper Yazilim</h4>-->
-<!--            <p id="job-title"><strong>Co-Founder and head of web app developer team</strong></p>-->
-<!--            <p id="job-responsibilities">Constantly revise and make updates</p>-->
-<!--            <h4 id="company-name">Kucuk Afacanlar preschool</h4>-->
-<!--            <li>English Teacher with IPC curriculum <a href="http://kucuk-afacanlar.com/" target="_blank">link</a></li>-->
-<!--            <li>General IT work, gallery</li>-->
-        </section>
-        <br>
-        <!--<h3>Educational Qualifications</h3>-->
-        <!--<table>-->
-        <!--<tbody>-->
-        <!--<tr id="heading">-->
-        <!--<td>Qualification</td>-->
-        <!--<td>Company/School</td>-->
-        <!--<td>Percentage / Grades</td>-->
-        <!--<td>Year</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-        <!--<td>Baccalauréat Exam</td>-->
-        <!--<td>El-Hayat Institute</td>-->
-        <!--<td>Top score 15.99/20</td>-->
-        <!--<td>2011</td>-->
-        <!--</tr>-->
-        <!--<tr>-->
-        <!--<td>Bachelor of science</td>-->
-        <!--<td>Antalya Bilim University</td>-->
-        <!--<td>GPA 3.0/4</td>-->
-        <!--<td>June 2017</td>-->
-        <!--</tr>-->
-        <!--</tbody>-->
-        <!--</table>-->
-        <!--<br>-->
-        <h3>Technical Skills</h3>
-        <p></p>
-        <ul>
-            <li><span id="course-name">Operating Systems:</span> DOS, Windows 7-10, Android, OSX, Linux (Ubuntu, Fedora)</li>
-            <li><span id="course-name">Application Software:</span> Microsoft Office 2016, Google (sheets,slide,docs) .</li>
-            <li><span id="course-name">Programming Skills:</span>HTML, CSS, JavaScript(Extjs,AngularJS,React,Vu),Typescript, C languages, SQL ,PHP (Drupal, WordPress,symfony), Python, R</li>
-            <li><span id="course-name">Platforms & Apps used:</span>Chrome Dev tools, Ionic Framework, React Native, Cloud Firebase, VSCODE ,Intellij, Android Studio, Xcode.</li>
-        </ul>
-        <p></p>
-        <h3>Personal Information:</h3>
-        <p>self motivated student, easy fast learner, reliable, open minded, positive. Has the required communication skills and has ability to work as a part of a team or independently.</p>
-        <p>Possesses a friendly and cheerful personality. Is eager to be challenged in order to grow and improve.
-        <p>energetic, ambitious person who has developed a mature and responsible approach to any task that undertake.</p>
-        <ul>
-            <li>Good Communication Skills, Presentation Skills, attitude towards leadership, authorisation and delegation, conflict resolution and negotiation and a very good team worker.</li>
-            <li>A young, determined and smart working person. .</li>
-            <li>I believe in task based roles and complete ownership of work .</li>
+                        <h3>Professional Experience :</h3>
 
-        </ul>
-        <br>
-        <!--        <li><span id="course-name">Languages Known:</span><br>-->
-        <!--            <table>-->
-        <!--                <tbody>-->
-        <!--                <tr id="heading">-->
-        <!--                    <td>Language</td>-->
-        <!--                    <td>Reading</td>-->
-        <!--                    <td>Speaking</td>-->
-        <!--                    <td>Writing</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Amazigh</td>-->
-        <!--                    <td>-&#45;&#45;&#45;&#45;</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>-&#45;&#45;&#45;&#45;</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Arabic</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>French</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>★★★★</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>English</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                    <td>★★★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Turkish</td>-->
-        <!--                    <td>★★★</td>-->
-        <!--                    <td>★★★★</td>-->
-        <!--                    <td>★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Russian</td>-->
-        <!--                    <td>★★★★</td>-->
-        <!--                    <td>★</td>-->
-        <!--                    <td>★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Chinese</td>-->
-        <!--                    <td>★★</td>-->
-        <!--                    <td>★★</td>-->
-        <!--                    <td>★★★</td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>Korean</td>-->
-        <!--                    <td>★★★★</td>-->
-        <!--                    <td>★★</td>-->
-        <!--                    <td>★★★★</td>-->
-        <!--                </tr>-->
-        <!--                </tbody>-->
-        <!--            </table>-->
-        <!--            <br></li>-->
-        <li>
-            <span id="course-name">Hobbies:</span> Cooking, watching Movies reading magazines, swimming, cycling ,surfing the Internet, self-learning through e-courses.
-        </li>
-        <li><span id="course-name">Area of Interest:</span> Software Development, Programming, Coding, App Development, Support Engineer, Customer Happiness, Client service.</li>
-
-    </ul>
-    <div id="declaration"><h3>Declaration</h3>
-        <p>I hereby declare that the details furnished above are true and correct to the best of my knowledge and belief.</p>
-        <p>Contact me for the PDF version, and References.</p></div>
-</div>
-<div id="footer">
-    <div id="redessociales">
-        <a class="smedia facebook" data-href="https://mounir1.github.io/" data-layout="button_count" data-size="small" data-mobile-iframe="true" class="fb-xfbml-parse-ignore" target="_blank"
-           href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmounir1.github.io%2F&amp;src=sdkpreparse"></a>
-        <a class="smedia twitter" href="https://twitter.com/intent/tweet?text=check%20out%20Mounir%20Abderrahmani%20CV%20at%20http://mounir1.github.io"></a>
-        <a class="smedia google" href="https://plus.google.com/share?url=mounir1.github.io" onclick="return window.open(this.href,&#34;Google+&#34;,&#34;width=490,height=530&#34;),!1"> <
-            src="https://lh3.googleusercontent.com/-fKVxA_ku4pY/AAAAAAAAAAI/AAAAAAAAMzA/RCHYWOpDQXU/s180-c-k-no/photo.jpg" alt="Google+" title="Google+"></a>
-        <a class="smedia email" href="mailto:?subject=I want you to check this out! &amp;body=Check out this CV http://mounir1.github.io" title="Recommendation"><img
-                src="https://lh3.googleusercontent.com/-fKVxA_ku4pY/AAAAAAAAAAI/AAAAAAAAMzA/RCHYWOpDQXU/s180-c-k-no/photo.jpg"></a>
+                        <ul>
+                            <li>Full Time Front-End Developer at Hotech <a target="_blank"
+                                    href="https://cloud.hotech.systems/otello/">OTLLO</a></li>
+                            <li>Freelancer work installing open source applications on Azure cloud services, Amazon aws
+                                and DigitalOcean.</li>
+                        </ul>
+                    </section>
+            </section>
     </div>
-    <!--//footer -->
-
-    <div class="colors-on-hover">
-        <a target="_blank" href="https://www.linkedin.com/in/mounir1badi/">
-            <png src="svg/linkedin.svg"></png>
-        </a>
-        <a target="_blank" href="https://twitter.com/Mounir1badi">
-            <png src="svg/twitter.svg"></png>
-        </a>
-        <a target="_blank" href="https://www.facebook.com/Abderrahmani.Mounir">
-            <png src="svg/facebook.svg"></png>
-        </a>
-        <a target="_blank" href="https://plus.google.com/u/0/+MounirAbderrahmani">
-            <png src="svg/googleplus.svg"></png>
-        </a>
-<!--        <a target="_blank" href="https://vk.com/id212224498">-->
-<!--            <png src="svg/vk.svg"></png>-->
-<!--        </a>-->
-        <a target="_blank" href="https://www.youtube.com/user/SmartBadi1/">
-            <png src="svg/youtube.svg"></png>
-        </a>
-        <a target="_blank" href="https://www.instagram.com/mounir_abderrahmani/">
-            <png src="svg/instagram.svg"></png>
-        </a>
-        <a target="_blank" href="https://www.rss.com/mounir1badi">
-            <png src="svg/rss.svg"></png>
-        </a>
-        <a target="_blank" href="https://join.slack.com/t/mounironslack/shared_invite/MjE5MjMxOTQxNTI1LTE1MDEyNTExMzQtY2E3MzZjNjE5ZA">
-            <png src="svg/slack.svg"></png>
-        </a>
-        <a target="_blank" href="http://plnkr.co/users/mounir1">
-            <png src="svg/plunker.svg"></png>
-        </a>
-        <a target="_blank" href="https://www.sencha.com/forum/member.php?847081-mounir1">
-            <png src="svg/sencha.svg"></png>
-        </a>
-        <a target="_blank" href="https://codepen.io/mounir1/">
-            <png src="svg/codepen.svg"></png>
-        </a>
-        <a target="_blank" href="https://jsfiddle.net/user/mounir1/fiddles/">
-            <png src="svg/jsfiddle.svg"></png>
-        </a>
-        <a target="_blank" href="https://github.com/mounir1">
-            <png src="svg/github.svg"></png>
-        </a>
-        <a target="_blank" href="https://t.me/Mounir_Abderrahmani">
-            <png src="svg/telegram.svg"></png>
-        </a>
-        <a target="_blank" href="https://chat.whatsapp.com/1wlNnJU7i5Y9z14EytdBx0">
-            <png src="svg/whatsapp.svg"></png>
-        </a>
-        <a target="_blank" href="https://hangouts.google.com/call/qwng2udlufhu3esyxdob3gn3u4y">
-            <png src="svg/hangout.svg"></png>
-        </a>
-        <a target="_blank" href="">
-            <png src="svg/skype.svg"></png>
-        </a>
-        <a href="#wechatqr">
-            <png src="svg/wechat.svg"></png>
-        </a>
-        <a href="#alloqr">
-            <png src="svg/allo.svg"></png>
-        </a>
-        <a href="#lineqr">
-            <png src="svg/line.svg"></png>
-        </a>
-        <a href="#messengerqr">
-            <png src="svg/messenger.svg"></png>
-        </a>
-        <a href="#snapqr">
-            <png src="svg/snapchat.svg"></png>
-        </a><a target="_blank" href="mailto:mounir1badi@gmail.com">
-        <png src="svg/envelope.svg"></png>
-    </a>
-        <a style="position:absolute;right:50px" target="_blank" href="https://jskit-app.web.app">
-            <png src="svg/note.svg"></png>
-        </a>
+    <div id="footer">
+        <a href="mailto:mounir.webdev@gmail.com">mounir.webdev@gmail.com</a>
     </div>
-    <div id="wechatqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/wechatme.jpg" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-    <div id="lineqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/lineme.jpeg" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-    <div id="messengerqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/messenger.jpg" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-    <div id="snapqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/snap.png" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-    <div id="skypeqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"></div>
-        </div>
-    </div>
-    <div id="profile" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/profile.png" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-    <div id="alloqr" class="overlay">
-        <div class="popup"><a class="close" href="#">&times;</a>
-            <div class="content"><img src="qr/allo.png" style="width:100%;height:100%"></div>
-        </div>
-    </div>
-</div>
-<script>
-    $('png')
-        .each(function(){
-            var t = $(this),
-                i = t.attr('src');
-            $.get(i, function(i){
-                var a = $(i)
-                    .find('svg');
-                t.replaceWith(a);
-            });
-            console.clear();
-        });
-</script>
+    <script src="js/index.js" type="text/javascript"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/app.js"></script>
 </body>
+
 </html>
