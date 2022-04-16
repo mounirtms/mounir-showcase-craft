@@ -20,10 +20,19 @@ $('#work').on('click',function(e){
     $("#work_container").css("display","inherit");
     $("#work_container").addClass("animated slideInRight");
 
-      setTimeout(function(){
-         document.getElementById('work_section').innerHTML=` <h2 class="animated slideInLeft">Web & Software Developer</h2>`
 
+      setTimeout(function(){
         $("#work_container").removeClass("animated slideInRight");
+
+        $(".animated-progress span").each(function () {
+            $(this).animate(
+              {
+                width: $(this).attr("data-progress") + "%",
+              },
+              1000
+            );
+            $(this).text($(this).attr("data-progress") + "%");
+          });
     },800);
 })
 

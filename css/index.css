@@ -201,11 +201,7 @@ body {
     overflow-y:auto;
     display:none;
 }
-.container div {
-    font-size:25px;
-    margin:20px 0px;
-    transition:0.4s ease-in-out;
-}
+
 .container div:hover {
     cursor:pointer;
 }
