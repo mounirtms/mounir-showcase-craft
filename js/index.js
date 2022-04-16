@@ -1,18 +1,22 @@
-function showabout(){
+
+
+$('#about').on("click", function(e){
     $("#about_container").css("display","inherit");
     $("#about_container").addClass("animated slideInLeft");
     setTimeout(function(){
         $("#about_container").removeClass("animated slideInLeft");
     },800);
-}
-function closeabout(){
+})
+
+$('#closeabout').on("click", function(e){
     $("#about_container").addClass("animated slideOutLeft");
     setTimeout(function(){
         $("#about_container").removeClass("animated slideOutLeft");
         $("#about_container").css("display","none");
     },800);
-}
-function showwork(){
+})
+
+$('#work').on('click',function(e){
     $("#work_container").css("display","inherit");
     $("#work_container").addClass("animated slideInRight");
 
@@ -21,15 +25,19 @@ function showwork(){
 
         $("#work_container").removeClass("animated slideInRight");
     },800);
-}
-function closework(){
+})
+
+ 
+$('#closework').on("click", function(e){
     $("#work_container").addClass("animated slideOutRight");
     setTimeout(function(){
         $("#work_container").removeClass("animated slideOutRight");
         $("#work_container").css("display","none");
     },800);
-}
-function showcontact(){
+})
+
+
+    $('#contact').on("click", function(e){
     $("#contact_container").css("display","inherit");
     $("#contact_container").addClass("animated slideInDown");
     setTimeout(function(){
@@ -48,29 +56,31 @@ function showcontact(){
             console.clear();
         });
     },800);
-}
-function closecontact(){
+})
+
+$('#closecontact').on("click", function(e){
     $("#contact_container").addClass("animated slideOutUp");
     setTimeout(function(){
         $("#contact_container").removeClass("animated slideOutUp");
         $("#contact_container").css("display","none");
     },800);
-}
+})
 
-function showresume(){
+$('#resume').on("click", function(e){
     $("#resume_container").css("display","inherit");
     $("#resume_container").addClass("animated slideInUp");
     setTimeout(function(){
         $("#resume_container").removeClass("animated slideInUp");
     },800);
-}
-function closeresume(){
+})
+
+$('#closeresume').on("click", function(e){
     $("#resume_container").addClass("animated slideOutDown");
     setTimeout(function(){
         $("#resume_container").removeClass("animated slideOutDown");
         $("#resume_container").css("display","none");
     },800);
-}
+})
 
 setTimeout(function(){
     $("#loading").addClass("animated fadeOut");

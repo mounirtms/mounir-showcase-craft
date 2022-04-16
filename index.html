@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Mounir Abderrahmani .</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+    <title>Mounir Abderrahmani </title>
+ 
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:700" rel="stylesheet">
-    <script src="js/jQuery.js"></script>
+ 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
         integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./dist/main.css">
+    
 </head>
 
 <body>
@@ -28,10 +28,10 @@
         <div class="box2 onlywide animated bounceOutRight" style="animation-delay:1.8s;"></div>
         <div class="box2 onlywide animated bounceOutRight" style="animation-delay:1.7s;"></div>
     </div>
-    <a id="about" onclick="showabout()" class="animated fadeIn" style="animation-delay:2.2s;">about</a>
-    <a id="work" onclick="showwork()" class="animated fadeIn" style="animation-delay:2.2s;">work</a>
-    <a id="contact" onclick="showcontact()" class="animated fadeIn" style="animation-delay:2.2s;">contact</a>
-    <a id="resume" onclick="showresume()" class="animated fadeIn" style="animation-delay:2.2s;">resume</a>
+    <a id="about" class="animated fadeIn" style="animation-delay:2.2s;">about</a>
+    <a id="work"   class="animated fadeIn" style="animation-delay:2.2s;">work</a>
+    <a id="contact"   class="animated fadeIn" style="animation-delay:2.2s;">contact</a>
+    <a id="resume"   class="animated fadeIn" style="animation-delay:2.2s;">resume</a>
     <div id="middle" class="animated slideInDown" style="animation-delay:2.0s;">
       
         <span>Hi, I am </span>
@@ -47,15 +47,26 @@
 
     </div>
     <div id="work_container" class="container">
-        <div onclick="closework()"><i style="font-size: 2em;" class="fas fa-angle-right"></i></div>
+        <div id="closework"><i style="font-size: 2em;" class="fas fa-angle-right"></i></div>
     
         <section id="work_section">
             <h2 class="animated pulse">Web & Software Developer</h2>
-            
+            <ul>
+                <li>
+                    javaScript 
+                </li>
+                <li>
+                    HTML 
+                </li>
+                <li>
+                    CSS 
+                </li>
+
+            </ul>
         </section>
     </div>
     <div id="about_container" class="container">
-        <div onclick="closeabout()"><i style="font-size: 2em;" class="fas fa-angle-left"></i></div>
+        <div id="closeabout"><i style="font-size: 2em;" class="fas fa-angle-left"></i></div>
 
         <section>
             <h2><i class="fas fa-circle"></i>about me</h2>
@@ -86,7 +97,7 @@
         </section>
       </div>
     <div id="contact_container" class="container">
-        <div onclick="closecontact()"><i style="font-size: 2em;" class="fas fa-angle-up"></i></div>
+        <div id="closecontact"><i style="font-size: 2em;" class="fas fa-angle-up"></i></div>
         <h2>Contact Me.</h2>
        <section>
 
@@ -97,12 +108,11 @@
     </div>
 
     <div id="resume_container" class="container">
-        <div onclick="closeresume()"><i style="font-size: 2em;" class="fas fa-angle-down"></i></div>
+        <div id="closeresume"><i style="font-size: 2em;" class="fas fa-angle-down"></i></div>
         <h2>CV Highlights.</h1>
             <section>
                 <ul>
-                    <li>Front-End Developer at <a target="_blanck" href="http://hotech.com.tr">Hotech</a></li>
-                    <li>Front-End Software Executive at <a target="_blanck" href="http://cloud.hotech.systems/pms/">Otello Cloud Systems</a></li>
+                    <li>Front-End Software Executive at <a target="_blanck" href="http://cloud.hotech.systems">Otello Cloud Systems</a></li>
                     <li>Senior mobile app and Full Stack software developer</li>
                     <li>Learning Solidity and Decentralized applications (smart contracts and web3)</li>
                     <section>
@@ -134,18 +144,15 @@
                             <li>Full Time Front-End Developer at Hotech <a target="_blank"
                                     href="https://cloud.hotech.systems/otello/">OTLLO</a></li>
                             <li>Freelancer work installing open source applications on Azure cloud services, Amazon aws
-                                and DigitalOcean.</li>
+                                and DigitalOcean. using my PMS <a target="_blank"
+                                href="https://jskit-app.web.app">jskit-app</a></li>
                         </ul>
                     </section>
             </section>
     </div>
     <div id="footer">
-        
-        <a href="mailto:mounir.webdev@gmail.com">mounir.webdev@gmail.com</a>
     </div>
-    <script src="js/index.js" type="text/javascript"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/app.js"></script>
+    <script src="./dist/bundle.js"></script>
 </body>
 
 </html>

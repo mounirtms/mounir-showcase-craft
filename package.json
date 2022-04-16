@@ -1,0 +1,35 @@
+{
+  "name": "mounir1.github.io",
+  "version": "1.0.0",
+  "description": "my portfolio",
+  "keywords": [
+    "mounir1.github.io",
+    "mounir1badi"
+  ],
+  "homepage": "https://github.com/mounir1/mounir1.github.io#readme",
+  "bugs": {
+    "url": "https://github.com/mounir1/mounir1.github.io/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mounir1/mounir1.github.io.git"
+  },
+  "license": "ISC",
+  "author": "Mounir Abderrahmani",
+  "sideEffects": false,
+  "scripts": {
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "lightbox2": "^2.11.3",
+    "slick-carousel": "^1.8.1"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "mini-css-extract-plugin": "^2.6.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
+  }
+}
