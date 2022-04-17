@@ -13,7 +13,7 @@ body {
     width: 100vw;
     height: 100vh;
     position: fixed;
-    background:rgba(223, 52, 243, 0.906);
+    background:rgba(192, 176, 194, 0.906);
     z-index: 999;
     display: flex;
     justify-content: center;
@@ -25,7 +25,7 @@ body {
     width:50px;
     height:50px;
     border:12px solid #fff;
-    border-bottom:12px solid rgb(255, 50, 50);
+    border-bottom:12px solid rgb(207, 237, 86);
     border-radius:50%;
     margin:0;
 }
@@ -819,12 +819,91 @@ body {
     --size: 200px;
 }
 
+ul {
+    list-style: none;
+    padding: 10px;
+  }
+  li {
+    position: relative;
+    font-size: 20px;
+    padding-left: 1.5em;  /* space to preserve indentation on wrap */
+  }
+  .tick li:before {
+  content: '';  /* placeholder for the SVG */
+    position: absolute;
+    left: 0;  /* place the SVG at the start of the padding */
+    width: 2em;
+    height: 2em;
+    background: url("data:image/svg+xml;utf8,<?xml%20version=%271.0%27%20encoding=%27utf-8%27?%3E%3Csvg%20width=%2718%27%20height=%2718%27%20viewBox=%270%200%201792%201792%27%20xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cpath%20d=%27M1671%20566q0%2040-28%2068l-724%20724-136%20136q-28%2028-68%2028t-68-28l-136-136-362-362q-28-28-28-68t28-68l136-136q28-28%2068-28t68%2028l294%20295%20656-657q28-28%2068-28t68%2028l136%20136q28%2028%2028%2068z%27/%3E%3C/svg%3E") no-repeat;
+  }
+
+  .carrot li:before {
+    content:"\2713\0020";
+      }
+
+
+.photo{
+    position: absolute;
+    top: 16px;
+    right: 12px;
+    transform: translate(-50%, -50%);
+    display: block;
+  }
+  
+  .photo img{
+    width: 170px;
+    height: 180px;
+    object-fit: cover;
+    filter: grayscale(100%) contrast(120%);
+    box-shadow: 10px 15px 25px 0 rgba(0,0,0,.2);
+    display: block;
+    transition: all .5s cubic-bezier(0.645, 0.045, 0.355, 1);
+    margin-top: -10px;
+  }
+  
+  .photo:hover img{
+    box-shadow: 1px 1px 10px 0 rgba(0,0,0,.1);
+    filter: drop-shadow(2px 4px 6px black)
+  }
+  
+ 
+ 
+.marks li:before {
+    content: "\f192";
+    font-family: "Font Awesome 5 Free";
+    display: inline-block;
+    width: 1.3em;
+  }
+.content {
+    width: 50%;
+    height: 50%;
+    float: left;
+  }
+  
+  #div1 {
+    background: #DDD;
+  }
+  
+  #div2 {
+    background: #AAA;
+  }
+  
+  #div3 {
+    background: #777;
+  }
+  
+  #div4 {
+    background: #444;
+  } 
+
+
 
 /* Work */
 .progress-title {
-    position: absolute;
-    margin: 5px 0px 1px 30px;
-    left: 0px;
+    position: relative;
+    margin: 0px 0px 0px 0px;
+    right: 45px;
+    bottom: -30px;
 }
 
 .animated-progress {
@@ -871,17 +950,16 @@ body {
 
 .all{
     display: flex;
+    margin: 0px 0px 100px 0px;
 }
 .circle-wrap {
-    display: grid;
-    grid-template-columns: repeat(1, 160px);
-    grid-gap: 80px;
-    margin-top: 100px;
-    margin-left: 50px;
-    width: 150px;
-    height: 150px;
-    background: #d9d7da;
-    border-radius: 50%;
+      grid-template-columns: repeat(1, 160px);
+      grid-gap: 80px;
+      margin-left: 45px;
+      width: 150px;
+      height: 150px;
+      background: #d9d7da;
+      border-radius: 50%;
 }
 .circle-title{
     position: relative;
