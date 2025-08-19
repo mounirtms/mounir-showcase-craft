@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Logo } from "@/components/ui/logo";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,10 +27,8 @@ export const Navigation = () => {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">M</span>
-            </div>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection("#home")}>
+            <Logo size="md" className="text-primary" />
             <div className="hidden sm:block">
               <div className="font-bold text-lg text-foreground">Mounir</div>
               <div className="text-xs text-muted-foreground -mt-1">Full-Stack Developer</div>
@@ -48,7 +47,7 @@ export const Navigation = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
             ))}
-            <Button size="sm" className="shadow-glow hover:shadow-medium transition-all duration-300">
+            <Button size="sm" className="shadow-glow hover:shadow-medium transition-all duration-300" onClick={() => scrollToSection("#contact")}>
               Let's Talk
             </Button>
           </div>
@@ -77,7 +76,7 @@ export const Navigation = () => {
                   {item.label}
                 </button>
               ))}
-              <Button size="sm" className="self-start mt-4">
+              <Button size="sm" className="self-start mt-4" onClick={() => scrollToSection("#contact")}>
                 Let's Talk
               </Button>
             </div>

@@ -1,217 +1,279 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Github, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink, Github, Star, Database, Loader2 } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+import { useEffect, useState } from "react";
+import { seedInitialData } from "@/lib/seed-data";
+import { Signature } from "@/components/ui/signature";
 
 export const Projects = () => {
-  const projects = [
-    {
-      title: "ERP-Magento Integration Platform",
-      description: "Enterprise-grade integration system connecting Cegid ERP with Magento 2, enabling real-time inventory synchronization across 25+ retail sources.",
-      category: "Enterprise Integration",
-      achievements: [
-        "Reduced inventory errors by 40%",
-        "Real-time sync across 25+ sources",
-        "Improved stock accuracy by 40%",
-        "Scalable ETL architecture"
-      ],
-      technologies: ["Magento 2", "Cegid ERP", "PHP", "API Development", "ETL"],
-      image: "/placeholder-project.svg",
-      liveUrl: "#",
-      githubUrl: "#",
-      featured: true
-    },
-    {
-      title: "OTELLO Hospitality Platform",
-      description: "Modern web application serving 100+ hotels with advanced dashboard and analytics capabilities, achieving 90+ Lighthouse performance scores.",
-      category: "Web Application",
-      achievements: [
-        "Serving 100+ hotels globally",
-        "Lighthouse 90+ performance",
-        "30% faster release cycles",
-        "Improved client satisfaction"
-      ],
-      technologies: ["React", "Node.js", "AWS", "GitLab CI/CD", "JavaScript"],
-      image: "/placeholder-project.svg",
-      liveUrl: "#",
-      githubUrl: "#",
-      featured: true
-    },
-    {
-      title: "Educaper ML Analytics",
-      description: "AI-driven education analytics platform built in collaboration with Istanbul Technical University, reaching 5,000+ mobile app users.",
-      category: "Machine Learning",
-      achievements: [
-        "5,000+ active users",
-        "ML-driven insights",
-        "University partnership",
-        "Mobile app deployment"
-      ],
-      technologies: ["React Native", "Python", "Machine Learning", "Node.js", "MongoDB"],
-      image: "/placeholder-project.svg",
-      liveUrl: "#",
-      githubUrl: "#",
-      featured: true
-    },
-    {
-      title: "E-commerce Solutions Portfolio",
-      description: "Collection of custom e-commerce platforms and integrations built for various clients, featuring payment gateways and CRM connections.",
-      category: "E-commerce",
-      achievements: [
-        "Multiple client deployments",
-        "Payment gateway integrations",
-        "CRM system connections",
-        "Custom reporting dashboards"
-      ],
-      technologies: ["Magento", "WordPress", "PHP", "JavaScript", "MySQL"],
-      image: "/placeholder-project.svg",
-      liveUrl: "#",
-      githubUrl: "#",
-      featured: false
-    }
-  ];
+  const { projects, featured, others, loading, error } = useProjects();
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  const categories = ["All", "Enterprise Integration", "Web Application", "Machine Learning", "E-commerce"];
+  useEffect(() => {
+    // Auto-seed data if no projects exist and Firebase is available
+    const autoSeed = async () => {
+      if (!loading && projects.length === 0 && !error) {
+        setIsSeeding(true);
+        await seedInitialData();
+        setIsSeeding(false);
+        // Refresh the page to load the seeded data
+        window.location.reload();
+      }
+    };
+
+    autoSeed();
+  }, [loading, projects.length, error]);
+
+  if (loading || isSeeding) {
+    return (
+      <section id="projects" className="py-20 px-6 bg-gradient-to-br from-background via-card/20 to-background">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+              Featured Projects
+            </h2>
+            <div className="flex items-center justify-center gap-3 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>{isSeeding ? "Setting up your portfolio..." : "Loading projects..."}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="projects" className="py-20 px-6 bg-gradient-to-br from-background via-card/20 to-background">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+              Featured Projects
+            </h2>
+            <div className="text-muted-foreground">
+              <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>Projects will be loaded from the admin dashboard</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section id="projects" className="py-24 px-6 bg-gradient-subtle">
+    <section id="projects" className="py-20 px-6 bg-gradient-to-br from-background via-card/20 to-background">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Featured <span className="text-primary">Projects</span>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            Featured Projects
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Real-world solutions that drive business value and user satisfaction
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Showcasing innovative solutions that drive business growth and deliver exceptional user experiences
           </p>
+          <div className="flex justify-center mt-6">
+            <Signature size="sm" className="opacity-30" />
+          </div>
         </div>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-16">
-          {categories.map((category, index) => (
-            <Button 
-              key={index} 
-              variant={index === 0 ? "default" : "outline"}
-              className="hover:scale-105 transition-transform duration-300"
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-
-        {/* Featured Projects Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          {projects.filter(p => p.featured).map((project, index) => (
-            <Card key={index} className="group hover:shadow-glow transition-all duration-500 hover:scale-[1.02] border-0 shadow-medium overflow-hidden">
-              <div className="aspect-video bg-gradient-primary/10 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <div className="text-6xl font-mono text-primary/30">{"</>"}</div>
-                </div>
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-primary/90 text-primary-foreground">
-                    {project.category}
-                  </Badge>
-                </div>
-              </div>
-              
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
-                  {project.title}
-                </CardTitle>
-                <p className="text-muted-foreground leading-relaxed">
-                  {project.description}
-                </p>
-              </CardHeader>
-              
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-semibold mb-3 text-foreground">Key Achievements</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {project.achievements.map((achievement, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                        <span className="text-muted-foreground">{achievement}</span>
-                      </div>
-                    ))}
+        {/* Featured Projects */}
+        {featured.length > 0 && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {featured.map((project) => (
+              <Card key={project.id} className="group overflow-hidden border-0 shadow-medium hover:shadow-large transition-all duration-500 hover:scale-105 bg-card/50 backdrop-blur-sm">
+                <div className="relative overflow-hidden">
+                  {project.image ? (
+                    <img 
+                      src={project.image} 
+                      alt={project.title}
+                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <Database className="w-12 h-12 text-primary/40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-primary/90 text-primary-foreground shadow-glow">
+                      <Star className="w-3 h-3 mr-1" />
+                      Featured
+                    </Badge>
                   </div>
                 </div>
                 
-                <div>
-                  <h4 className="font-semibold mb-3 text-foreground">Technologies</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech, i) => (
-                      <Badge key={i} variant="outline" className="text-xs hover:bg-primary/10">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors duration-300">
+                    {project.title}
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground leading-relaxed">
+                    {project.description}
+                  </CardDescription>
+                </CardHeader>
                 
-                <div className="flex gap-4 pt-4">
-                  <Button size="sm" className="flex-1 group/btn">
-                    <span>View Project</span>
-                    <ExternalLink className="ml-2 h-4 w-4 group-hover/btn:scale-110 transition-transform" />
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1 group/btn">
-                    <Github className="mr-2 h-4 w-4 group-hover/btn:scale-110 transition-transform" />
-                    <span>Code</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Other Projects */}
-        <div className="space-y-6">
-          <h3 className="text-2xl font-bold text-center mb-8">Other Notable Projects</h3>
-          <div className="grid gap-6">
-            {projects.filter(p => !p.featured).map((project, index) => (
-              <Card key={index} className="group hover:shadow-medium transition-all duration-300 border-0 shadow-soft">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div className="flex-1 space-y-4">
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="text-xs">
-                          {project.category}
+                <CardContent className="space-y-4">
+                  {project.technologies && project.technologies.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.slice(0, 4).map((tech) => (
+                        <Badge key={tech} variant="outline" className="text-xs hover:bg-primary/10 transition-colors">
+                          {tech}
                         </Badge>
-                        <h4 className="text-xl font-bold group-hover:text-primary transition-colors">
-                          {project.title}
-                        </h4>
-                      </div>
-                      <p className="text-muted-foreground">{project.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {project.technologies.slice(0, 4).map((tech, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {tech}
-                          </Badge>
-                        ))}
+                      ))}
+                      {project.technologies.length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{project.technologies.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Project Stats */}
+                  {project.achievements && project.achievements.length > 0 && (
+                    <div className="py-3 border-t border-border/50">
+                      <div className="text-xs text-muted-foreground mb-2">Key Achievement:</div>
+                      <div className="text-sm font-medium text-primary">
+                        {project.achievements[0]}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="group/btn">
-                        <span>View</span>
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                  )}
+                  
+                  <div className="flex gap-3 pt-2">
+                    {project.liveUrl && (
+                      <Button size="sm" className="flex-1 shadow-glow hover:shadow-large transition-all duration-300" asChild>
+                        <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Live Demo
+                        </a>
                       </Button>
-                    </div>
+                    )}
+                    {project.githubUrl && (
+                      <Button size="sm" variant="outline" className="hover:bg-primary/10 transition-colors" asChild>
+                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                          <Github className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {project.demoUrl && !project.liveUrl && (
+                      <Button size="sm" className="flex-1 shadow-glow hover:shadow-large transition-all duration-300" asChild>
+                        <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Demo
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* CTA */}
-        <div className="text-center mt-20">
-          <div className="bg-card/50 backdrop-blur-sm rounded-3xl p-12 shadow-medium border-0">
-            <h3 className="text-3xl font-bold mb-6">Ready to Build Something Amazing?</h3>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let's discuss your next project and create solutions that drive real business results.
+        {/* Other Projects */}
+        {others.length > 0 && (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold mb-4">More Projects</h3>
+              <p className="text-muted-foreground">Additional projects showcasing diverse technical skills</p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {others.map((project) => (
+                <Card key={project.id} className="group border-0 shadow-medium hover:shadow-large transition-all duration-300 hover:scale-102 bg-card/30 backdrop-blur-sm">
+                  <div className="flex">
+                    <div className="w-32 h-32 flex-shrink-0">
+                      {project.image ? (
+                        <img 
+                          src={project.image} 
+                          alt={project.title}
+                          className="w-full h-full object-cover rounded-l-lg transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 rounded-l-lg flex items-center justify-center">
+                          <Database className="w-8 h-8 text-primary/40" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 p-6">
+                      <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                        {project.title}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {project.description}
+                      </CardDescription>
+                      {project.technologies && project.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {project.technologies.slice(0, 3).map((tech) => (
+                            <Badge key={tech} variant="outline" className="text-xs">
+                              {tech}
+                            </Badge>
+                          ))}
+                          {project.technologies.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{project.technologies.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        {project.liveUrl && (
+                          <Button size="sm" variant="outline" className="text-xs" asChild>
+                            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              View
+                            </a>
+                          </Button>
+                        )}
+                        {project.githubUrl && (
+                          <Button size="sm" variant="outline" className="text-xs" asChild>
+                            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                              <Github className="w-3 h-3 mr-1" />
+                              Code
+                            </a>
+                          </Button>
+                        )}
+                        {project.demoUrl && (
+                          <Button size="sm" variant="outline" className="text-xs" asChild>
+                            <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              Demo
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {projects.length === 0 && !loading && (
+          <div className="text-center py-16">
+            <Database className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-xl font-semibold mb-2">No Projects Yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Projects will appear here once added through the admin dashboard.
             </p>
-            <Button size="lg" className="text-lg px-10 py-4 shadow-glow hover:shadow-large transition-all duration-300 hover:scale-105">
-              <span>Start a Conversation</span>
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button asChild>
+              <a href="/admin">
+                <Database className="w-4 h-4 mr-2" />
+                Go to Admin
+              </a>
             </Button>
           </div>
+        )}
+
+        {/* Professional Footer */}
+        <div className="text-center mt-16 pt-8 border-t border-border/20">
+          <div className="flex justify-center mb-4">
+            <Signature size="md" className="opacity-40" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            All projects are built with modern technologies and best practices
+          </p>
         </div>
       </div>
     </section>
