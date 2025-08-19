@@ -3,17 +3,17 @@ import { cn } from "@/lib/utils";
 interface SignatureProps {
   className?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  variant?: "text" | "icon" | "full" | "minimal" | "artistic";
+  variant?: "svg" | "text" | "icon" | "full" | "minimal" | "compact";
   interactive?: boolean;
   showTitle?: boolean;
 }
 
 const sizeClasses = {
-  xs: "text-sm",
-  sm: "text-base",
-  md: "text-lg", 
-  lg: "text-xl",
-  xl: "text-2xl"
+  xs: "text-xs",
+  sm: "text-sm",
+  md: "text-base", 
+  lg: "text-lg",
+  xl: "text-xl"
 };
 
 const iconSizes = {
@@ -24,31 +24,48 @@ const iconSizes = {
   xl: "w-10 h-10"
 };
 
-const artisticSizes = {
+const svgSizes = {
   xs: "w-16 h-6",
   sm: "w-20 h-8",
-  md: "w-32 h-12",
-  lg: "w-40 h-16",
-  xl: "w-48 h-20"
+  md: "w-24 h-10",
+  lg: "w-32 h-12",
+  xl: "w-40 h-16"
 };
 
 export function Signature({ 
   className, 
   size = "md", 
-  variant = "artistic",
+  variant = "svg",
   interactive = false,
   showTitle = false
 }: SignatureProps) {
   const baseClasses = cn(
-    "font-signature select-none transition-all duration-300",
-    sizeClasses[size],
-    interactive && "hover:scale-105 cursor-pointer hover:text-primary",
+    "transition-all duration-300",
+    interactive && "hover:scale-105 cursor-pointer",
     className
   );
 
+  // SVG Signature (default - most unique and mobile-optimized)
+  if (variant === "svg") {
+    return (
+      <div className={cn("flex items-center justify-center", baseClasses)}>
+        <img 
+          src="/mounir-signature.svg" 
+          alt="Mounir Abderrahmani Signature" 
+          className={cn(
+            svgSizes[size],
+            "object-contain",
+            interactive && "hover:scale-110 transition-transform duration-300"
+          )}
+        />
+      </div>
+    );
+  }
+
+  // Icon only
   if (variant === "icon") {
     return (
-      <div className={cn("flex items-center justify-center", className)}>
+      <div className={cn("flex items-center justify-center", baseClasses)}>
         <img 
           src="/mounir-icon.svg" 
           alt="Mounir Abderrahmani" 
@@ -58,30 +75,32 @@ export function Signature({
     );
   }
 
+  // Text only
   if (variant === "text") {
     return (
-      <div className={baseClasses}>
+      <div className={cn("font-signature select-none", sizeClasses[size], baseClasses)}>
         Mounir Abderrahmani
       </div>
     );
   }
 
+  // Full signature with icon and text
   if (variant === "full") {
     return (
-      <div className={cn("flex flex-col items-center gap-1", className)}>
+      <div className={cn("flex flex-col items-center gap-1", baseClasses)}>
         <div className="flex items-center gap-2">
           <img 
             src="/mounir-icon.svg" 
             alt="Mounir Abderrahmani" 
             className={cn(iconSizes[size], interactive && "hover:scale-110 transition-transform duration-300")}
           />
-          <div className={baseClasses}>
+          <div className={cn("font-signature", sizeClasses[size])}>
             Mounir Abderrahmani
           </div>
         </div>
         {showTitle && (
           <div className={cn(
-            "text-muted-foreground font-medium",
+            "text-muted-foreground font-medium text-center",
             size === "xs" && "text-xs",
             size === "sm" && "text-xs",
             size === "md" && "text-sm",
@@ -95,99 +114,50 @@ export function Signature({
     );
   }
 
+  // Minimal signature
   if (variant === "minimal") {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
+      <div className={cn("flex items-center gap-2", baseClasses)}>
         <div className={cn(
           "w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary/60",
           interactive && "animate-pulse"
         )} />
-        <div className={cn(baseClasses, "text-muted-foreground")}>
+        <div className={cn("font-signature text-muted-foreground", sizeClasses[size])}>
           MAB
         </div>
       </div>
     );
   }
 
-  // Artistic signature (default)
-  return (
-    <div className={cn("relative flex items-center justify-center", artisticSizes[size], className)}>
-      <div className="flex items-center gap-2">
-        {/* Mounir Icon */}
-        <div className="relative">
-          <img 
-            src="/mounir-icon.svg" 
-            alt="Mounir Signature" 
-            className={cn(
-              iconSizes[size], 
-              "opacity-90 hover:opacity-100 transition-opacity duration-300",
-              interactive && "hover:scale-110"
-            )}
-          />
-        </div>
-        
-        {/* Signature SVG */}
-        <div className="relative">
-          <svg 
-            viewBox="0 0 160 40" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            className={cn(
-              size === "xs" && "w-20 h-5",
-              size === "sm" && "w-24 h-6",
-              size === "md" && "w-32 h-8",
-              size === "lg" && "w-40 h-10",
-              size === "xl" && "w-48 h-12"
-            )}
-          >
-            <defs>
-              <linearGradient id="signatureGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style={{stopColor: "#4361ee", stopOpacity: 0.9}} />
-                <stop offset="50%" style={{stopColor: "#7209b7", stopOpacity: 1}} />
-                <stop offset="100%" style={{stopColor: "#f72585", stopOpacity: 0.8}} />
-              </linearGradient>
-              <filter id="signatureGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-                <feMerge> 
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            
-            {/* Stylized signature path */}
-            <path 
-              d="M5 25 Q15 15 25 25 Q35 35 45 25 Q55 15 65 25 Q75 35 85 25 Q95 15 105 25 Q115 35 125 25 Q135 15 145 25 Q150 20 155 25" 
-              stroke="url(#signatureGradient)" 
-              strokeWidth="2.5" 
-              fill="none" 
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#signatureGlow)"
-              className="opacity-90"
-            />
-            
-            {/* Decorative underline */}
-            <path 
-              d="M5 32 Q80 29 155 32" 
-              stroke="url(#signatureGradient)" 
-              strokeWidth="1" 
-              fill="none" 
-              strokeLinecap="round"
-              className="opacity-60"
-            />
-            
-            {/* Animated decorative elements */}
-            <circle cx="20" cy="15" r="1" fill="#4361ee" className="opacity-70 animate-pulse" style={{animationDelay: "0s"}} />
-            <circle cx="80" cy="15" r="0.8" fill="#7209b7" className="opacity-60 animate-pulse" style={{animationDelay: "1s"}} />
-            <circle cx="140" cy="15" r="1" fill="#f72585" className="opacity-70 animate-pulse" style={{animationDelay: "2s"}} />
-          </svg>
+  // Compact signature for very small spaces
+  if (variant === "compact") {
+    return (
+      <div className={cn("flex items-center gap-1.5", baseClasses)}>
+        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+        <div className={cn("font-signature text-muted-foreground", sizeClasses[size])}>
+          M.A
         </div>
       </div>
+    );
+  }
+
+  // Default to SVG
+  return (
+    <div className={cn("flex items-center justify-center", baseClasses)}>
+      <img 
+        src="/mounir-signature.svg" 
+        alt="Mounir Abderrahmani Signature" 
+        className={cn(
+          svgSizes[size],
+          "object-contain",
+          interactive && "hover:scale-110 transition-transform duration-300"
+        )}
+      />
     </div>
   );
 }
 
+// Professional signature with icon and text
 export function ProfessionalSignature({ 
   className, 
   size = "md",
@@ -258,5 +228,19 @@ export function CompactSignature({
         MAB
       </div>
     </div>
+  );
+}
+
+// SVG-only signature for maximum flexibility
+export function SVGSignature({ 
+  className,
+  size = "md"
+}: Pick<SignatureProps, "className" | "size">) {
+  return (
+    <img 
+      src="/mounir-signature.svg" 
+      alt="Mounir Abderrahmani" 
+      className={cn(svgSizes[size], "object-contain", className)}
+    />
   );
 }
