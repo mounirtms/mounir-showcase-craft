@@ -3,29 +3,43 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Github, Star, Database, Loader2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { seedInitialData } from "@/lib/seed-data";
 import { Signature } from "@/components/ui/signature";
 
 export const Projects = () => {
   const { projects, featured, others, loading, error } = useProjects();
   const [isSeeding, setIsSeeding] = useState(false);
+  const hasSeeded = useRef(false);
 
   useEffect(() => {
     // Auto-seed data if no projects exist and Firebase is available
     const autoSeed = async () => {
-      if (!loading && projects.length === 0 && !error) {
+      if (!loading && projects.length === 0 && !error && !hasSeeded.current && !isSeeding) {
+        hasSeeded.current = true;
         setIsSeeding(true);
-        await seedInitialData();
-        setIsSeeding(false);
-        // Refresh the page to load the seeded data
-        window.location.reload();
+        
+        try {
+          const seeded = await seedInitialData();
+          if (seeded) {
+            // Wait for Firebase to sync, then reload
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            setIsSeeding(false);
+          }
+        } catch (err) {
+          console.error("Seeding failed:", err);
+          setIsSeeding(false);
+        }
       }
     };
 
     autoSeed();
-  }, [loading, projects.length, error]);
+  }, [loading, projects.length, error, isSeeding]);
 
+  // Show loading state
   if (loading || isSeeding) {
     return (
       <section id="projects" className="py-20 px-6 bg-gradient-to-br from-background via-card/20 to-background">
@@ -38,12 +52,18 @@ export const Projects = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
               <span>{isSeeding ? "Setting up your portfolio..." : "Loading projects..."}</span>
             </div>
+            {isSeeding && (
+              <p className="text-sm text-muted-foreground mt-2">
+                This may take a moment on first visit
+              </p>
+            )}
           </div>
         </div>
       </section>
     );
   }
 
+  // Show error state
   if (error) {
     return (
       <section id="projects" className="py-20 px-6 bg-gradient-to-br from-background via-card/20 to-background">
@@ -54,7 +74,14 @@ export const Projects = () => {
             </h2>
             <div className="text-muted-foreground">
               <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>Projects will be loaded from the admin dashboard</p>
+              <p>Unable to load projects. Please check your connection.</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline" 
+                className="mt-4"
+              >
+                Retry
+              </Button>
             </div>
           </div>
         </div>
@@ -91,10 +118,22 @@ export const Projects = () => {
                     />
                   ) : (
                     <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                      <Database className="w-12 h-12 text-primary/40" />
+                      <div className="text-4xl">{project.icon || "🚀"}</div>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Company Logo */}
+                  {project.logo && (
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-medium hover:scale-110 transition-transform duration-300">
+                      <img 
+                        src={project.logo} 
+                        alt={`${project.title} logo`}
+                        className="h-6 w-auto max-w-[80px] object-contain"
+                      />
+                    </div>
+                  )}
+                  
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-primary/90 text-primary-foreground shadow-glow">
                       <Star className="w-3 h-3 mr-1" />
@@ -190,14 +229,23 @@ export const Projects = () => {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 rounded-l-lg flex items-center justify-center">
-                          <Database className="w-8 h-8 text-primary/40" />
+                          <div className="text-2xl">{project.icon || "🚀"}</div>
                         </div>
                       )}
                     </div>
                     <div className="flex-1 p-6">
-                      <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                        {project.title}
-                      </CardTitle>
+                      <div className="flex items-start justify-between mb-2">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {project.title}
+                        </CardTitle>
+                        {project.logo && (
+                          <img 
+                            src={project.logo} 
+                            alt=""
+                            className="h-5 w-auto max-w-[60px] object-contain opacity-70"
+                          />
+                        )}
+                      </div>
                       <CardDescription className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {project.description}
                       </CardDescription>
@@ -250,7 +298,7 @@ export const Projects = () => {
         )}
 
         {/* Empty State */}
-        {projects.length === 0 && !loading && (
+        {projects.length === 0 && !loading && !isSeeding && (
           <div className="text-center py-16">
             <Database className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
             <h3 className="text-xl font-semibold mb-2">No Projects Yet</h3>

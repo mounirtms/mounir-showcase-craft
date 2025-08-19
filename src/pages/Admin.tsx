@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProjects, PROJECTS_COLLECTION, type ProjectInput } from "@/hooks/useProjects";
+import { useProjects, PROJECTS_COLLECTION, type ProjectInput, DEFAULT_PROJECT } from "@/hooks/useProjects";
 import { addDoc, collection, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 import { ProfessionalSignature } from "@/components/ui/signature";
+import { DataManager } from "@/components/admin/DataManager";
 import { 
   BarChart3, 
   Plus, 
@@ -28,9 +29,9 @@ import {
   Settings,
   Users,
   TrendingUp,
-  Database
+  Database,
+  Upload
 } from "lucide-react";
-import { ProjectCategory, ProjectStatus, DEFAULT_PROJECT } from "@/lib/database-schema";
 
 export default function Admin() {
   const [email, setEmail] = useState("");
@@ -109,13 +110,14 @@ export default function Admin() {
     if (!db) return;
     
     const form = new FormData(e.currentTarget);
+    
     const data: ProjectInput = {
       ...DEFAULT_PROJECT,
       title: String(form.get("title") || "Untitled"),
       description: String(form.get("description") || ""),
       longDescription: String(form.get("longDescription") || ""),
-      category: String(form.get("category") || "Other") as ProjectCategory,
-      status: String(form.get("status") || "completed") as ProjectStatus,
+      category: String(form.get("category") || "Web Application") as any,
+      status: String(form.get("status") || "completed") as any,
       achievements: String(form.get("achievements") || "")
         .split("\n")
         .map((s) => s.trim())
@@ -129,17 +131,46 @@ export default function Admin() {
         .map((s) => s.trim())
         .filter(Boolean),
       image: String(form.get("image") || ""),
+      logo: String(form.get("logo") || ""),
+      icon: String(form.get("icon") || ""),
       liveUrl: String(form.get("liveUrl") || ""),
       githubUrl: String(form.get("githubUrl") || ""),
       demoUrl: String(form.get("demoUrl") || ""),
+      caseStudyUrl: String(form.get("caseStudyUrl") || ""),
       featured: form.get("featured") === "on",
       disabled: form.get("disabled") === "on",
       priority: Number(form.get("priority") || 50),
       startDate: String(form.get("startDate") || ""),
       endDate: String(form.get("endDate") || ""),
       duration: String(form.get("duration") || ""),
+      teamSize: Number(form.get("teamSize") || 1),
+      role: String(form.get("role") || "Full-Stack Developer"),
+      clientInfo: {
+        name: String(form.get("clientName") || ""),
+        industry: String(form.get("clientIndustry") || ""),
+        size: String(form.get("clientSize") || "medium") as any,
+        location: String(form.get("clientLocation") || ""),
+        website: String(form.get("clientWebsite") || ""),
+        isPublic: form.get("clientIsPublic") === "on"
+      },
+      metrics: {
+        usersReached: Number(form.get("usersReached") || 0),
+        performanceImprovement: String(form.get("performanceImprovement") || ""),
+        revenueImpact: String(form.get("revenueImpact") || ""),
+        uptime: String(form.get("uptime") || ""),
+        customMetrics: {}
+      },
+      challenges: String(form.get("challenges") || "")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      solutions: String(form.get("solutions") || "")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      version: 1
     };
 
     try {
@@ -258,7 +289,7 @@ export default function Admin() {
                   <Input 
                     id="password"
                     type="password" 
-                    placeholder="••••••••" 
+                    placeholder="•••••••���" 
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} 
                     disabled={authLoading}
@@ -361,10 +392,14 @@ export default function Admin() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload Data
             </TabsTrigger>
             <TabsTrigger value="projects" className="flex items-center gap-2">
               <Database className="h-4 w-4" />
@@ -412,6 +447,14 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button 
+                    onClick={() => setActiveTab("upload")} 
+                    className="w-full justify-start"
+                    variant="outline"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Portfolio Data
+                  </Button>
+                  <Button 
                     onClick={() => setActiveTab("add-project")} 
                     className="w-full justify-start"
                     variant="outline"
@@ -440,6 +483,10 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          <TabsContent value="upload" className="space-y-6">
+            <DataManager />
+          </TabsContent>
+
           <TabsContent value="projects" className="space-y-6">
             <Card className="border-0 shadow-medium">
               <CardHeader>
@@ -453,7 +500,7 @@ export default function Admin() {
                   <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
                 ) : !projects.length ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No projects found. Add your first project to get started.
+                    No projects found. Upload your portfolio data or add your first project to get started.
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -462,6 +509,9 @@ export default function Admin() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2">
                             <div className="flex items-center gap-3">
+                              {project.logo && (
+                                <img src={project.logo} alt="" className="w-6 h-6 object-contain" />
+                              )}
                               <h3 className="font-semibold text-lg">{project.title}</h3>
                               <div className="flex gap-2">
                                 {project.featured && (
@@ -552,116 +602,245 @@ export default function Admin() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form className="space-y-6" onSubmit={addProject}>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Project Title *</Label>
-                        <Input id="title" name="title" placeholder="Amazing Project" required />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Short Description *</Label>
-                        <Textarea id="description" name="description" placeholder="Brief project description..." required />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="longDescription">Detailed Description</Label>
-                        <Textarea id="longDescription" name="longDescription" placeholder="Detailed project description..." />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
+                <form className="space-y-8" onSubmit={addProject}>
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Basic Information</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="category">Category</Label>
-                          <Select name="category">
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Web Application">Web Application</SelectItem>
-                              <SelectItem value="Mobile Application">Mobile Application</SelectItem>
-                              <SelectItem value="Enterprise Integration">Enterprise Integration</SelectItem>
-                              <SelectItem value="E-commerce">E-commerce</SelectItem>
-                              <SelectItem value="Machine Learning">Machine Learning</SelectItem>
-                              <SelectItem value="API Development">API Development</SelectItem>
-                              <SelectItem value="DevOps & Infrastructure">DevOps & Infrastructure</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Label htmlFor="title">Project Title *</Label>
+                          <Input id="title" name="title" placeholder="Amazing Project" required />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="status">Status</Label>
-                          <Select name="status">
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="completed">Completed</SelectItem>
-                              <SelectItem value="in-progress">In Progress</SelectItem>
-                              <SelectItem value="maintenance">Maintenance</SelectItem>
-                              <SelectItem value="archived">Archived</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Label htmlFor="description">Short Description *</Label>
+                          <Textarea id="description" name="description" placeholder="Brief project description..." required />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="longDescription">Detailed Description</Label>
+                          <Textarea id="longDescription" name="longDescription" placeholder="Detailed project description..." rows={4} />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Select name="category">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Web Application">Web Application</SelectItem>
+                                <SelectItem value="Mobile Application">Mobile Application</SelectItem>
+                                <SelectItem value="Enterprise Integration">Enterprise Integration</SelectItem>
+                                <SelectItem value="E-commerce">E-commerce</SelectItem>
+                                <SelectItem value="Machine Learning">Machine Learning</SelectItem>
+                                <SelectItem value="API Development">API Development</SelectItem>
+                                <SelectItem value="DevOps & Infrastructure">DevOps & Infrastructure</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="status">Status</Label>
+                            <Select name="status">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="in-progress">In Progress</SelectItem>
+                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                                <SelectItem value="archived">Archived</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="technologies">Technologies (comma separated)</Label>
+                          <Textarea id="technologies" name="technologies" placeholder="React, Node.js, TypeScript..." />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="tags">Tags (comma separated)</Label>
+                          <Input id="tags" name="tags" placeholder="react, frontend, responsive..." />
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="technologies">Technologies (comma separated)</Label>
-                        <Textarea id="technologies" name="technologies" placeholder="React, Node.js, TypeScript..." />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="achievements">Key Achievements (one per line)</Label>
-                        <Textarea id="achievements" name="achievements" placeholder="Improved performance by 40%&#10;Reduced loading time by 2 seconds&#10;Increased user engagement by 25%" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="tags">Tags (comma separated)</Label>
-                        <Input id="tags" name="tags" placeholder="react, frontend, responsive..." />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
+                  </div>
+
+                  {/* Media & Links */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Media & Links</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="startDate">Start Date</Label>
-                          <Input id="startDate" name="startDate" type="date" />
+                          <Label htmlFor="image">Featured Image URL</Label>
+                          <Input id="image" name="image" type="url" placeholder="https://example.com/image.jpg" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="endDate">End Date</Label>
-                          <Input id="endDate" name="endDate" type="date" />
+                          <Label htmlFor="logo">Company Logo URL</Label>
+                          <Input id="logo" name="logo" type="url" placeholder="/company-logo.svg" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="icon">Project Icon (emoji)</Label>
+                          <Input id="icon" name="icon" placeholder="🚀" />
                         </div>
                       </div>
-                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="liveUrl">Live URL</Label>
+                          <Input id="liveUrl" name="liveUrl" type="url" placeholder="https://example.com" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="githubUrl">GitHub URL</Label>
+                          <Input id="githubUrl" name="githubUrl" type="url" placeholder="https://github.com/..." />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="demoUrl">Demo URL</Label>
+                          <Input id="demoUrl" name="demoUrl" type="url" placeholder="https://demo.example.com" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="caseStudyUrl">Case Study URL</Label>
+                          <Input id="caseStudyUrl" name="caseStudyUrl" type="url" placeholder="https://case-study.com" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Project Details */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Project Details</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="achievements">Key Achievements (one per line)</Label>
+                          <Textarea id="achievements" name="achievements" placeholder="Improved performance by 40%&#10;Reduced loading time by 2 seconds&#10;Increased user engagement by 25%" rows={4} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="challenges">Challenges (one per line)</Label>
+                          <Textarea id="challenges" name="challenges" placeholder="Complex data integration&#10;Performance optimization&#10;Scalability requirements" rows={3} />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="solutions">Solutions (one per line)</Label>
+                          <Textarea id="solutions" name="solutions" placeholder="Implemented microservices&#10;Used caching strategies&#10;Built auto-scaling system" rows={3} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="teamSize">Team Size</Label>
+                            <Input id="teamSize" name="teamSize" type="number" min="1" defaultValue="1" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="role">Your Role</Label>
+                            <Input id="role" name="role" placeholder="Full-Stack Developer" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Timeline</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="startDate">Start Date</Label>
+                        <Input id="startDate" name="startDate" type="date" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="endDate">End Date</Label>
+                        <Input id="endDate" name="endDate" type="date" />
+                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="duration">Duration</Label>
                         <Input id="duration" name="duration" placeholder="3 months" />
                       </div>
                     </div>
                   </div>
-                  
+
+                  {/* Client Information */}
                   <div className="space-y-4">
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="liveUrl">Live URL</Label>
-                        <Input id="liveUrl" name="liveUrl" type="url" placeholder="https://example.com" />
+                    <h3 className="text-lg font-semibold border-b pb-2">Client Information</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="clientName">Client Name</Label>
+                          <Input id="clientName" name="clientName" placeholder="Company Name" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="clientIndustry">Industry</Label>
+                          <Input id="clientIndustry" name="clientIndustry" placeholder="Technology" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="clientWebsite">Client Website</Label>
+                          <Input id="clientWebsite" name="clientWebsite" type="url" placeholder="https://client.com" />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="githubUrl">GitHub URL</Label>
-                        <Input id="githubUrl" name="githubUrl" type="url" placeholder="https://github.com/..." />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="demoUrl">Demo URL</Label>
-                        <Input id="demoUrl" name="demoUrl" type="url" placeholder="https://demo.example.com" />
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="clientSize">Company Size</Label>
+                          <Select name="clientSize">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="startup">Startup</SelectItem>
+                              <SelectItem value="small">Small</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="large">Large</SelectItem>
+                              <SelectItem value="enterprise">Enterprise</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="clientLocation">Location</Label>
+                          <Input id="clientLocation" name="clientLocation" placeholder="City, Country" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch id="clientIsPublic" name="clientIsPublic" />
+                          <Label htmlFor="clientIsPublic">Public Client</Label>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="image">Featured Image URL</Label>
-                      <Input id="image" name="image" type="url" placeholder="https://example.com/image.jpg" />
+                  </div>
+
+                  {/* Metrics */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Project Metrics</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="usersReached">Users Reached</Label>
+                          <Input id="usersReached" name="usersReached" type="number" placeholder="10000" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="performanceImprovement">Performance Improvement</Label>
+                          <Input id="performanceImprovement" name="performanceImprovement" placeholder="75% faster processing" />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="revenueImpact">Revenue Impact</Label>
+                          <Input id="revenueImpact" name="revenueImpact" placeholder="$1M+ revenue increase" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="uptime">Uptime</Label>
+                          <Input id="uptime" name="uptime" placeholder="99.9%" />
+                        </div>
+                      </div>
                     </div>
-                    
+                  </div>
+
+                  {/* Settings */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">Settings</h3>
                     <div className="flex items-center gap-8">
                       <div className="flex items-center gap-2">
                         <Switch id="featured" name="featured" />

@@ -14,6 +14,23 @@ export type ProjectCategory =
 
 export type ProjectStatus = "completed" | "in-progress" | "maintenance" | "archived";
 
+export interface ClientInfo {
+  name: string;
+  industry: string;
+  size: "startup" | "small" | "medium" | "large" | "enterprise";
+  location: string;
+  website?: string;
+  isPublic: boolean;
+}
+
+export interface ProjectMetrics {
+  usersReached?: number;
+  performanceImprovement?: string;
+  revenueImpact?: string;
+  uptime?: string;
+  customMetrics?: Record<string, any>;
+}
+
 export interface ProjectInput {
   title: string;
   description: string;
@@ -25,17 +42,26 @@ export interface ProjectInput {
   tags: string[];
   image?: string;
   logo?: string;
+  icon?: string;
   liveUrl?: string;
   githubUrl?: string;
   demoUrl?: string;
+  caseStudyUrl?: string;
   featured: boolean;
   disabled: boolean;
   priority: number;
   startDate?: string;
   endDate?: string;
   duration?: string;
+  clientInfo?: ClientInfo;
+  metrics?: ProjectMetrics;
+  challenges?: string[];
+  solutions?: string[];
+  teamSize?: number;
+  role?: string;
   createdAt: number;
   updatedAt: number;
+  version?: number;
 }
 
 export interface Project extends ProjectInput {
@@ -43,6 +69,50 @@ export interface Project extends ProjectInput {
 }
 
 export const PROJECTS_COLLECTION = "projects";
+
+// Default project template
+export const DEFAULT_PROJECT: Omit<ProjectInput, 'title' | 'description' | 'category'> = {
+  longDescription: "",
+  status: "completed",
+  achievements: [],
+  technologies: [],
+  tags: [],
+  image: "",
+  logo: "",
+  icon: "",
+  liveUrl: "",
+  githubUrl: "",
+  demoUrl: "",
+  caseStudyUrl: "",
+  featured: false,
+  disabled: false,
+  priority: 50,
+  startDate: "",
+  endDate: "",
+  duration: "",
+  clientInfo: {
+    name: "",
+    industry: "",
+    size: "medium",
+    location: "",
+    website: "",
+    isPublic: true
+  },
+  metrics: {
+    usersReached: 0,
+    performanceImprovement: "",
+    revenueImpact: "",
+    uptime: "",
+    customMetrics: {}
+  },
+  challenges: [],
+  solutions: [],
+  teamSize: 1,
+  role: "Full-Stack Developer",
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+  version: 1
+};
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);

@@ -1,6 +1,28 @@
-import { ProjectInput } from "@/hooks/useProjects";
+#!/usr/bin/env node
 
-export const initialProjects: ProjectInput[] = [
+// Manual script to upload projects to Firebase Firestore
+// Run with: node scripts/upload-projects.js
+
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
+
+// Firebase configuration (replace with your actual config)
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID,
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Comprehensive project data from your CV and portfolio
+const projects = [
   {
     title: "HoTech Systems - Enterprise Integration Platform",
     description: "Comprehensive enterprise integration platform with real-time data synchronization and advanced analytics dashboard.",
@@ -20,11 +42,9 @@ export const initialProjects: ProjectInput[] = [
     tags: ["enterprise", "integration", "real-time", "scalable", "microservices", "b2b"],
     image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop",
     logo: "/hotech-logo.svg",
-    icon: "🏢",
     liveUrl: "https://hotech.systems",
     githubUrl: "",
     demoUrl: "",
-    caseStudyUrl: "",
     featured: true,
     disabled: false,
     priority: 95,
@@ -36,38 +56,20 @@ export const initialProjects: ProjectInput[] = [
       industry: "Technology Integration",
       size: "enterprise",
       location: "International",
-      website: "https://hotech.systems",
       isPublic: true
     },
     metrics: {
       usersReached: 10000,
       performanceImprovement: "75% faster processing",
-      revenueImpact: "$2M+ cost savings",
       uptime: "99.9%",
       customMetrics: {
         "transactions_monthly": 1000000,
         "systems_integrated": 15,
-        "cost_savings": "40%",
-        "automation_level": "90%"
+        "cost_savings": "40%"
       }
     },
-    challenges: [
-      "Complex legacy system integration",
-      "Real-time data synchronization across multiple databases",
-      "High availability requirements with zero downtime",
-      "Scalability for growing transaction volume"
-    ],
-    solutions: [
-      "Implemented microservices architecture with Docker",
-      "Built event-driven data synchronization system",
-      "Created automated failover and monitoring systems",
-      "Designed horizontal scaling with Kubernetes"
-    ],
-    teamSize: 5,
-    role: "Lead Full-Stack Developer & Architect",
     createdAt: Date.now() - 86400000 * 30,
     updatedAt: Date.now() - 86400000 * 5,
-    version: 1
   },
   {
     title: "TechnoStationery E-commerce Platform",
@@ -88,7 +90,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["ecommerce", "payments", "inventory", "analytics", "responsive", "b2c"],
     image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
     logo: "/technostationery-logo.svg",
-    icon: "🛒",
     liveUrl: "https://technostationery.com",
     githubUrl: "",
     demoUrl: "",
@@ -103,7 +104,6 @@ export const initialProjects: ProjectInput[] = [
       industry: "Office Supplies & Stationery",
       size: "medium",
       location: "Algeria",
-      website: "https://technostationery.com",
       isPublic: true
     },
     metrics: {
@@ -113,27 +113,11 @@ export const initialProjects: ProjectInput[] = [
       customMetrics: {
         "cart_abandonment_reduction": "45%",
         "page_load_time": "2s",
-        "payment_gateways": 5,
-        "inventory_automation": "95%"
+        "payment_gateways": 5
       }
     },
-    challenges: [
-      "Complex inventory management across multiple warehouses",
-      "Integration with legacy accounting systems",
-      "Multi-currency and multi-language support",
-      "Real-time inventory synchronization"
-    ],
-    solutions: [
-      "Built centralized inventory management system",
-      "Created API bridges for legacy system integration",
-      "Implemented i18n with dynamic currency conversion",
-      "Developed real-time WebSocket inventory updates"
-    ],
-    teamSize: 3,
-    role: "Full-Stack Developer & Project Lead",
     createdAt: Date.now() - 86400000 * 60,
     updatedAt: Date.now() - 86400000 * 10,
-    version: 1
   },
   {
     title: "ETL Data Processing Platform",
@@ -154,7 +138,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["etl", "big-data", "automation", "monitoring", "scalable", "data-engineering"],
     image: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop",
     logo: "/etl-platform-logo.svg",
-    icon: "⚡",
     liveUrl: "https://etl.techno-dz.com",
     githubUrl: "",
     demoUrl: "",
@@ -169,7 +152,6 @@ export const initialProjects: ProjectInput[] = [
       industry: "Data Processing",
       size: "medium",
       location: "Algeria",
-      website: "https://etl.techno-dz.com",
       isPublic: true
     },
     metrics: {
@@ -178,27 +160,11 @@ export const initialProjects: ProjectInput[] = [
       customMetrics: {
         "daily_data_processed": "5TB",
         "accuracy_rate": "99.95%",
-        "automation_level": "95%",
-        "processing_speed_improvement": "80%"
+        "automation_level": "95%"
       }
     },
-    challenges: [
-      "Processing massive datasets efficiently",
-      "Ensuring data quality and accuracy",
-      "Handling various data formats and sources",
-      "Scaling processing power dynamically"
-    ],
-    solutions: [
-      "Implemented Apache Spark for distributed processing",
-      "Built comprehensive data validation pipelines",
-      "Created flexible data transformation modules",
-      "Used Kubernetes for auto-scaling processing nodes"
-    ],
-    teamSize: 4,
-    role: "Data Engineer & DevOps Specialist",
     createdAt: Date.now() - 86400000 * 45,
     updatedAt: Date.now() - 86400000 * 3,
-    version: 1
   },
   {
     title: "Magento E-commerce Solutions",
@@ -219,7 +185,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["magento", "ecommerce", "php", "enterprise", "optimization", "b2b", "b2c"],
     image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop",
     logo: "/magento-logo.svg",
-    icon: "🛍️",
     liveUrl: "",
     githubUrl: "",
     demoUrl: "",
@@ -243,27 +208,11 @@ export const initialProjects: ProjectInput[] = [
         "stores_built": 15,
         "custom_modules": 25,
         "payment_gateways": 10,
-        "performance_improvement": "65%",
-        "seo_improvement": "200%"
+        "performance_improvement": "65%"
       }
     },
-    challenges: [
-      "Legacy Magento 1.x to 2.x migrations",
-      "Performance optimization for large catalogs",
-      "Complex B2B pricing and workflow requirements",
-      "Multi-store and multi-language implementations"
-    ],
-    solutions: [
-      "Developed automated migration tools and scripts",
-      "Implemented advanced caching and indexing strategies",
-      "Built custom B2B modules with approval workflows",
-      "Created scalable multi-store architecture"
-    ],
-    teamSize: 6,
-    role: "Senior Magento Developer & Technical Lead",
     createdAt: Date.now() - 86400000 * 200,
     updatedAt: Date.now() - 86400000 * 30,
-    version: 1
   },
   {
     title: "JSKit Development Toolkit",
@@ -284,7 +233,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["toolkit", "development", "automation", "testing", "productivity", "open-source"],
     image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop",
     logo: "/jskit-logo.svg",
-    icon: "🔧",
     liveUrl: "https://jskit-app.web.app",
     githubUrl: "https://github.com/mounir1/jskit",
     demoUrl: "https://jskit-app.web.app/demo",
@@ -300,27 +248,11 @@ export const initialProjects: ProjectInput[] = [
       customMetrics: {
         "code_snippets_generated": 10000,
         "user_satisfaction": "95%",
-        "development_time_saved": "60%",
-        "ide_integrations": 5
+        "development_time_saved": "60%"
       }
     },
-    challenges: [
-      "Creating flexible code generation templates",
-      "Supporting multiple JavaScript frameworks",
-      "Maintaining compatibility across different environments",
-      "Building intuitive CLI interface"
-    ],
-    solutions: [
-      "Developed modular template system with customization",
-      "Built framework-agnostic core with plugins",
-      "Implemented comprehensive testing across environments",
-      "Created interactive CLI with helpful prompts"
-    ],
-    teamSize: 2,
-    role: "Lead Developer & Product Owner",
     createdAt: Date.now() - 86400000 * 90,
     updatedAt: Date.now() - 86400000 * 15,
-    version: 1
   },
   {
     title: "Noor Al Maarifa Educational Platform",
@@ -341,7 +273,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["education", "learning", "analytics", "interactive", "scalable", "mobile"],
     image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop",
     logo: "/noor-almaarifa-logo.svg",
-    icon: "📚",
     liveUrl: "https://www.nooralmaarifa.com",
     githubUrl: "",
     demoUrl: "",
@@ -356,7 +287,6 @@ export const initialProjects: ProjectInput[] = [
       industry: "Education",
       size: "medium",
       location: "Algeria",
-      website: "https://www.nooralmaarifa.com",
       isPublic: true
     },
     metrics: {
@@ -365,27 +295,11 @@ export const initialProjects: ProjectInput[] = [
       customMetrics: {
         "student_satisfaction": "98%",
         "active_students": 2000,
-        "learning_improvement": "40%",
-        "course_completion_rate": "85%"
+        "learning_improvement": "40%"
       }
     },
-    challenges: [
-      "Creating engaging interactive learning content",
-      "Implementing real-time collaboration features",
-      "Building comprehensive analytics dashboard",
-      "Ensuring mobile accessibility"
-    ],
-    solutions: [
-      "Developed interactive multimedia content system",
-      "Integrated WebRTC for real-time communication",
-      "Built advanced analytics with Chart.js and D3",
-      "Implemented PWA for mobile-first experience"
-    ],
-    teamSize: 4,
-    role: "Full-Stack Developer & UX Designer",
     createdAt: Date.now() - 86400000 * 75,
     updatedAt: Date.now() - 86400000 * 8,
-    version: 1
   },
   {
     title: "IT Collaborator Project Management",
@@ -406,7 +320,6 @@ export const initialProjects: ProjectInput[] = [
     tags: ["project-management", "collaboration", "automation", "integration", "productivity", "saas"],
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
     logo: "/it-collaborator-logo.svg",
-    icon: "👥",
     liveUrl: "https://it-collaborator-techno.web.app",
     githubUrl: "",
     demoUrl: "https://it-collaborator-techno.web.app/demo",
@@ -426,23 +339,8 @@ export const initialProjects: ProjectInput[] = [
         "project_delay_reduction": "35%"
       }
     },
-    challenges: [
-      "Integrating with multiple third-party tools",
-      "Building real-time collaboration features",
-      "Creating intuitive project visualization",
-      "Implementing complex permission systems"
-    ],
-    solutions: [
-      "Built unified API gateway for tool integrations",
-      "Implemented WebSocket-based real-time updates",
-      "Created interactive Gantt and Kanban components",
-      "Developed role-based access control system"
-    ],
-    teamSize: 5,
-    role: "Frontend Lead & Integration Specialist",
     createdAt: Date.now() - 86400000 * 120,
     updatedAt: Date.now() - 86400000 * 20,
-    version: 1
   },
   {
     title: "Real-time Analytics Dashboard",
@@ -462,7 +360,6 @@ export const initialProjects: ProjectInput[] = [
     technologies: ["React", "D3.js", "WebSocket", "InfluxDB", "Grafana", "Node.js", "Kafka", "Docker", "TypeScript", "Material-UI"],
     tags: ["analytics", "real-time", "visualization", "dashboard", "performance", "big-data"],
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-    icon: "📊",
     liveUrl: "",
     githubUrl: "https://github.com/mounir1/analytics-dashboard",
     demoUrl: "",
@@ -477,27 +374,11 @@ export const initialProjects: ProjectInput[] = [
       customMetrics: {
         "events_per_minute": 1000000,
         "chart_types": 50,
-        "visualization_speed": "sub-second",
-        "data_retention": "1_year"
+        "visualization_speed": "sub-second"
       }
     },
-    challenges: [
-      "Handling high-frequency data streams",
-      "Creating responsive visualizations",
-      "Implementing real-time alerts",
-      "Optimizing for large datasets"
-    ],
-    solutions: [
-      "Implemented data streaming with Kafka",
-      "Built custom React visualization components",
-      "Created rule-based alerting system",
-      "Used data aggregation and sampling techniques"
-    ],
-    teamSize: 3,
-    role: "Frontend Developer & Data Visualization Specialist",
     createdAt: Date.now() - 86400000 * 100,
     updatedAt: Date.now() - 86400000 * 12,
-    version: 1
   },
   {
     title: "Microservices Architecture Migration",
@@ -517,7 +398,6 @@ export const initialProjects: ProjectInput[] = [
     technologies: ["Docker", "Kubernetes", "Istio", "Kong", "Prometheus", "Grafana", "Jenkins", "Terraform", "AWS", "Microservices"],
     tags: ["microservices", "migration", "scalability", "devops", "kubernetes", "cloud"],
     image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop",
-    icon: "🔄",
     liveUrl: "",
     githubUrl: "",
     demoUrl: "",
@@ -529,6 +409,7 @@ export const initialProjects: ProjectInput[] = [
     duration: "9 months",
     metrics: {
       performanceImprovement: "10x scalability improvement",
+      costSavings: "50% infrastructure cost reduction",
       customMetrics: {
         "code_lines_migrated": 500000,
         "scalability_improvement": "10x",
@@ -536,22 +417,110 @@ export const initialProjects: ProjectInput[] = [
         "deployment_time_reduction": "80%"
       }
     },
-    challenges: [
-      "Breaking down monolithic codebase",
-      "Maintaining data consistency",
-      "Implementing service communication",
-      "Ensuring zero-downtime migration"
-    ],
-    solutions: [
-      "Applied domain-driven design principles",
-      "Implemented event sourcing and CQRS patterns",
-      "Built service mesh with Istio",
-      "Used blue-green deployment strategy"
-    ],
-    teamSize: 8,
-    role: "DevOps Lead & Migration Architect",
     createdAt: Date.now() - 86400000 * 150,
     updatedAt: Date.now() - 86400000 * 25,
-    version: 1
+  },
+  {
+    title: "Mobile Banking Application",
+    description: "Secure mobile banking app with biometric authentication, real-time transactions, and comprehensive financial management.",
+    longDescription: "Developed a secure mobile banking application using React Native with advanced security features including biometric authentication, end-to-end encryption, and real-time fraud detection. Features include account management, money transfers, bill payments, investment tracking, and financial analytics.",
+    category: "Mobile Application",
+    status: "completed",
+    achievements: [
+      "Serves 25K+ active users",
+      "Achieved 99.8% uptime",
+      "Implemented biometric security",
+      "Built real-time fraud detection",
+      "Integrated with 10+ banks",
+      "Achieved 4.8/5 app store rating",
+      "Processed $10M+ in transactions"
+    ],
+    technologies: ["React Native", "Node.js", "PostgreSQL", "AWS", "Biometric APIs", "Encryption", "Push Notifications", "Redux"],
+    tags: ["mobile", "banking", "security", "fintech", "react-native", "biometric"],
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop",
+    liveUrl: "",
+    githubUrl: "",
+    demoUrl: "",
+    featured: false,
+    disabled: false,
+    priority: 82,
+    startDate: "2022-03-01",
+    endDate: "2022-11-30",
+    duration: "9 months",
+    clientInfo: {
+      name: "Financial Services Client",
+      industry: "Banking & Finance",
+      size: "enterprise",
+      location: "International",
+      isPublic: false
+    },
+    metrics: {
+      usersReached: 25000,
+      uptime: "99.8%",
+      revenueImpact: "$10M+ transactions processed",
+      customMetrics: {
+        "app_rating": "4.8/5",
+        "transaction_volume": "$10M+",
+        "bank_integrations": 10
+      }
+    },
+    createdAt: Date.now() - 86400000 * 180,
+    updatedAt: Date.now() - 86400000 * 40,
   }
 ];
+
+async function clearExistingProjects() {
+  console.log('🗑️  Clearing existing projects...');
+  const querySnapshot = await getDocs(collection(db, 'projects'));
+  const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+  await Promise.all(deletePromises);
+  console.log(`✅ Cleared ${querySnapshot.docs.length} existing projects`);
+}
+
+async function uploadProjects() {
+  console.log('🚀 Starting project upload to Firebase Firestore...\n');
+
+  try {
+    // Optional: Clear existing projects (uncomment if needed)
+    // await clearExistingProjects();
+
+    console.log('📤 Uploading projects...');
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const project of projects) {
+      try {
+        const docRef = await addDoc(collection(db, 'projects'), {
+          ...project,
+          version: 1,
+          createdAt: project.createdAt || Date.now(),
+          updatedAt: project.updatedAt || Date.now()
+        });
+        
+        console.log(`✅ Uploaded: ${project.title} (ID: ${docRef.id})`);
+        successCount++;
+      } catch (error) {
+        console.error(`❌ Failed to upload: ${project.title}`, error.message);
+        errorCount++;
+      }
+    }
+
+    console.log('\n📊 Upload Summary:');
+    console.log(`✅ Successfully uploaded: ${successCount} projects`);
+    console.log(`❌ Failed uploads: ${errorCount} projects`);
+    console.log(`📁 Total projects: ${projects.length}`);
+
+    if (successCount > 0) {
+      console.log('\n🎉 Projects successfully uploaded to Firebase Firestore!');
+      console.log('🌐 You can now view them in your portfolio application.');
+      console.log('🔧 Admin dashboard: /admin');
+    }
+
+  } catch (error) {
+    console.error('💥 Upload failed:', error.message);
+    process.exit(1);
+  }
+}
+
+// Run the upload
+uploadProjects();
