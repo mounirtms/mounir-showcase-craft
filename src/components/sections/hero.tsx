@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Download, MapPin, Calendar } from "lucide-react";
+import { Signature } from "@/components/ui/signature";
 
 export const Hero = () => {
   const handleDownloadCV = () => {
@@ -16,7 +17,7 @@ export const Hero = () => {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
         <div className="text-center lg:text-left space-y-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-4 backdrop-blur-sm">
+            <div className="inline-flex items-center px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-4 backdrop-blur-sm shadow-glow">
               <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
               Available for new opportunities
             </div>
@@ -87,6 +88,11 @@ export const Hero = () => {
               <div className="text-sm text-muted-foreground">Users Served</div>
             </div>
           </div>
+
+          {/* Professional Signature */}
+          <div className="flex justify-center lg:justify-start pt-4">
+            <Signature size="sm" variant="minimal" className="opacity-60" />
+          </div>
         </div>
         
         <div className="flex justify-center lg:justify-end">
@@ -94,7 +100,7 @@ export const Hero = () => {
             <div className="absolute inset-0 bg-gradient-primary rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
             <div className="relative">
               <img 
-                src="/profile.webp" 
+                src="/professional-avatar.svg" 
                 alt="Mounir Abderrahmani - Senior Full-Stack Developer"
                 className="relative w-full max-w-lg rounded-3xl shadow-large hover:shadow-glow transition-all duration-500 group-hover:scale-105 object-cover aspect-square"
               />
