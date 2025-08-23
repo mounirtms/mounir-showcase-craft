@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
+import { initialSkills } from "@/data/initial-skills";
 
 export type SkillCategory = 
   | "Frontend Development"
@@ -43,12 +44,20 @@ export function useSkills() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Use local data when Firebase is not enabled (development mode)
     if (!isFirebaseEnabled || !db) {
+      console.log('Using local skills data - Firebase disabled in development');
+      const localSkills: Skill[] = initialSkills.map((skill, index) => ({
+        id: `local-skill-${index}`,
+        ...skill
+      }));
+      setSkills(localSkills);
       setLoading(false);
-      setError("Firebase not configured");
+      setError(null);
       return;
     }
 
+    // Use Firebase in production
     const q = query(
       collection(db, SKILLS_COLLECTION),
       where("disabled", "==", false),
@@ -69,9 +78,16 @@ export function useSkills() {
         setError(null);
       },
       (err) => {
-        console.error("Error fetching skills:", err);
-        setError(err.message);
+        console.error("Error fetching skills from Firebase:", err);
+        console.log('Falling back to local skills data');
+        // Fallback to local data on Firebase error
+        const localSkills: Skill[] = initialSkills.map((skill, index) => ({
+          id: `fallback-skill-${index}`,
+          ...skill
+        }));
+        setSkills(localSkills);
         setLoading(false);
+        setError(null);
       }
     );
 

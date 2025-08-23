@@ -17,7 +17,9 @@ const firebaseConfig = {
 export const isFirebaseEnabled: boolean = Boolean(
   firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
-  firebaseConfig.projectId
+  firebaseConfig.projectId &&
+  firebaseConfig.apiKey !== 'mock-api-key-for-development' &&
+  import.meta.env.PROD // Only enable Firebase in production
 );
 
 let app: FirebaseApp | undefined;
@@ -43,7 +45,7 @@ if (isFirebaseEnabled) {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
       }
       if (!db._delegate._databaseId?.projectId?.includes('demo-')) {
-        connectFirestoreEmulator(db, 'localhost', 8080);
+        connectFirestoreEmulator(db, 'localhost', 8081); // Use different port to avoid conflict with Vite
       }
     } catch (error) {
       // Emulators might already be connected or not available

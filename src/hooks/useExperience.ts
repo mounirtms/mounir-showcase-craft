@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
+import { initialExperience } from "@/data/initial-experience";
 
 export interface Experience {
   id: string;
@@ -37,12 +38,20 @@ export function useExperience() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Use local data when Firebase is not enabled (development mode)
     if (!isFirebaseEnabled || !db) {
+      console.log('Using local experience data - Firebase disabled in development');
+      const localExperience: Experience[] = initialExperience.map((exp, index) => ({
+        id: `local-exp-${index}`,
+        ...exp
+      }));
+      setExperiences(localExperience);
       setLoading(false);
-      setError("Firebase not configured");
+      setError(null);
       return;
     }
 
+    // Use Firebase in production
     const q = query(
       collection(db, EXPERIENCE_COLLECTION),
       where("disabled", "==", false),
@@ -63,9 +72,16 @@ export function useExperience() {
         setError(null);
       },
       (err) => {
-        console.error("Error fetching experience:", err);
-        setError(err.message);
+        console.error("Error fetching experience from Firebase:", err);
+        console.log('Falling back to local experience data');
+        // Fallback to local data on Firebase error
+        const localExperience: Experience[] = initialExperience.map((exp, index) => ({
+          id: `fallback-exp-${index}`,
+          ...exp
+        }));
+        setExperiences(localExperience);
         setLoading(false);
+        setError(null);
       }
     );
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { initialProjects } from "@/data/initial-projects";
 
 export type ProjectCategory = 
   | "Web Application"
@@ -120,12 +121,20 @@ export function useProjects() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Use local data when Firebase is not enabled (development mode)
     if (!isFirebaseEnabled || !db) {
+      console.log('Using local project data - Firebase disabled in development');
+      const localProjects: Project[] = initialProjects.map((project, index) => ({
+        id: `local-${index}`,
+        ...project
+      }));
+      setProjects(localProjects);
       setLoading(false);
-      setError("Firebase not configured");
+      setError(null);
       return;
     }
 
+    // Use Firebase in production
     const q = query(
       collection(db, PROJECTS_COLLECTION),
       where("disabled", "==", false),
@@ -146,9 +155,16 @@ export function useProjects() {
         setError(null);
       },
       (err) => {
-        console.error("Error fetching projects:", err);
-        setError(err.message);
+        console.error("Error fetching projects from Firebase:", err);
+        console.log('Falling back to local project data');
+        // Fallback to local data on Firebase error
+        const localProjects: Project[] = initialProjects.map((project, index) => ({
+          id: `fallback-${index}`,
+          ...project
+        }));
+        setProjects(localProjects);
         setLoading(false);
+        setError(null);
       }
     );
 
