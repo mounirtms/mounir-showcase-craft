@@ -1,16 +1,30 @@
+# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-Allow: /sitemap.xml
+Disallow: /admin
+Disallow: /admin/*
 
+# Sitemap
 Sitemap: https://mounir.bio/sitemap.xml
 
-# Block access to specific files
-Disallow: /js/
-Disallow: /css/
-Disallow: /.git/
-Disallow: /.github/
-Disallow: /node_modules/
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
 
-# Allow crawling of assets
-Allow: /assets/images/
-Allow: /assets/icons/
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+Disallow: /admin
