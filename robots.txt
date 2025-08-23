@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+
+Sitemap: https://mounir.bio/sitemap.xml
+
+# Block access to specific files
+Disallow: /js/
+Disallow: /css/
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /node_modules/
+
+# Allow crawling of assets
+Allow: /assets/images/
+Allow: /assets/icons/

@@ -1,6 +1,0 @@
-.marks li:before {
-    content: "\f192";
-    font-family: "Font Awesome 5 Free";
-    display: inline-block;
-    width: 1.3em;
-  }
