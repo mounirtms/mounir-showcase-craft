@@ -1,26 +1,81 @@
 {
-  "name": "Mounir Abderrahmani - Portfolio",
+  "name": "Mounir Abderrahmani - Senior Full-Stack Developer",
   "short_name": "Mounir Portfolio",
-  "description": "Senior Full-Stack Developer Portfolio",
+  "description": "Award-winning Senior Full-Stack Developer with 10+ years of experience in React, Node.js, ExtJS, and Cloud Technologies.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#8b5cf6",
+  "categories": ["business", "productivity", "portfolio"],
+  "lang": "en-US",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/favicon-16x16.png",
       "sizes": "16x16",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/favicon-32x32.png",
       "sizes": "32x32",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/mounir-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon-temp.svg",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Projects",
+      "short_name": "Projects",
+      "description": "Browse my latest projects",
+      "url": "/#projects",
+      "icons": [
+        {
+          "src": "/mounir-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Contact Me",
+      "short_name": "Contact",
+      "description": "Get in touch",
+      "url": "/#contact",
+      "icons": [
+        {
+          "src": "/mounir-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Portfolio management",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/mounir-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ]
 }

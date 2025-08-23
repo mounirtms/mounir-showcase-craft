@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary, AdminErrorFallback } from "@/components/ui/error-boundary";
+import { UpdateNotification, NetworkStatus } from "@/components/ui/update-notification";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
@@ -13,6 +14,15 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+    mutations: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on authentication errors
+        if (error?.code?.includes('auth/')) return false;
+        return failureCount < 2;
+      },
     },
   },
 });
@@ -38,6 +48,10 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        
+        {/* PWA and Offline Features */}
+        <UpdateNotification />
+        <NetworkStatus />
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>

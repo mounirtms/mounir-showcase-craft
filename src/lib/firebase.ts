@@ -14,13 +14,29 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 } as const;
 
-export const isFirebaseEnabled: boolean = Boolean(
+// Validate configuration
+const hasRequiredConfig = Boolean(
   firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
   firebaseConfig.projectId &&
-  firebaseConfig.apiKey !== 'mock-api-key-for-development' &&
-  import.meta.env.PROD // Only enable Firebase in production
+  firebaseConfig.apiKey !== 'mock-api-key-for-development'
 );
+
+// Enable Firebase in production or development with valid config
+export const isFirebaseEnabled: boolean = hasRequiredConfig && (
+  import.meta.env.PROD || 
+  (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_ENABLE_DEV === 'true')
+);
+
+// Log configuration status
+if (import.meta.env.DEV) {
+  console.log('Firebase Configuration Status:', {
+    hasRequiredConfig,
+    isEnabled: isFirebaseEnabled,
+    environment: import.meta.env.MODE,
+    authDomain: firebaseConfig.authDomain
+  });
+}
 
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;

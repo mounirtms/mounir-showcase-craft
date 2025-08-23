@@ -81,6 +81,26 @@ if (!indexContent.includes('Mounir Abderrahmani')) {
   process.exit(1);
 }
 
+// Verify PWA files
+const requiredFiles = [
+  'sw.js',
+  'site.webmanifest', 
+  'offline.html',
+  'CNAME',
+  'mounir-icon.svg'
+];
+
+console.log('🔍 Verifying PWA files...');
+const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(distPath, file)));
+
+if (missingFiles.length > 0) {
+  console.warn('⚠️  Warning: Missing PWA files:');
+  missingFiles.forEach(file => console.warn(`   - ${file}`));
+  console.warn('   PWA features may not work correctly.\n');
+} else {
+  console.log('✅ All PWA files are present.');
+}
+
 console.log('✅ Build verification passed.\n');
 
 // Calculate build size
