@@ -1,24 +1,59 @@
-# https://www.robotstxt.org/robotstxt.html
+# robots.txt for Mounir Abderrahmani Portfolio
+# https://mounir1.github.io
+
 User-agent: *
 Allow: /
+
+# Main sitemap
+Sitemap: https://mounir1.github.io/sitemap.xml
+
+# Disallow admin areas and sensitive files
+Disallow: /myadmin
 Disallow: /admin
-Disallow: /admin/*
+Disallow: /.env
+Disallow: /node_modules
+Disallow: /src
+Disallow: /.git
 
-# Sitemap
-Sitemap: https://mounir.bio/sitemap.xml
+# Allow search engines to index all public content
+Allow: /assets/
+Allow: /images/
+Allow: /icons/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.json
+Allow: /*.webp
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.svg
+Allow: /*.ico
 
-# Crawl-delay for respectful crawling
+# Crawl delay (be respectful)
 Crawl-delay: 1
 
-# Allow specific bots
+# Major search engines
 User-agent: Googlebot
 Allow: /
-Disallow: /admin
+Disallow: /myadmin
 
 User-agent: Bingbot
 Allow: /
-Disallow: /admin
+Disallow: /myadmin
 
+User-agent: Slurp
+Allow: /
+Disallow: /myadmin
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Social media crawlers
 User-agent: Twitterbot
 Allow: /
 
@@ -27,4 +62,16 @@ Allow: /
 
 User-agent: LinkedInBot
 Allow: /
-Disallow: /admin
+
+# Block spam/harmful bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MauiBot
+Disallow: /
