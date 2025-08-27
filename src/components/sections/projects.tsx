@@ -302,15 +302,9 @@ export const Projects = () => {
           <div className="text-center py-16">
             <Database className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
             <h3 className="text-xl font-semibold mb-2">No Projects Yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Projects will appear here once added through the admin dashboard.
+            <p className="text-muted-foreground">
+              Projects will be available soon. Check back later!
             </p>
-            <Button asChild>
-              <a href="/admin">
-                <Database className="w-4 h-4 mr-2" />
-                Go to Admin
-              </a>
-            </Button>
           </div>
         )}
 

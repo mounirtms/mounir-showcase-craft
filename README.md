@@ -38,7 +38,7 @@ Deploy:    GitHub Actions + GitHub Pages
 ### **Development Setup**
 ```bash
 # Clone and setup
-git clone https://github.com/mounir1/portfolio.git
+git clone 
 cd portfolio
 npm install
 

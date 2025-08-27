@@ -17,15 +17,15 @@ export function ThemeToggle() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="relative h-9 w-9 px-0 hover:bg-accent/50 transition-all duration-300 group"
+          className="relative h-9 w-9 px-0 hover:bg-primary/10 transition-all duration-300 group border border-border/50 hover:border-primary/30"
         >
           <div className="relative">
-            <Sun className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+            <Sun className={`h-[1.2rem] w-[1.2rem] transition-all duration-500 text-amber-500 ${
               actualTheme === 'dark' 
                 ? 'rotate-90 scale-0 opacity-0' 
                 : 'rotate-0 scale-100 opacity-100'
             }`} />
-            <Moon className={`absolute inset-0 h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+            <Moon className={`absolute inset-0 h-[1.2rem] w-[1.2rem] transition-all duration-500 text-blue-400 ${
               actualTheme === 'dark' 
                 ? 'rotate-0 scale-100 opacity-100' 
                 : '-rotate-90 scale-0 opacity-0'
@@ -33,8 +33,8 @@ export function ThemeToggle() {
           </div>
           <span className="sr-only">Toggle theme</span>
           
-          {/* Glow effect */}
-          <div className={`absolute inset-0 rounded-md bg-gradient-to-r from-violet-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`} />
+          {/* Enhanced glow effect */}
+          <div className={`absolute inset-0 rounded-md bg-gradient-to-r from-primary/20 to-primary/30 opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 blur-sm`} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 

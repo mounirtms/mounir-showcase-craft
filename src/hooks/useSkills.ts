@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { collection, query, orderBy, onSnapshot, where, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
 import { initialSkills } from "@/data/initial-skills";
 
@@ -115,11 +115,87 @@ export function useSkills() {
     skills.filter(skill => skill.featured && !skill.disabled)
   , [skills]);
 
+  // CRUD Operations
+  const addSkill = useCallback(async (skillData: SkillInput) => {
+    if (!isFirebaseEnabled || !db) {
+      console.log("Firebase not enabled, cannot add skill");
+      return null;
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, SKILLS_COLLECTION), {
+        ...skillData,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error adding skill:", error);
+      throw error;
+    }
+  }, []);
+
+  const updateSkill = useCallback(async (id: string, updates: Partial<SkillInput>) => {
+    if (!isFirebaseEnabled || !db) {
+      console.log("Firebase not enabled, cannot update skill");
+      return;
+    }
+
+    // Check if this is a fallback/local ID that doesn't exist in Firebase
+    if (id.startsWith('fallback-') || id.startsWith('local-')) {
+      console.log("Cannot update local/fallback skill in Firebase. Please add as new skill.");
+      throw new Error("Cannot update local skill. Please create a new skill instead.");
+    }
+
+    try {
+      await updateDoc(doc(db, SKILLS_COLLECTION, id), {
+        ...updates,
+        updatedAt: Date.now()
+      });
+    } catch (error) {
+      console.error("Error updating skill:", error);
+      throw error;
+    }
+  }, []);
+
+  const deleteSkill = useCallback(async (id: string) => {
+    if (!isFirebaseEnabled || !db) {
+      console.log("Firebase not enabled, cannot delete skill");
+      return;
+    }
+
+    // Check if this is a fallback/local ID that doesn't exist in Firebase
+    if (id.startsWith('fallback-') || id.startsWith('local-')) {
+      console.log("Cannot delete local/fallback skill from Firebase.");
+      throw new Error("Cannot delete local skill from Firebase.");
+    }
+
+    try {
+      await deleteDoc(doc(db, SKILLS_COLLECTION, id));
+    } catch (error) {
+      console.error("Error deleting skill:", error);
+      throw error;
+    }
+  }, []);
+
+  const getStats = useCallback(() => {
+    return {
+      total: skills.length,
+      featured: skills.filter(s => s.featured).length,
+      categories: Object.keys(skillsByCategory).length,
+      averageLevel: skills.length > 0 ? Math.round(skills.reduce((sum, s) => sum + s.level, 0) / skills.length) : 0
+    };
+  }, [skills, skillsByCategory]);
+
   return {
     skills,
     skillsByCategory,
     featuredSkills,
     loading,
-    error
+    error,
+    addSkill,
+    updateSkill,
+    deleteSkill,
+    getStats
   };
 }

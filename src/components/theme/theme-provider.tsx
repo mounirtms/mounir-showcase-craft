@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import * as React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system"
 
@@ -28,13 +29,23 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = React.useState<Theme>(() => {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return defaultTheme;
+    }
+    try {
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    } catch (error) {
+      console.warn('Failed to read from localStorage:', error);
+      return defaultTheme;
+    }
+  });
 
-  const [actualTheme, setActualTheme] = useState<"dark" | "light">("light")
+  const [actualTheme, setActualTheme] = React.useState<"dark" | "light">("light");
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const root = window.document.documentElement
 
     root.classList.remove("light", "dark")
@@ -90,6 +101,8 @@ export function ThemeProvider({
   }, [theme])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
 
     const handleChange = () => {
@@ -108,8 +121,14 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          localStorage.setItem(storageKey, theme);
+        } catch (error) {
+          console.warn('Failed to save theme to localStorage:', error);
+        }
+      }
+      setTheme(theme);
     },
     actualTheme,
   }

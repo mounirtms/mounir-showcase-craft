@@ -2,14 +2,6 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { ErrorBoundary } from './components/ui/error-boundary'
-import { registerServiceWorker } from './utils/sw-registration'
-
-// Register service worker for offline functionality
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    registerServiceWorker();
-  });
-}
 
 // Enhanced error handling for unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {

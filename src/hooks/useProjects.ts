@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { initialProjects } from "@/data/initial-projects";
 
 export type ProjectCategory = 
@@ -29,7 +29,7 @@ export interface ProjectMetrics {
   performanceImprovement?: string;
   revenueImpact?: string;
   uptime?: string;
-  customMetrics?: Record<string, any>;
+  customMetrics?: Record<string, string | number>;
 }
 
 export interface ProjectInput {

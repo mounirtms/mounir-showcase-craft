@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSkills, type SkillCategory, type Skill } from "@/hooks/useSkills";
 import { 
-  Plus as PlusIcon, 
-  Edit as EditIcon, 
-  Trash2 as TrashIcon,
   Award,
   Check
 } from "lucide-react";
@@ -12,22 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SkipLinks } from "@/components/shared/AccessibleComponents";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { AccessibilitySettings } from "@/components/admin/AccessibilitySettings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjects, PROJECTS_COLLECTION, type ProjectInput, DEFAULT_PROJECT, type Project } from "@/hooks/useProjects";
-import { useApplications, type Application, type ApplicationInput, DEFAULT_APPLICATION } from "@/hooks/useApplications";
-import { useExperienceEnhanced, type WorkExperience, type WorkExperienceInput, DEFAULT_WORK_EXPERIENCE } from "@/hooks/useExperienceEnhanced";
 import { addDoc, collection, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 import { ProfessionalSignature } from "@/components/ui/signature";
-import { DataManager } from "@/components/admin/DataManager";
-import { ApplicationsManager } from "@/components/admin/ApplicationsManager";
-import { ExportManager } from "@/components/admin/ExportManager";
-import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ProjectsManager } from "@/components/admin/ProjectsManager";
+import { SkillsTab } from "@/components/admin/skills";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { DashboardOverview } from "@/components/admin/dashboard";
 import { 
   BarChart3, 
   Plus, 
@@ -68,7 +64,7 @@ import {
   Target,
   LineChart
 } from "lucide-react";
-import type { ClientInfo, ProjectMetrics } from "@/hooks/useProjects";
+import type { ClientInfo, ProjectMetrics, ProjectCategory, ProjectStatus } from "@/hooks/useProjects";
 
 export default function Admin() {
   const [email, setEmail] = useState("");
@@ -77,22 +73,17 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("overview");
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editingProjectData, setEditingProjectData] = useState<ProjectInput | null>(null);
-  const [editingSkill, setEditingSkill] = useState<string | null>(null);
-  const [editingSkillData, setEditingSkillData] = useState<Skill | null>(null);
-  const { skills, loading: skillsLoading, addSkill, updateSkill, deleteSkill } = useSkills();
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const { projects, loading } = useProjects();
-  
-  // Applications Management
-  const { applications, loading: applicationsLoading, addApplication, updateApplication, deleteApplication, getStats: getApplicationStats } = useApplications();
-  const [editingApplication, setEditingApplication] = useState<string | null>(null);
-  const [editingApplicationData, setEditingApplicationData] = useState<ApplicationInput | null>(null);
-  
-  // Experience Management
-  const { experiences, loading: experiencesLoading, addExperience, updateExperience, deleteExperience, getStats: getExperienceStats } = useExperienceEnhanced();
-  const [editingExperience, setEditingExperience] = useState<string | null>(null);
-  const [editingExperienceData, setEditingExperienceData] = useState<WorkExperienceInput | null>(null);
+  const { skipLinks } = useAccessibility();
+
+  // Define skip links for admin navigation
+  const adminSkipLinks = [
+    { id: 'admin-header', label: 'Skip to Header', target: 'admin-header' },
+    { id: 'admin-main', label: 'Skip to Main Content', target: 'admin-main' },
+    { id: 'admin-tabs', label: 'Skip to Navigation Tabs', target: 'admin-tabs' }
+  ];
 
   useEffect(() => {
     if (!auth) return;
@@ -110,15 +101,10 @@ export default function Admin() {
       categories: [...new Set(projects.map(p => p.category))].length
     };
     
-    const applicationStats = getApplicationStats();
-    const experienceStats = getExperienceStats();
-    
     return {
-      projects: projectStats,
-      applications: applicationStats,
-      experiences: experienceStats
+      projects: projectStats
     };
-  }, [projects, applications, experiences]);
+  }, [projects]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -131,30 +117,9 @@ export default function Admin() {
       await signInWithEmailAndPassword(auth, email, password);
       setEmail("");
       setPassword("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
-      setAuthError(error.message || "Login failed. Please try again.");
-    } finally {
-      setAuthLoading(false);
-    }
-  }
-
-  async function handleGoogleLogin() {
-    if (!auth) return;
-    
-    setAuthLoading(true);
-    setAuthError(null);
-    
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      await signInWithPopup(auth, provider);
-    } catch (error: any) {
-      console.error("Google login failed:", error);
-      if (error.code !== 'auth/popup-closed-by-user') {
-        setAuthError(error.message || "Google login failed. Please try again.");
-      }
+      setAuthError(error instanceof Error ? error.message : "Login failed. Please try again.");
     } finally {
       setAuthLoading(false);
     }
@@ -176,8 +141,8 @@ export default function Admin() {
       title: String(form.get("title") || "Untitled"),
       description: String(form.get("description") || ""),
       longDescription: String(form.get("longDescription") || ""),
-      category: String(form.get("category") || "Web Application") as any,
-      status: String(form.get("status") || "completed") as any,
+      category: String(form.get("category") || "Web Application") as ProjectCategory,
+      status: String(form.get("status") || "completed") as ProjectStatus,
       achievements: String(form.get("achievements") || "")
         .split("\n")
         .map((s) => s.trim())
@@ -208,7 +173,7 @@ export default function Admin() {
       clientInfo: {
         name: String(form.get("clientName") || ""),
         industry: String(form.get("clientIndustry") || ""),
-        size: String(form.get("clientSize") || "medium") as any,
+        size: String(form.get("clientSize") || "medium") as ClientInfo['size'],
         location: String(form.get("clientLocation") || ""),
         website: String(form.get("clientWebsite") || ""),
         isPublic: form.get("clientIsPublic") === "on"
@@ -286,7 +251,7 @@ export default function Admin() {
     }
   }
 
-  function handleProjectFormChange(field: keyof ProjectInput, value: any) {
+  function handleProjectFormChange(field: keyof ProjectInput, value: string | number | boolean | string[]) {
     if (editingProjectData) {
       setEditingProjectData({
         ...editingProjectData,
@@ -295,7 +260,7 @@ export default function Admin() {
     }
   }
 
-  function handleClientInfoChange(field: keyof ClientInfo, value: any) {
+  function handleClientInfoChange(field: keyof ClientInfo, value: string | boolean) {
     if (editingProjectData?.clientInfo) {
       setEditingProjectData({
         ...editingProjectData,
@@ -307,7 +272,7 @@ export default function Admin() {
     }
   }
 
-  function handleMetricsChange(field: keyof ProjectMetrics, value: any) {
+  function handleMetricsChange(field: keyof ProjectMetrics, value: string | number) {
     if (editingProjectData?.metrics) {
       setEditingProjectData({
         ...editingProjectData,
@@ -321,21 +286,49 @@ export default function Admin() {
 
   if (!canUseAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-subtle">
-        <Card className="max-w-lg w-full shadow-glow border-0">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
-              <img src="/mounir-icon.svg" alt="Admin" className="w-16 h-16 mx-auto opacity-80" />
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-mesh relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-400/20 rounded-full blur-3xl animate-float" />
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
+          <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-6s' }} />
+        </div>
+        
+        <Card className="glass-card max-w-lg w-full shadow-2xl animate-scale-in border-0 backdrop-blur-xl relative z-10">
+          <CardHeader className="text-center pb-8">
+            <div className="mx-auto mb-6 relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-lg opacity-75 group-hover:opacity-100 animate-glow transition-opacity" />
+              <div className="relative bg-white dark:bg-gray-900 rounded-full p-4">
+                <img src="/mounir-icon.svg" alt="Admin" className="w-12 h-12" />
+              </div>
             </div>
-            <CardTitle className="text-2xl">Admin Panel Unavailable</CardTitle>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+              Admin Panel Unavailable
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">
-              Firebase is not configured properly. Please check your environment variables and rebuild the application.
-            </p>
-            <div className="text-xs text-muted-foreground/70">
-              Required: Firebase Auth, Firestore Database
+          <CardContent className="text-center space-y-6">
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 backdrop-blur-sm">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Shield className="w-5 h-5" />
+                <span className="font-medium">Configuration Required</span>
+              </div>
+              <p className="text-sm text-red-200">
+                Firebase is not configured properly. Please check your environment variables and restart the development server.
+              </p>
             </div>
+            
+            <div className="text-xs text-white/50 space-y-1">
+              <div>Required: Firebase Auth, Firestore Database</div>
+              <div>Check: .env.local file and VITE_FIREBASE_ENABLE_DEV=true</div>
+            </div>
+            
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0"
+            >
+              <Activity className="w-4 h-4 mr-2" />
+              Retry Connection
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -378,48 +371,6 @@ export default function Admin() {
                   <p className="mt-1 text-red-200">{authError}</p>
                 </div>
               )}
-
-              {/* Google Sign In */}
-              <Button 
-                onClick={handleGoogleLogin}
-                disabled={authLoading}
-                className="w-full h-14 text-base font-semibold bg-white hover:bg-gray-50 text-gray-900 border-0 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 group relative overflow-hidden"
-              >
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100" />
-                
-                <svg className="w-5 h-5 mr-3 z-10" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                
-                <span className="z-10">
-                  {authLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                      Signing in...
-                    </div>
-                  ) : (
-                    "Continue with Google"
-                  )}
-                </span>
-                
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Button>
-
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-4 text-xs uppercase tracking-wider text-white/60 bg-gradient-to-r from-purple-900/50 via-purple-800/80 to-purple-900/50 backdrop-blur-sm rounded-full">
-                    Or continue with email
-                  </span>
-                </div>
-              </div>
 
               {/* Email/Password Form */}
               <form className="space-y-5" onSubmit={handleLogin}>
@@ -495,8 +446,11 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
+      {/* Skip Links for Accessibility */}
+      <SkipLinks links={skipLinks.length > 0 ? skipLinks : adminSkipLinks} />
+      
       {/* Header */}
-      <div className="glass border-b border-border/30 sticky top-0 z-50">
+      <div id="admin-header" className="glass border-b border-border/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -531,8 +485,9 @@ export default function Admin() {
       </div>
 
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Enhanced Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-6">
+        {/* Stats Overview */}
+        <main id="admin-main">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -564,54 +519,26 @@ export default function Admin() {
           <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-500/10 rounded-xl">
-                  <Building2 className="h-6 w-6 text-blue-500" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{stats.applications.total}</div>
-                  <div className="text-sm text-muted-foreground">Applications</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-orange-500/10 rounded-xl">
-                  <Clock className="h-6 w-6 text-orange-500" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{stats.applications.pending}</div>
-                  <div className="text-sm text-muted-foreground">Pending</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-500/10 rounded-xl">
-                  <Briefcase className="h-6 w-6 text-purple-500" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{stats.experiences.total}</div>
-                  <div className="text-sm text-muted-foreground">Experience</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
                 <div className="p-3 bg-green-500/10 rounded-xl">
-                  <TrendingUp className="h-6 w-6 text-green-500" />
+                  <CheckCircle2 className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{stats.experiences.totalYears}y</div>
-                  <div className="text-sm text-muted-foreground">Total Exp</div>
+                  <div className="text-2xl font-bold">{stats.projects.active}</div>
+                  <div className="text-sm text-muted-foreground">Active</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-medium hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-500/10 rounded-xl">
+                  <Layers className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">{stats.projects.categories}</div>
+                  <div className="text-sm text-muted-foreground">Categories</div>
                 </div>
               </div>
             </CardContent>
@@ -619,43 +546,17 @@ export default function Admin() {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs">
           <div className="flex flex-wrap gap-2">
-            <TabsList className="grid grid-cols-4 lg:w-auto lg:grid-cols-4">
+            <TabsList className="grid grid-cols-5 lg:w-auto lg:grid-cols-5">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Upload Data
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <LineChart className="h-4 w-4" />
-                Analytics
-              </TabsTrigger>
-              <TabsTrigger value="export" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Export
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsList className="grid grid-cols-3 lg:w-auto lg:grid-cols-3">
               <TabsTrigger value="projects" className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
                 Projects
               </TabsTrigger>
-              <TabsTrigger value="applications" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Applications
-              </TabsTrigger>
-              <TabsTrigger value="experience" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Experience
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsList className="grid grid-cols-2 lg:w-auto lg:grid-cols-2">
               <TabsTrigger value="add-project" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Add Project
@@ -664,332 +565,29 @@ export default function Admin() {
                 <Award className="h-4 w-4" />
                 Skills
               </TabsTrigger>
+              <TabsTrigger value="accessibility" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Accessibility
+              </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-medium">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {projects.slice(0, 5).map((project) => (
-                      <div key={project.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="font-medium">{project.title}</div>
-                          <div className="text-xs text-muted-foreground">{project.category}</div>
-                        </div>
-                        <Badge variant={project.featured ? "default" : "outline"}>
-                          {project.featured ? "Featured" : "Standard"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-medium">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    onClick={() => setActiveTab("upload")} 
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Portfolio Data
-                  </Button>
-                  <Button 
-                    onClick={() => setActiveTab("add-project")} 
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Project
-                  </Button>
-                  <Button 
-                    onClick={() => setActiveTab("projects")} 
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
-                    <Database className="h-4 w-4 mr-2" />
-                    Manage Projects
-                  </Button>
-                  <Button 
-                    onClick={() => window.open("/", "_blank")} 
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Live Site
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="upload" className="space-y-6">
-            <DataManager />
-          </TabsContent>
-
-          <TabsContent value="applications" className="space-y-6">
-            <ApplicationsManager />
-          </TabsContent>
-
-          <TabsContent value="experience" className="space-y-6">
-            <Card className="border-0 shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  Experience Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {experiencesLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading experiences...</div>
-                ) : !experiences.length ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No work experiences found. Add your first experience to get started.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {experiences.map((experience) => (
-                      <div key={experience.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              {experience.companyLogo && (
-                                <img src={experience.companyLogo} alt="" className="w-6 h-6 object-contain" />
-                              )}
-                              <h3 className="font-semibold text-lg">{experience.jobTitle}</h3>
-                              <div className="flex gap-2">
-                                {experience.portfolioHighlight && (
-                                  <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">
-                                    <Star className="h-3 w-3 mr-1" />
-                                    Highlighted
-                                  </Badge>
-                                )}
-                                <Badge variant="outline">{experience.employmentType}</Badge>
-                                {experience.isCurrent && (
-                                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                                    Current
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-muted-foreground">{experience.company} • {experience.location}</p>
-                            <div className="text-sm text-muted-foreground">
-                              {experience.startDate} - {experience.endDate || 'Present'} • {experience.workArrangement}
-                            </div>
-                            {experience.technologiesUsed && experience.technologiesUsed.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {experience.technologiesUsed.slice(0, 5).map((tech, i) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {tech}
-                                  </Badge>
-                                ))}
-                                {experience.technologiesUsed.length > 5 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{experience.technologiesUsed.length - 5} more
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            {experience.companyWebsite && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={experience.companyWebsite} target="_blank" rel="noopener noreferrer">
-                                  <Globe className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            )}
-                            <Button size="sm" variant="outline" onClick={() => {
-                              setEditingExperience(experience.id);
-                              setEditingExperienceData({ ...experience });
-                              // TODO: Switch to experience form tab
-                            }}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateExperience(experience.id, { isVisible: !experience.isVisible })}
-                            >
-                              {experience.isVisible === false ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateExperience(experience.id, { portfolioHighlight: !experience.portfolioHighlight })}
-                            >
-                              <Star className={`h-4 w-4 ${experience.portfolioHighlight ? 'fill-current text-purple-500' : ''}`} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                if (confirm('Are you sure you want to delete this experience?')) {
-                                  deleteExperience(experience.id);
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <Card className="border-0 shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LineChart className="h-5 w-5" />
-                  Portfolio Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  Analytics dashboard coming soon...
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="export" className="space-y-6">
-            <ExportManager />
+            <DashboardOverview 
+              onNavigateToTab={setActiveTab}
+              onStatClick={(statType) => {
+                // Handle stat clicks - could show filtered views
+                console.log('Stat clicked:', statType);
+              }}
+              onQuickAction={(actionId) => {
+                // Handle quick actions
+                console.log('Quick action:', actionId);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="projects" className="space-y-6">
-            <Card className="border-0 shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5" />
-                  Project Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
-                ) : !projects.length ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No projects found. Upload your portfolio data or add your first project to get started.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {projects.map((project) => (
-                      <div key={project.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              {project.logo && (
-                                <img src={project.logo} alt="" className="w-6 h-6 object-contain" />
-                              )}
-                              <h3 className="font-semibold text-lg">{project.title}</h3>
-                              <div className="flex gap-2">
-                                {project.featured && (
-                                  <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                                    <Star className="h-3 w-3 mr-1" />
-                                    Featured
-                                  </Badge>
-                                )}
-                                <Badge variant="outline">{project.category}</Badge>
-                                {project.disabled && (
-                                  <Badge variant="secondary" className="bg-red-500/10 text-red-600">
-                                    <EyeOff className="h-3 w-3 mr-1" />
-                                    Hidden
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-muted-foreground">{project.description}</p>
-                            {project.technologies && project.technologies.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {project.technologies.slice(0, 5).map((tech, i) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {tech}
-                                  </Badge>
-                                ))}
-                                {project.technologies.length > 5 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{project.technologies.length - 5} more
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            {project.liveUrl && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                                  <Globe className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            )}
-                            {project.githubUrl && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-                                  <Github className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => startEditingProject(project)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateProject(project.id, { disabled: !project.disabled })}
-                            >
-                              {project.disabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateProject(project.id, { featured: !project.featured })}
-                            >
-                              <Star className={`h-4 w-4 ${project.featured ? 'fill-current text-yellow-500' : ''}`} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => deleteProject(project.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <ProjectsManager />
           </TabsContent>
 
           <TabsContent value="add-project" className="space-y-6">
@@ -1519,185 +1117,14 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="skills" className="space-y-6">
-            <Card className="border-0 shadow-medium">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  {editingSkill ? (
-                    <>
-                      <EditIcon className="h-5 w-5" />
-                      Edit Skill
-                    </>
-                  ) : (
-                    <>
-                      <PlusIcon className="h-5 w-5" />
-                      Add Skill
-                    </>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form 
-                  className="space-y-6" 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!editingSkillData) return;
-                    
-                    if (editingSkill) {
-                      updateSkill(editingSkill, editingSkillData);
-                    } else {
-                      addSkill(editingSkillData);
-                    }
-                    
-                    setEditingSkill(null);
-                    setEditingSkillData(null);
-                  }}
-                >
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="skill-name">Skill Name *</Label>
-                      <Input
-                        id="skill-name"
-                        value={editingSkillData?.name || ""}
-                        onChange={(e) => setEditingSkillData({
-                          ...editingSkillData!,
-                          name: e.target.value
-                        })}
-                        required
-                      />
-                    </div>
+            <SkillsTab />
+          </TabsContent>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="skill-category">Category *</Label>
-                      <Select
-                        value={editingSkillData?.category || "technical"}
-                        onValueChange={(value) => setEditingSkillData({
-                          ...editingSkillData!,
-                          category: value as SkillCategory
-                        })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="technical">Technical</SelectItem>
-                          <SelectItem value="framework">Framework</SelectItem>
-                          <SelectItem value="language">Language</SelectItem>
-                          <SelectItem value="tool">Tool</SelectItem>
-                          <SelectItem value="methodology">Methodology</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="skill-proficiency">Proficiency (1-100)</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id="skill-proficiency"
-                          type="number"
-                          min="1"
-                          max="100"
-                          value={editingSkillData?.proficiency || 50}
-                          onChange={(e) => setEditingSkillData({
-                            ...editingSkillData!,
-                            proficiency: parseInt(e.target.value) || 50
-                          })}
-                        />
-                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${editingSkillData?.proficiency || 50}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="skill-logo">Logo URL</Label>
-                      <Input
-                        id="skill-logo"
-                        value={editingSkillData?.logo || ""}
-                        onChange={(e) => setEditingSkillData({
-                          ...editingSkillData!,
-                          logo: e.target.value
-                        })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Button type="submit" className="flex-1">
-                      {editingSkill ? (
-                        <><EditIcon className="h-4 w-4 mr-2" /> Update Skill</>
-                      ) : (
-                        <><PlusIcon className="h-4 w-4 mr-2" /> Add Skill</>
-                      )}
-                    </Button>
-                    {editingSkill && (
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => {
-                          setEditingSkill(null);
-                          setEditingSkillData(null);
-                        }}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </form>
-
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4">Skill List</h3>
-                  {skillsLoading ? (
-                    <div className="text-center py-4">Loading skills...</div>
-                  ) : (
-                    <div className="space-y-3">
-                      {skills.map((skill) => (
-                        <div 
-                          key={skill.id} 
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            {skill.logo && (
-                              <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain" />
-                            )}
-                            <div>
-                              <div className="font-medium">{skill.name}</div>
-                              <div className="text-xs text-muted-foreground capitalize">{skill.category}</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{skill.proficiency}%</Badge>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingSkill(skill.id);
-                                setEditingSkillData(skill);
-                              }}
-                            >
-                              <EditIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => deleteSkill(skill.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="accessibility" className="space-y-6">
+            <AccessibilitySettings />
           </TabsContent>
         </Tabs>
+        </main>
       </div>
     </div>
   );

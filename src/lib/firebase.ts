@@ -28,6 +28,17 @@ export const isFirebaseEnabled: boolean = hasRequiredConfig && (
   (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_ENABLE_DEV === 'true')
 );
 
+// Debug logging
+console.log('🔥 Firebase Debug Info:', {
+  hasRequiredConfig,
+  isFirebaseEnabled,
+  isDev: import.meta.env.DEV,
+  isProd: import.meta.env.PROD,
+  enableDev: import.meta.env.VITE_FIREBASE_ENABLE_DEV,
+  apiKey: firebaseConfig.apiKey ? '✅ Present' : '❌ Missing',
+  projectId: firebaseConfig.projectId || '❌ Missing'
+});
+
 // Log configuration status
 if (import.meta.env.DEV) {
   console.log('Firebase Configuration Status:', {
@@ -44,29 +55,39 @@ let auth: Auth | undefined;
 let analytics: Analytics | undefined;
 
 if (isFirebaseEnabled) {
-  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  auth = getAuth(app);
-  
-  // Initialize Analytics only in production
-  if (typeof window !== 'undefined' && import.meta.env.PROD) {
-    analytics = getAnalytics(app);
-  }
-  
-  // Connect to emulators in development
-  if (import.meta.env.DEV && typeof window !== 'undefined') {
-    try {
-      // Only connect if not already connected
-      if (!auth._delegate._config?.emulator) {
-        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-      }
-      if (!db._delegate._databaseId?.projectId?.includes('demo-')) {
-        connectFirestoreEmulator(db, 'localhost', 8081); // Use different port to avoid conflict with Vite
-      }
-    } catch (error) {
-      // Emulators might already be connected or not available
-      console.log('Firebase emulators not available, using production');
+  try {
+    app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    
+    // Initialize Analytics only in production
+    if (typeof window !== 'undefined' && import.meta.env.PROD) {
+      analytics = getAnalytics(app);
     }
+    
+    // Connect to emulators in development - disabled to avoid connection issues in production
+    if (import.meta.env.DEV && typeof window !== 'undefined' && import.meta.env.VITE_FIREBASE_USE_EMULATORS === 'true') {
+      try {
+        // Only connect if not already connected
+        if (auth && !auth._delegate._config?.emulator) {
+          connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+        }
+        if (db && !db._delegate._databaseId?.projectId?.includes('demo-')) {
+          connectFirestoreEmulator(db, 'localhost', 8081);
+        }
+      } catch (error) {
+        console.log('Firebase emulators not available, using production');
+      }
+    }
+    
+    console.log('✅ Firebase initialized successfully');
+  } catch (error) {
+    console.error('❌ Firebase initialization failed:', error);
+    // Reset Firebase state on initialization failure
+    app = undefined;
+    db = undefined;
+    auth = undefined;
+    analytics = undefined;
   }
 }
 

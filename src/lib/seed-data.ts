@@ -1,49 +1,78 @@
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import { db, isFirebaseEnabled } from "@/lib/firebase";
-import { initialProjects } from "@/data/initial-projects";
-import { PROJECTS_COLLECTION } from "@/hooks/useProjects";
+import { db, isFirebaseEnabled } from "./firebase";
 
-export async function seedInitialData() {
-  if (!isFirebaseEnabled || !db) {
-    console.log("Firebase not configured, skipping data seeding");
-    return false;
+// Sample project data for seeding
+const sampleProjects = [
+  {
+    title: "Portfolio Website",
+    description: "A modern, responsive portfolio website built with React and TypeScript",
+    technologies: ["React", "TypeScript", "Tailwind CSS", "Vite"],
+    githubUrl: "https://github.com/example/portfolio",
+    liveUrl: "https://example.com",
+    featured: true,
+    status: "completed",
+    startDate: "2024-01-01",
+    endDate: "2024-02-15",
+    category: "web",
+    imageUrl: "/placeholder.svg"
+  },
+  {
+    title: "Task Management App",
+    description: "A full-stack task management application with real-time updates",
+    technologies: ["React", "Node.js", "MongoDB", "Socket.io"],
+    githubUrl: "https://github.com/example/task-app",
+    liveUrl: "https://task-app.example.com",
+    featured: true,
+    status: "completed",
+    startDate: "2023-10-01",
+    endDate: "2023-12-20",
+    category: "web",
+    imageUrl: "/placeholder.svg"
+  },
+  {
+    title: "E-commerce Platform",
+    description: "A scalable e-commerce platform with payment integration",
+    technologies: ["Next.js", "Stripe", "PostgreSQL", "Prisma"],
+    githubUrl: "https://github.com/example/ecommerce",
+    featured: false,
+    status: "in-progress",
+    startDate: "2024-03-01",
+    category: "web",
+    imageUrl: "/placeholder.svg"
   }
+];
 
+export const seedInitialData = async (): Promise<boolean> => {
   try {
-    // Check if projects already exist
-    const projectsSnapshot = await getDocs(collection(db, PROJECTS_COLLECTION));
-    
-    if (projectsSnapshot.docs.length > 0) {
-      console.log("Projects already exist, skipping seeding");
+    // Check if Firebase is enabled and db is available
+    if (!isFirebaseEnabled || !db) {
+      console.log("Firebase not enabled or db not available, skipping seed");
       return false;
     }
 
-    console.log("🌱 Seeding initial project data...");
+    // Check if projects already exist
+    const projectsSnapshot = await getDocs(collection(db, "projects"));
     
-    // Add initial projects
-    const promises = initialProjects.map(async (project) => {
-      try {
-        const docRef = await addDoc(collection(db, PROJECTS_COLLECTION), {
-          ...project,
-          createdAt: project.createdAt || Date.now(),
-          updatedAt: project.updatedAt || Date.now(),
-          version: project.version || 1
-        });
-        console.log(`✅ Added project: ${project.title} (${docRef.id})`);
-        return docRef;
-      } catch (error) {
-        console.error(`❌ Failed to add project: ${project.title}`, error);
-        return null;
-      }
-    });
+    if (!projectsSnapshot.empty) {
+      console.log("Projects already exist, skipping seed");
+      return false;
+    }
 
-    const results = await Promise.all(promises);
-    const successCount = results.filter(Boolean).length;
+    // Add sample projects
+    const projectsCollection = collection(db, "projects");
     
-    console.log(`🎉 Successfully seeded ${successCount}/${initialProjects.length} projects`);
+    for (const project of sampleProjects) {
+      await addDoc(projectsCollection, {
+        ...project,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+
+    console.log("Successfully seeded initial data");
     return true;
   } catch (error) {
-    console.error("Failed to seed initial data:", error);
-    return false;
+    console.error("Error seeding data:", error);
+    return false; // Return false instead of throwing to prevent app crash
   }
-}
+};

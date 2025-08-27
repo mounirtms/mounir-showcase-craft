@@ -11,7 +11,7 @@ interface SignatureProps {
 const sizeClasses = {
   xs: "text-xs",
   sm: "text-sm",
-  md: "text-base", 
+  md: "text-base",
   lg: "text-lg",
   xl: "text-xl"
 };
@@ -32,9 +32,9 @@ const svgSizes = {
   xl: "w-40 h-16"
 };
 
-export function Signature({ 
-  className, 
-  size = "md", 
+export function Signature({
+  className,
+  size = "md",
   variant = "svg",
   interactive = false,
   showTitle = false
@@ -49,9 +49,9 @@ export function Signature({
   if (variant === "svg") {
     return (
       <div className={cn("flex items-center justify-center", baseClasses)}>
-        <img 
-          src="/mounir-signature.svg" 
-          alt="Mounir Abderrahmani Signature" 
+        <img
+          src="/mounir-signature.svg"
+          alt="Mounir Abderrahmani Signature"
           className={cn(
             svgSizes[size],
             "object-contain",
@@ -66,9 +66,9 @@ export function Signature({
   if (variant === "icon") {
     return (
       <div className={cn("flex items-center justify-center", baseClasses)}>
-        <img 
-          src="/mounir-icon.svg" 
-          alt="Mounir Abderrahmani" 
+        <img
+          src="/mounir-icon.svg"
+          alt="Mounir Abderrahmani"
           className={cn(iconSizes[size], interactive && "hover:scale-110 transition-transform duration-300")}
         />
       </div>
@@ -89,9 +89,9 @@ export function Signature({
     return (
       <div className={cn("flex flex-col items-center gap-1", baseClasses)}>
         <div className="flex items-center gap-2">
-          <img 
-            src="/mounir-icon.svg" 
-            alt="Mounir Abderrahmani" 
+          <img
+            src="/mounir-icon.svg"
+            alt="Mounir Abderrahmani"
             className={cn(iconSizes[size], interactive && "hover:scale-110 transition-transform duration-300")}
           />
           <div className={cn("font-signature", sizeClasses[size])}>
@@ -144,9 +144,9 @@ export function Signature({
   // Default to SVG
   return (
     <div className={cn("flex items-center justify-center", baseClasses)}>
-      <img 
-        src="/mounir-signature.svg" 
-        alt="Mounir Abderrahmani Signature" 
+      <img
+        src="/mounir-signature.svg"
+        alt="Mounir Abderrahmani Signature"
         className={cn(
           svgSizes[size],
           "object-contain",
@@ -158,19 +158,19 @@ export function Signature({
 }
 
 // Professional signature with icon and text
-export function ProfessionalSignature({ 
-  className, 
+export function ProfessionalSignature({
+  className,
   size = "md",
   interactive = false,
   showTitle = false
 }: SignatureProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <img 
-        src="/mounir-icon.svg" 
-        alt="Mounir Abderrahmani" 
+      <img
+        src="/mounir-icon.svg"
+        alt="Mounir Abderrahmani"
         className={cn(
-          iconSizes[size], 
+          iconSizes[size],
           "opacity-80",
           interactive && "hover:scale-110 transition-transform duration-300"
         )}
@@ -183,7 +183,7 @@ export function ProfessionalSignature({
           <div className={cn(
             "text-muted-foreground/70 font-normal",
             size === "xs" && "text-xs",
-            size === "sm" && "text-xs", 
+            size === "sm" && "text-xs",
             size === "md" && "text-sm",
             size === "lg" && "text-base",
             size === "xl" && "text-lg"
@@ -197,15 +197,15 @@ export function ProfessionalSignature({
 }
 
 // Mobile-optimized signature for headers and footers
-export function MobileSignature({ 
+export function MobileSignature({
   className,
   size = "sm"
 }: Pick<SignatureProps, "className" | "size">) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <img 
-        src="/mounir-icon.svg" 
-        alt="MA" 
+      <img
+        src="/mounir-icon.svg"
+        alt="MA"
         className={iconSizes[size]}
       />
       <div className={cn("font-signature", sizeClasses[size])}>
@@ -217,7 +217,7 @@ export function MobileSignature({
 }
 
 // Compact signature for small spaces
-export function CompactSignature({ 
+export function CompactSignature({
   className,
   size = "xs"
 }: Pick<SignatureProps, "className" | "size">) {
@@ -232,14 +232,14 @@ export function CompactSignature({
 }
 
 // SVG-only signature for maximum flexibility
-export function SVGSignature({ 
+export function SVGSignature({
   className,
   size = "md"
 }: Pick<SignatureProps, "className" | "size">) {
   return (
-    <img 
-      src="/mounir-signature.svg" 
-      alt="Mounir Abderrahmani" 
+    <img
+      src="/mounir-signature.svg"
+      alt="Mounir Abderrahmani"
       className={cn(svgSizes[size], "object-contain", className)}
     />
   );
