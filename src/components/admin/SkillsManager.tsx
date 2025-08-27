@@ -5,6 +5,7 @@ import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable, ActionColumn } from "@/components/ui/data-table";
 import { validateSkillUpdate } from "@/lib/validation-schemas";
+import { getSkillIcon, getSkillColor } from "@/lib/skill-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import {
@@ -82,10 +83,13 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { SkillSchema, SkillCategorySchema, type SkillInput } from "@/lib/validation-schemas";
+import { DataExportManager } from "@/components/admin/DataExportManager";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 // Map of category to icon
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -123,6 +127,8 @@ export function SkillsManager() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [skillsToDelete, setSkillsToDelete] = useState<Skill[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [iconUrl, setIconUrl] = useState<string>("");
+  const [iconPath, setIconPath] = useState<string>("");
 
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
@@ -141,7 +147,63 @@ export function SkillsManager() {
     },
   });
 
-  // Reset form when modal closes
+  // Handle form submission
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      if (skillToEdit) {
+        // Check if this is a local skill (can't be updated in Firebase)
+        if (skillToEdit.id.startsWith('local-') || skillToEdit.id.startsWith('fallback-')) {
+          toast({
+            title: "Cannot Edit Local Skill",
+            description: "This is a local/demo skill. Please create a new skill instead.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Update existing skill
+        await updateSkill(skillToEdit.id, {
+          ...values,
+          icon: iconUrl || values.icon,
+          disabled: values.disabled ?? false,
+          updatedAt: Date.now(),
+        } as Partial<Skill>);
+        toast({
+          title: "Skill updated",
+          description: `${values.name} has been updated successfully.`,
+        });
+      } else {
+        // Add new skill
+        await addSkill({
+          ...values,
+          icon: iconUrl || values.icon,
+          certifications: [],
+          projects: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          disabled: values.disabled ?? false,
+        } as SkillInput);
+        toast({
+          title: "Skill added",
+          description: `${values.name} has been added successfully.`,
+        });
+      }
+      setIsFormOpen(false);
+      resetForm();
+      setIconUrl("");
+      setIconPath("");
+    } catch (error) {
+      console.error("Error saving skill:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      toast({
+        title: "Failed to save skill",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Reset form
   const resetForm = useCallback(() => {
     form.reset({
       name: "",
@@ -155,49 +217,9 @@ export function SkillsManager() {
       icon: "",
       color: "",
     });
-    setSkillToEdit(null);
   }, [form]);
 
-  // Handle form submission
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      if (skillToEdit) {
-        // Update existing skill
-        await updateSkill(skillToEdit.id, {
-          ...values,
-          updatedAt: Date.now(),
-        });
-        toast({
-          title: "Skill updated",
-          description: `${values.name} has been updated successfully.`,
-        });
-      } else {
-        // Add new skill
-        await addSkill({
-          ...values,
-          certifications: [],
-          projects: [],
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
-        toast({
-          title: "Skill added",
-          description: `${values.name} has been added successfully.`,
-        });
-      }
-      setIsFormOpen(false);
-      resetForm();
-    } catch (error) {
-      console.error("Error saving skill:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save skill. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Open form for editing
+  // Handle edit skill
   const handleEditSkill = useCallback((skill: Skill) => {
     setSkillToEdit(skill);
     form.reset({
@@ -209,129 +231,34 @@ export function SkillsManager() {
       featured: skill.featured,
       disabled: skill.disabled,
       priority: skill.priority,
-      icon: skill.icon || "",
-      color: skill.color || "",
+      icon: skill.icon,
+      color: skill.color,
     });
+    setIconUrl(skill.icon);
     setIsFormOpen(true);
   }, [form]);
 
-  // Data for filter dropdowns
-  const categoryOptions = useMemo(() => {
-    const categories = Object.values(SkillCategorySchema.enum);
-    return categories.map(cat => ({ label: cat, value: cat }));
+  // Handle delete skill
+  const handleDeleteSkill = useCallback((skill: Skill) => {
+    setSkillToDelete(skill);
   }, []);
 
-  // Table columns definition
-  const columns = useMemo<ColumnDef<Skill, unknown>[]>(() => [
-    {
-      accessorKey: "name",
-      header: "Skill",
-      cell: ({ row }) => {
-        const skill = row.original;
-        return (
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-md flex-shrink-0 overflow-hidden flex items-center justify-center text-white`} style={{ backgroundColor: skill.color || "#6E56CF" }}>
-              {skill.icon ? (
-                <span className="text-lg">{skill.icon}</span>
-              ) : (
-                CATEGORY_ICONS[skill.category] || <Award className="h-4 w-4" />
-              )}
-            </div>
-            <div>
-              <div className="font-medium">{skill.name}</div>
-              <div className="text-xs text-muted-foreground">
-                {skill.yearsOfExperience} {skill.yearsOfExperience === 1 ? "year" : "years"} of experience
-              </div>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "category",
-      header: "Category",
-      cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize flex items-center gap-1">
-          {CATEGORY_ICONS[row.original.category]}
-          <span>{row.original.category}</span>
-        </Badge>
-      ),
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
-    },
-    {
-      accessorKey: "level",
-      header: "Proficiency",
-      cell: ({ row }) => {
-        const level = row.original.level;
-        
-        let color = "bg-blue-500";
-        if (level >= 90) color = "bg-purple-500";
-        else if (level >= 75) color = "bg-green-500";
-        else if (level >= 50) color = "bg-yellow-500";
-        else if (level < 30) color = "bg-gray-500";
-        
-        return (
-          <div className="flex items-center gap-2">
-            <Progress value={level} className="h-2 w-24" indicatorClassName={color} />
-            <span className="text-sm">{level}%</span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "featured",
-      header: "Featured",
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          {row.original.featured ? (
-            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-          ) : (
-            <Star className="h-4 w-4 text-muted-foreground" />
-          )}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "disabled",
-      header: "Visible",
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          {row.original.disabled ? (
-            <EyeOff className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <Eye className="h-4 w-4 text-green-500" />
-          )}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "priority",
-      header: "Priority",
-      cell: ({ row }) => (
-        <Badge variant="outline">{row.original.priority}</Badge>
-      ),
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        return (
-          <ActionColumn
-            row={row}
-            onEdit={() => handleEditSkill(row.original)}
-            onDelete={() => setSkillToDelete(row.original)}
-          />
-        );
-      },
-    },
-  ], [handleEditSkill]);
-
-  // Delete a single skill
-  const handleDeleteSkill = useCallback(async () => {
-    if (!skillToDelete) return;
+  // Confirm delete skill
+  const confirmDeleteSkill = useCallback(async () => {
+    if (!skillToDelete || !db) return;
 
     try {
+      // Check if this is a local skill (can't be deleted from Firebase)
+      if (skillToDelete.id.startsWith('local-') || skillToDelete.id.startsWith('fallback-')) {
+        toast({
+          title: "Cannot Delete Local Skill",
+          description: "This is a local/demo skill and cannot be deleted.",
+          variant: "destructive",
+        });
+        setSkillToDelete(null);
+        return;
+      }
+
       await deleteSkill(skillToDelete.id);
       toast({
         title: "Skill deleted",
@@ -339,23 +266,44 @@ export function SkillsManager() {
       });
       setSkillToDelete(null);
     } catch (error) {
-      console.error("Failed to delete skill:", error);
+      console.error("Error deleting skill:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
-        title: "Failed to delete",
-        description: "There was an error deleting the skill.",
+        title: "Failed to delete skill",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   }, [skillToDelete, deleteSkill]);
 
-  // Delete multiple skills
-  const handleBulkDelete = useCallback(async () => {
-    if (!db || skillsToDelete.length === 0) return;
+  // Handle bulk delete
+  const handleBulkDelete = useCallback((skills: Skill[]) => {
+    setSkillsToDelete(skills);
+    setBulkDeleteOpen(true);
+  }, []);
+
+  // Confirm bulk delete
+  const confirmBulkDelete = useCallback(async () => {
+    if (skillsToDelete.length === 0 || !db) return;
 
     try {
       const batch = writeBatch(db);
-      
-      skillsToDelete.forEach(skill => {
+      const deletableSkills = skillsToDelete.filter(
+        skill => !skill.id.startsWith('local-') && !skill.id.startsWith('fallback-')
+      );
+
+      if (deletableSkills.length === 0) {
+        toast({
+          title: "Cannot Delete Local Skills",
+          description: "Local/demo skills cannot be deleted.",
+          variant: "destructive",
+        });
+        setBulkDeleteOpen(false);
+        setSkillsToDelete([]);
+        return;
+      }
+
+      deletableSkills.forEach((skill) => {
         const skillRef = doc(db, "skills", skill.id);
         batch.delete(skillRef);
       });
@@ -364,99 +312,163 @@ export function SkillsManager() {
       
       toast({
         title: "Skills deleted",
-        description: `${skillsToDelete.length} skills have been deleted successfully.`,
+        description: `${deletableSkills.length} skills have been deleted successfully.`,
       });
+      
       setBulkDeleteOpen(false);
       setSkillsToDelete([]);
     } catch (error) {
-      console.error("Failed to delete skills:", error);
+      console.error("Error deleting skills:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
-        title: "Failed to delete",
-        description: "There was an error deleting the skills.",
+        title: "Failed to delete skills",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   }, [skillsToDelete]);
 
-  // Export skills
-  const handleExport = useCallback((skills: Skill[]) => {
-    try {
-      // Format skills for export
-      const exportData = {
-        metadata: {
-          exportedAt: new Date().toISOString(),
-          count: skills.length,
-          type: "skills_export"
-        },
-        skills
-      };
-      
-      // Create file and download
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement("a");
-      link.href = url;
-      const date = new Date();
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      link.download = `skills_export_${formattedDate}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Export successful",
-        description: `${skills.length} skills exported successfully.`,
-      });
-    } catch (error) {
-      console.error("Failed to export skills:", error);
-      toast({
-        title: "Export failed",
-        description: "There was an error exporting the skills.",
-        variant: "destructive",
-      });
-    }
-  }, []);
+  // Columns definition
+  const columns: ColumnDef<Skill>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{row.original.icon}</span>
+          <span>{row.getValue("name")}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {CATEGORY_ICONS[row.original.category] || <LayoutPanelLeft className="h-4 w-4" />}
+          <span>{row.getValue("category")}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "level",
+      header: "Level",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Progress 
+            value={row.getValue("level")} 
+            className="w-24" 
+            indicatorClassName="bg-primary"
+          />
+          <span className="text-sm text-muted-foreground w-8">{row.getValue("level")}%</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "yearsOfExperience",
+      header: "Years",
+    },
+    {
+      accessorKey: "featured",
+      header: "Featured",
+      cell: ({ row }) => (
+        row.getValue("featured") ? 
+        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" /> : 
+        <Star className="h-4 w-4 text-muted-foreground" />
+      ),
+    },
+    {
+      accessorKey: "disabled",
+      header: "Status",
+      cell: ({ row }) => (
+        row.getValue("disabled") ? 
+        <Badge variant="destructive">Disabled</Badge> : 
+        <Badge variant="default" className="bg-green-500 hover:bg-green-600">Active</Badge>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <ActionColumn
+          row={row}
+          onView={() => console.log("View skill", row.original)}
+          onEdit={() => handleEditSkill(row.original)}
+          onDelete={() => handleDeleteSkill(row.original)}
+          onDuplicate={() => console.log("Duplicate skill", row.original)}
+          onToggleStatus={async () => {
+            try {
+              await updateSkill(row.original.id, {
+                ...row.original,
+                disabled: !row.original.disabled,
+                updatedAt: Date.now(),
+              } as Partial<Skill>);
+              toast({
+                title: "Skill updated",
+                description: `${row.original.name} status has been updated.`,
+              });
+            } catch (error) {
+              console.error("Error updating skill:", error);
+              toast({
+                title: "Failed to update skill",
+                description: "Please try again.",
+                variant: "destructive",
+              });
+            }
+          }}
+          onToggleFeatured={async () => {
+            try {
+              await updateSkill(row.original.id, {
+                ...row.original,
+                featured: !row.original.featured,
+                updatedAt: Date.now(),
+              } as Partial<Skill>);
+              toast({
+                title: "Skill updated",
+                description: `${row.original.name} featured status has been updated.`,
+              });
+            } catch (error) {
+              console.error("Error updating skill:", error);
+              toast({
+                title: "Failed to update skill",
+                description: "Please try again.",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+      ),
+    },
+  ];
+
+  // Filter options
+  const categoryOptions = useMemo(() => {
+    const categories = [...new Set(skills.map(s => s.category))];
+    return categories.map(cat => ({ label: cat, value: cat }));
+  }, [skills]);
+
+  const statusOptions = useMemo(() => [
+    { label: "Active", value: "false" },
+    { label: "Disabled", value: "true" },
+  ], []);
 
   return (
-    <>
-      <Card className="border-0 shadow-medium">
+    <div className="space-y-6">
+      <DataExportManager />
+      
+      <Card className="border-0 shadow-medium bg-card text-card-foreground">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                Skills Management
-              </CardTitle>
+              <CardTitle className="text-2xl font-bold">Skills Management</CardTitle>
               <CardDescription>
-                Manage your skills and expertise with advanced filtering and bulk operations
+                Manage your technical skills and expertise
               </CardDescription>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-                className="hidden md:flex"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-              <Button 
-                size="sm"
-                onClick={() => {
-                  resetForm();
-                  setIsFormOpen(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Skill
-              </Button>
-            </div>
+            <Button onClick={() => setIsFormOpen(true)} className="shadow-glow">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Skill
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -465,174 +477,195 @@ export function SkillsManager() {
             data={skills}
             loading={loading}
             searchPlaceholder="Search skills..."
-            onAdd={() => {
-              resetForm();
-              setIsFormOpen(true);
-            }}
-            onDelete={(skills) => {
-              setSkillsToDelete(skills);
-              setBulkDeleteOpen(true);
-            }}
-            onExport={handleExport}
-            onRefresh={() => window.location.reload()}
             filterFields={[
               {
                 key: "category",
                 title: "Category",
-                options: categoryOptions
-              }
+                options: categoryOptions,
+              },
+              {
+                key: "disabled",
+                title: "Status",
+                options: statusOptions,
+              },
             ]}
-            rowClassName={(row) => {
-              if (row.original.disabled) return "opacity-60";
-              if (row.original.featured) return "bg-blue-50/30 dark:bg-blue-950/20";
-              return "";
+            onRefresh={() => window.location.reload()}
+            onDelete={(items) => {
+              setSkillsToDelete(items);
+              setBulkDeleteOpen(true);
             }}
+            onAdd={() => setIsFormOpen(true)}
+            emptyStateMessage="No skills found"
+            emptyStateDescription="Get started by adding a new skill"
           />
         </CardContent>
       </Card>
 
       {/* Skill Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={(open) => {
-        if (!open) {
-          resetForm();
-        }
-        setIsFormOpen(open);
-      }}>
-        <DialogContent className="sm:max-w-[600px]">
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
-            <DialogTitle>{skillToEdit ? 'Edit Skill' : 'Add New Skill'}</DialogTitle>
+            <DialogTitle>{skillToEdit ? "Edit Skill" : "Add Skill"}</DialogTitle>
             <DialogDescription>
               {skillToEdit 
-                ? 'Update the details of this skill' 
-                : 'Add a new skill to your portfolio'}
+                ? "Update the skill details below" 
+                : "Fill in the details for your new skill"}
             </DialogDescription>
           </DialogHeader>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Basic Information</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Skill Name*</FormLabel>
-                        <FormControl>
-                          <Input placeholder="React.js" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category*</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(SkillCategorySchema.enum).map((category) => (
-                              <SelectItem key={category} value={category}>
-                                <div className="flex items-center gap-2">
-                                  {CATEGORY_ICONS[category]}
-                                  <span>{category}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="level"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Proficiency Level (1-100)*</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-4">
-                            <Input 
-                              type="range" 
-                              min="1" 
-                              max="100" 
-                              {...field} 
-                              className="w-full" 
-                            />
-                            <span className="w-10 text-center">{field.value}%</span>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="yearsOfExperience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Years of Experience*</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" step="0.5" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Brief description of your expertise with this skill..." 
-                          className="resize-none" 
+                        <Input 
+                          placeholder="e.g., React, Node.js" 
                           {...field} 
+                          className="bg-background text-foreground border-input"
                         />
                       </FormControl>
+                      <FormDescription>
+                        The name of the skill or technology
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              
-              {/* Visual Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Visual Settings</h3>
-                <div className="grid gap-4 md:grid-cols-2">
+                
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background text-foreground border-input">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover text-popover-foreground border-border">
+                          {Object.keys(CATEGORY_ICONS).map((category) => (
+                            <SelectItem 
+                              key={category} 
+                              value={category}
+                              className="focus:bg-accent focus:text-accent-foreground"
+                            >
+                              <div className="flex items-center gap-2">
+                                {CATEGORY_ICONS[category]}
+                                {category}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The category this skill belongs to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="level"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Proficiency Level</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Slider
+                            min={1}
+                            max={100}
+                            step={1}
+                            value={[field.value]}
+                            onValueChange={(vals) => field.onChange(vals[0])}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-sm">
+                            <span>Beginner</span>
+                            <span className="font-medium">{field.value}%</span>
+                            <span>Expert</span>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Your proficiency level (1-100%)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="yearsOfExperience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Years of Experience</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Your years of experience with this skill
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          max="100" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Display priority (1-100, higher means more prominent)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex items-end gap-4">
                   <FormField
                     control={form.control}
                     name="icon"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon (emoji)</FormLabel>
+                      <FormItem className="flex-1">
+                        <FormLabel>Icon</FormLabel>
                         <FormControl>
-                          <Input placeholder="🚀" {...field} />
+                          <Input 
+                            placeholder="e.g., ⚛️, 🟢" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
                         </FormControl>
                         <FormDescription>
-                          Enter an emoji or leave blank to use default icon
+                          Emoji or text icon representing the skill
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -645,25 +678,21 @@ export function SkillsManager() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <FormControl>
                             <Input 
                               type="color" 
                               {...field} 
-                              className="w-12 h-9 p-1" 
-                              value={field.value || "#6E56CF"}
+                              className="w-12 h-10 p-1 border-input"
                             />
-                            <Input 
-                              placeholder="#6E56CF" 
-                              {...field} 
-                              value={field.value || ""}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              className="flex-1"
-                            />
-                          </div>
-                        </FormControl>
+                          </FormControl>
+                          <div 
+                            className="w-8 h-8 rounded border" 
+                            style={{ backgroundColor: field.value || "#000000" }}
+                          />
+                        </div>
                         <FormDescription>
-                          Choose a color for the skill badge
+                          Color associated with this skill
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -672,89 +701,122 @@ export function SkillsManager() {
                 </div>
               </div>
               
-              {/* Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">Settings</h3>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="featured"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                        <div className="space-y-0.5">
-                          <FormLabel>Featured</FormLabel>
-                          <FormDescription>
-                            Highlight in your portfolio
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="disabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                        <div className="space-y-0.5">
-                          <FormLabel>Hidden</FormLabel>
-                          <FormDescription>
-                            Hide from portfolio
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="priority"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Display Priority (1-100)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            max="100" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Lower is higher priority
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe your experience with this skill..."
+                        className="min-h-[100px] bg-background text-foreground border-input"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      A brief description of your experience and expertise
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex flex-col md:flex-row gap-6 pt-4">
+                <ImageUpload
+                  onUploadComplete={(url, path) => {
+                    setIconUrl(url);
+                    setIconPath(path);
+                    form.setValue("icon", url);
+                  }}
+                  currentImageUrl={iconUrl}
+                  folder="skill-icons"
+                  title="Skill Icon"
+                  description="Upload an icon for this skill (optional)"
+                />
               </div>
               
-              <DialogFooter>
+              <div className="flex items-center gap-6 pt-4">
+                <FormField
+                  control={form.control}
+                  name="featured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Featured Skill
+                      </FormLabel>
+                      <FormDescription>
+                        Display this skill prominently
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="disabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Disable Skill
+                      </FormLabel>
+                      <FormDescription>
+                        Hide this skill from display
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <DialogFooter className="gap-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
                     setIsFormOpen(false);
                     resetForm();
+                    setIconUrl("");
+                    setIconPath("");
                   }}
+                  className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {skillToEdit ? 'Update Skill' : 'Add Skill'}
+                <Button 
+                  type="submit" 
+                  className="shadow-glow"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : skillToEdit ? (
+                    <>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Skill
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Skill
+                    </>
+                  )}
                 </Button>
               </DialogFooter>
             </form>
@@ -763,24 +825,31 @@ export function SkillsManager() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog 
-        open={!!skillToDelete} 
-        onOpenChange={(open) => !open && setSkillToDelete(null)}
-      >
-        <AlertDialogContent>
+      <AlertDialog open={!!skillToDelete} onOpenChange={() => setSkillToDelete(null)}>
+        <AlertDialogContent className="bg-background text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Skill</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{skillToDelete?.name}"? This action cannot be undone.
+              This will permanently delete the skill <strong>{skillToDelete?.name}</strong>.
+              {skillToDelete?.id.startsWith('local-') || skillToDelete?.id.startsWith('fallback-') ? (
+                <span className="block mt-2 text-yellow-500 font-medium">
+                  This is a local/demo skill and cannot be deleted from Firebase.
+                </span>
+              ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteSkill}
+            <AlertDialogCancel 
+              onClick={() => setSkillToDelete(null)}
+              className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteSkill}
+              disabled={skillToDelete?.id.startsWith('local-') || skillToDelete?.id.startsWith('fallback-')}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Trash className="h-4 w-4 mr-2" />
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -788,38 +857,35 @@ export function SkillsManager() {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog 
-        open={bulkDeleteOpen} 
-        onOpenChange={setBulkDeleteOpen}
-      >
-        <AlertDialogContent>
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent className="bg-background text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle>Bulk Delete Skills</AlertDialogTitle>
+            <AlertDialogTitle>Delete Multiple Skills</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {skillsToDelete.length} skills? This action cannot be undone.
+              This will permanently delete <strong>{skillsToDelete.length}</strong> skills.
+              {skillsToDelete.some(s => s.id.startsWith('local-') || s.id.startsWith('fallback-')) ? (
+                <span className="block mt-2 text-yellow-500 font-medium">
+                  Note: Local/demo skills cannot be deleted and will be skipped.
+                </span>
+              ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="max-h-[200px] overflow-y-auto">
-            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-              {skillsToDelete.map((skill) => (
-                <li key={skill.id}>{skill.name}</li>
-              ))}
-            </ul>
-          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSkillsToDelete([])}>
+            <AlertDialogCancel 
+              onClick={() => setBulkDeleteOpen(false)}
+              className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleBulkDelete}
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Trash className="h-4 w-4 mr-2" />
               Delete All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

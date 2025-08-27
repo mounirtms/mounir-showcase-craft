@@ -42,11 +42,26 @@ export function useSkills() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Update online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
-    // Use local data when Firebase is not enabled (development mode)
-    if (!isFirebaseEnabled || !db) {
-      console.log('Using local skills data - Firebase disabled in development');
+    // Use local data when Firebase is not enabled (development mode) or offline
+    if (!isFirebaseEnabled || !db || !isOnline) {
+      console.log('Using local skills data - Firebase disabled or offline');
       const localSkills: Skill[] = initialSkills.map((skill, index) => ({
         id: `local-skill-${index}`,
         ...skill
@@ -79,6 +94,8 @@ export function useSkills() {
       },
       (err) => {
         console.error("Error fetching skills from Firebase:", err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+        setError(`Failed to load skills: ${errorMessage}. Showing local data instead.`);
         console.log('Falling back to local skills data');
         // Fallback to local data on Firebase error
         const localSkills: Skill[] = initialSkills.map((skill, index) => ({
@@ -87,12 +104,11 @@ export function useSkills() {
         }));
         setSkills(localSkills);
         setLoading(false);
-        setError(null);
       }
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [isOnline]);
 
   const skillsByCategory = useMemo(() => {
     const grouped = skills.reduce((acc, skill) => {
@@ -119,7 +135,7 @@ export function useSkills() {
   const addSkill = useCallback(async (skillData: SkillInput) => {
     if (!isFirebaseEnabled || !db) {
       console.log("Firebase not enabled, cannot add skill");
-      return null;
+      throw new Error("Firebase is not configured. Please check your environment settings.");
     }
 
     try {
@@ -131,20 +147,21 @@ export function useSkills() {
       return docRef.id;
     } catch (error) {
       console.error("Error adding skill:", error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      throw new Error(`Failed to add skill: ${errorMessage}. Please try again.`);
     }
   }, []);
 
   const updateSkill = useCallback(async (id: string, updates: Partial<SkillInput>) => {
     if (!isFirebaseEnabled || !db) {
       console.log("Firebase not enabled, cannot update skill");
-      return;
+      throw new Error("Firebase is not configured. Please check your environment settings.");
     }
 
     // Check if this is a fallback/local ID that doesn't exist in Firebase
     if (id.startsWith('fallback-') || id.startsWith('local-')) {
       console.log("Cannot update local/fallback skill in Firebase. Please add as new skill.");
-      throw new Error("Cannot update local skill. Please create a new skill instead.");
+      throw new Error("Cannot update local/demo skill. Please create a new skill instead.");
     }
 
     try {
@@ -154,27 +171,43 @@ export function useSkills() {
       });
     } catch (error) {
       console.error("Error updating skill:", error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      // Provide specific error guidance
+      let userMessage = `Failed to update skill: ${errorMessage}. Please try again.`;
+      if (errorMessage.includes('permission')) {
+        userMessage = "You don't have permission to update this skill. Please check your access rights.";
+      } else if (errorMessage.includes('network')) {
+        userMessage = "Network error. Please check your internet connection and try again.";
+      }
+      throw new Error(userMessage);
     }
   }, []);
 
   const deleteSkill = useCallback(async (id: string) => {
     if (!isFirebaseEnabled || !db) {
       console.log("Firebase not enabled, cannot delete skill");
-      return;
+      throw new Error("Firebase is not configured. Please check your environment settings.");
     }
 
     // Check if this is a fallback/local ID that doesn't exist in Firebase
     if (id.startsWith('fallback-') || id.startsWith('local-')) {
       console.log("Cannot delete local/fallback skill from Firebase.");
-      throw new Error("Cannot delete local skill from Firebase.");
+      throw new Error("Cannot delete local/demo skill.");
     }
 
     try {
       await deleteDoc(doc(db, SKILLS_COLLECTION, id));
     } catch (error) {
       console.error("Error deleting skill:", error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      // Provide specific error guidance
+      let userMessage = `Failed to delete skill: ${errorMessage}. Please try again.`;
+      if (errorMessage.includes('permission')) {
+        userMessage = "You don't have permission to delete this skill. Please check your access rights.";
+      } else if (errorMessage.includes('network')) {
+        userMessage = "Network error. Please check your internet connection and try again.";
+      }
+      throw new Error(userMessage);
     }
   }, []);
 

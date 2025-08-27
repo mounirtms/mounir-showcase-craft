@@ -32,11 +32,11 @@ export {
 } from "./ScrollAnimations";
 export { default as ScrollAnimationsDemo } from "./ScrollAnimationsDemo";
 export type {
-  ScrollAnimationConfig,
-  ParallaxConfig,
-  ScrollAnimationProps,
-  ParallaxProps,
-  StaggeredAnimationProps,
+  ScrollAnimationConfig as OriginalScrollAnimationConfig,
+  ParallaxConfig as OriginalParallaxConfig,
+  ScrollAnimationProps as OriginalScrollAnimationProps,
+  ParallaxProps as OriginalParallaxProps,
+  StaggeredAnimationProps as OriginalStaggeredAnimationProps,
   ScrollProgressProps
 } from "./ScrollAnimations";
 

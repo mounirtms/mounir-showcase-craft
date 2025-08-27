@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ErrorBoundary, AdminErrorFallback } from "@/components/ui/error-boundary";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
@@ -26,7 +26,7 @@ const App = () => (
                 <Route 
                   path="/myadmin" 
                   element={
-                    <ErrorBoundary fallback={AdminErrorFallback}>
+                    <ErrorBoundary>
                       <Admin />
                     </ErrorBoundary>
                   } 
@@ -44,4 +44,3 @@ const App = () => (
 );
 
 export default App;
-

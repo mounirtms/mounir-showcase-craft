@@ -181,6 +181,9 @@ export function AdminDataTable<TData, TValue>({
   
   const tableRef = useRef<HTMLDivElement>(null);
 
+  // Focus management for accessibility
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
   // Enhanced columns with selection checkbox
   const enhancedColumns = useMemo(() => {
     const selectColumn: ColumnDef<TData, TValue> = {
@@ -189,14 +192,16 @@ export function AdminDataTable<TData, TValue>({
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label="Select all rows"
+          className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label={`Select row ${row.index + 1}`}
+          className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
         />
       ),
       enableSorting: false,
@@ -282,6 +287,18 @@ export function AdminDataTable<TData, TValue>({
     link.click();
   };
 
+  // Add a new function to export all data (not just selected)
+  const exportAllToJSON = useCallback((data: TData[], customFileName?: string) => {
+    const fileName = customFileName || `${title.toLowerCase().replace(/\s+/g, '-')}-all-data`;
+    exportToJSON(data, fileName);
+  }, [title]);
+
+  // Add a new function to export selected data
+  const exportSelectedToJSON = useCallback((data: TData[], customFileName?: string) => {
+    const fileName = customFileName || `${title.toLowerCase().replace(/\s+/g, '-')}-selected-data`;
+    exportToJSON(data, fileName);
+  }, [title]);
+
   // Bulk action handler with confirmation
   const handleBulkAction = useCallback((action: BulkAction<TData>) => {
     if (action.requiresConfirmation) {
@@ -301,17 +318,25 @@ export function AdminDataTable<TData, TValue>({
   }), [rows, enhancedColumns, rowClassName]);
 
   return (
-    <Card className="border-0 shadow-medium">
-      <CardHeader>
+    <Card className="border-0 shadow-medium bg-card text-card-foreground" role="region" aria-labelledby="admin-table-title">
+      <CardHeader className="bg-muted/50 dark:bg-muted/30">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-semibold">{title}</CardTitle>
+            <CardTitle id="admin-table-title" className="text-xl font-semibold">
+              {title}
+            </CardTitle>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
             )}
           </div>
           {createButton && (
-            <Button onClick={createButton.onClick} className="shadow-glow">
+            <Button 
+              onClick={createButton.onClick} 
+              className="shadow-glow"
+              aria-label={`Create new ${title.toLowerCase()}`}
+            >
               <Plus className="h-4 w-4 mr-2" />
               {createButton.label}
             </Button>
@@ -319,18 +344,20 @@ export function AdminDataTable<TData, TValue>({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-0">
         {/* Enhanced Toolbar */}
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between p-6 pb-4 border-b">
           <div className="flex flex-1 items-center space-x-2 flex-wrap gap-2">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 placeholder={searchPlaceholder}
                 value={globalFilter}
                 onChange={(event) => setGlobalFilter(event.target.value)}
-                className="pl-8 w-64"
+                className="pl-8 w-64 bg-background text-foreground"
+                aria-label={`Search ${title.toLowerCase()}`}
               />
             </div>
             
@@ -343,14 +370,14 @@ export function AdminDataTable<TData, TValue>({
                   table.getColumn(field.key)?.setFilterValue(value === "all" ? "" : value)
                 }
               >
-                <SelectTrigger className="w-[150px]">
-                  <Filter className="h-4 w-4 mr-2" />
+                <SelectTrigger className="w-[150px] bg-background text-foreground border-input" aria-label={`Filter by ${field.title}`}>
+                  <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder={field.title} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All {field.title}</SelectItem>
+                <SelectContent className="bg-popover text-popover-foreground border-border">
+                  <SelectItem value="all" className="focus:bg-accent focus:text-accent-foreground">All {field.title}</SelectItem>
                   {field.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value} className="focus:bg-accent focus:text-accent-foreground">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -361,14 +388,14 @@ export function AdminDataTable<TData, TValue>({
             {/* Column visibility */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Columns className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="bg-background text-foreground border-input" aria-label="Toggle column visibility">
+                  <Columns className="h-4 w-4 mr-2 text-muted-foreground" />
                   Columns
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+              <DropdownMenuContent align="end" className="w-[200px] bg-popover text-popover-foreground border-border">
+                <DropdownMenuLabel className="text-foreground">Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border" />
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
@@ -376,9 +403,10 @@ export function AdminDataTable<TData, TValue>({
                     return (
                       <DropdownMenuCheckboxItem
                         key={column.id}
-                        className="capitalize"
+                        className="capitalize focus:bg-accent focus:text-accent-foreground text-foreground"
                         checked={column.getIsVisible()}
                         onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                        aria-label={`Toggle ${column.id} column visibility`}
                       >
                         {column.id}
                       </DropdownMenuCheckboxItem>
@@ -392,7 +420,7 @@ export function AdminDataTable<TData, TValue>({
             {/* Selection info and bulk actions */}
             {selectedRows.length > 0 && (
               <>
-                <Badge variant="secondary" className="mr-2">
+                <Badge variant="secondary" className="mr-2 bg-secondary text-secondary-foreground" aria-label={`${selectedRows.length} rows selected`}>
                   {selectedRows.length} selected
                 </Badge>
                 
@@ -402,6 +430,8 @@ export function AdminDataTable<TData, TValue>({
                     variant={action.variant === 'destructive' ? 'destructive' : 'outline'}
                     size="sm"
                     onClick={() => handleBulkAction(action)}
+                    className={action.variant === 'destructive' ? "" : "bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"}
+                    aria-label={`${action.label} for selected items`}
                   >
                     <action.icon className="h-4 w-4 mr-2" />
                     {action.label} ({selectedRows.length})
@@ -414,20 +444,22 @@ export function AdminDataTable<TData, TValue>({
             {exportOptions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground" aria-label="Export data options">
+                    <Download className="h-4 w-4 mr-2 text-muted-foreground" />
                     Export
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Export format</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                <DropdownMenuContent align="end" className="bg-popover text-popover-foreground border-border">
+                  <DropdownMenuLabel className="text-foreground">Export format</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-border" />
                   {exportOptions.map((option, index) => (
                     <DropdownMenuItem
                       key={index}
                       onClick={() => handleExport(option, selectedRows.length > 0 ? selectedRows : data)}
+                      className="focus:bg-accent focus:text-accent-foreground"
+                      aria-label={`Export as ${option.label}`}
                     >
-                      <option.icon className="h-4 w-4 mr-2" />
+                      <option.icon className="h-4 w-4 mr-2 text-muted-foreground" />
                       {option.label}
                       {selectedRows.length > 0 && ` (${selectedRows.length} selected)`}
                     </DropdownMenuItem>
@@ -437,8 +469,14 @@ export function AdminDataTable<TData, TValue>({
             )}
             
             {onRefresh && (
-              <Button variant="outline" size="sm" onClick={onRefresh}>
-                <RefreshCw className="h-4 w-4 mr-2" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onRefresh}
+                className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                aria-label="Refresh data"
+              >
+                <RefreshCw className="h-4 w-4 mr-2 text-muted-foreground" />
                 Refresh
               </Button>
             )}
@@ -446,19 +484,19 @@ export function AdminDataTable<TData, TValue>({
         </div>
 
         {/* Enhanced Table with Virtual Scrolling */}
-        <div className="rounded-md border" ref={tableRef}>
+        <div className="rounded-md border border-border" ref={tableRef}>
           {virtualScrolling && data.length > 50 ? (
             <div>
               {/* Sticky Header */}
-              <div className={cn("bg-muted/50", stickyHeader && "sticky top-0 z-10")}>
+              <div className={cn("bg-muted/50 dark:bg-muted/30", stickyHeader && "sticky top-0 z-10")}>
                 <Table>
                   <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
+                      <TableRow key={headerGroup.id} className="bg-muted/50 dark:bg-muted/30 hover:bg-muted/70 dark:hover:bg-muted/50">
                         {headerGroup.headers.map((header) => (
                           <TableHead 
                             key={header.id} 
-                            className="relative"
+                            className="relative text-foreground"
                             style={{ width: header.getSize() }}
                           >
                             {header.isPlaceholder ? null : (
@@ -466,13 +504,13 @@ export function AdminDataTable<TData, TValue>({
                                 <div
                                   className={cn(
                                     "flex items-center space-x-2",
-                                    header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 rounded p-1 -m-1"
+                                    header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 dark:hover:bg-muted/30 rounded p-1 -m-1"
                                   )}
                                   onClick={header.column.getToggleSortingHandler()}
                                 >
                                   {flexRender(header.column.columnDef.header, header.getContext())}
                                   {header.column.getCanSort() && (
-                                    <div className="ml-2">
+                                    <div className="ml-2 text-muted-foreground">
                                       {{
                                         asc: <ArrowUp className="h-4 w-4" />,
                                         desc: <ArrowDown className="h-4 w-4" />,
@@ -490,7 +528,7 @@ export function AdminDataTable<TData, TValue>({
                                     onTouchStart={header.getResizeHandler()}
                                     className="absolute right-0 top-0 h-full w-1 bg-border hover:bg-primary cursor-col-resize opacity-0 hover:opacity-100 transition-opacity"
                                   >
-                                    <GripVertical className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                                    <GripVertical className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
                                   </div>
                                 )}
                               </div>
@@ -518,6 +556,7 @@ export function AdminDataTable<TData, TValue>({
                     itemCount={rows.length}
                     itemSize={rowHeight}
                     itemData={virtualData}
+                    width="100%"
                   >
                     {VirtualRow}
                   </List>
@@ -528,17 +567,89 @@ export function AdminDataTable<TData, TValue>({
                   </div>
                 )}
               </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between px-6 py-4 border-t">
+                <div className="flex-1 text-sm text-muted-foreground">
+                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                  {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className="flex items-center space-x-6 lg:space-x-8">
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm font-medium">Rows per page</p>
+                    <Select
+                      value={`${table.getState().pagination.pageSize}`}
+                      onValueChange={(value) => {
+                        table.setPageSize(Number(value));
+                      }}
+                    >
+                      <SelectTrigger className="h-8 w-[70px] bg-background text-foreground border-input">
+                        <SelectValue placeholder={table.getState().pagination.pageSize} />
+                      </SelectTrigger>
+                      <SelectContent side="top" className="bg-popover text-popover-foreground border-border">
+                        {[10, 20, 30, 40, 50, 100].map((pageSize) => (
+                          <SelectItem key={pageSize} value={`${pageSize}`} className="focus:bg-accent focus:text-accent-foreground">
+                            {pageSize}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                    Page {table.getState().pagination.pageIndex + 1} of{" "}
+                    {table.getPageCount()}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      className="hidden h-8 w-8 p-0 lg:flex bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => table.setPageIndex(0)}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      <span className="sr-only">Go to first page</span>
+                      <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0 bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      <span className="sr-only">Go to previous page</span>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0 bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      <span className="sr-only">Go to next page</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="hidden h-8 w-8 p-0 lg:flex bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                      onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      <span className="sr-only">Go to last page</span>
+                      <ChevronsRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             // Standard table for smaller datasets
             <Table>
               <TableHeader className={cn(stickyHeader && "sticky top-0 z-10 bg-background")}>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="bg-muted/50 dark:bg-muted/30 hover:bg-muted/70 dark:hover:bg-muted/50">
                     {headerGroup.headers.map((header) => (
                       <TableHead 
                         key={header.id} 
-                        className="relative"
+                        className="relative text-foreground"
                         style={{ width: header.getSize() }}
                       >
                         {header.isPlaceholder ? null : (
@@ -546,13 +657,13 @@ export function AdminDataTable<TData, TValue>({
                             <div
                               className={cn(
                                 "flex items-center space-x-2",
-                                header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 rounded p-1 -m-1"
+                                header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 dark:hover:bg-muted/30 rounded p-1 -m-1"
                               )}
                               onClick={header.column.getToggleSortingHandler()}
                             >
                               {flexRender(header.column.columnDef.header, header.getContext())}
                               {header.column.getCanSort() && (
-                                <div className="ml-2">
+                                <div className="ml-2 text-muted-foreground">
                                   {{
                                     asc: <ArrowUp className="h-4 w-4" />,
                                     desc: <ArrowDown className="h-4 w-4" />,
@@ -570,7 +681,7 @@ export function AdminDataTable<TData, TValue>({
                                 onTouchStart={header.getResizeHandler()}
                                 className="absolute right-0 top-0 h-full w-1 bg-border hover:bg-primary cursor-col-resize opacity-0 hover:opacity-100 transition-opacity"
                               >
-                                <GripVertical className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                                <GripVertical className="h-4 w-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-muted-foreground" />
                               </div>
                             )}
                           </div>
@@ -595,10 +706,14 @@ export function AdminDataTable<TData, TValue>({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      className={rowClassName ? rowClassName(row) : ""}
+                      className={cn(
+                        "hover:bg-muted/50 dark:hover:bg-muted/30",
+                        rowClassName ? rowClassName(row) : "",
+                        row.getIsSelected() && "bg-muted dark:bg-muted/50"
+                      )}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
+                        <TableCell key={cell.id} style={{ width: cell.column.getSize() }} className="text-foreground">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -621,7 +736,7 @@ export function AdminDataTable<TData, TValue>({
 
         {/* Enhanced Pagination */}
         {!virtualScrolling && (
-          <div className="flex items-center justify-between px-2">
+          <div className="flex items-center justify-between px-6 py-4 border-t">
             <div className="flex-1 text-sm text-muted-foreground">
               {table.getFilteredSelectedRowModel().rows.length} of{" "}
               {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -635,12 +750,12 @@ export function AdminDataTable<TData, TValue>({
                     table.setPageSize(Number(value));
                   }}
                 >
-                  <SelectTrigger className="h-8 w-[70px]">
+                  <SelectTrigger className="h-8 w-[70px] bg-background text-foreground border-input">
                     <SelectValue placeholder={table.getState().pagination.pageSize} />
                   </SelectTrigger>
-                  <SelectContent side="top">
+                  <SelectContent side="top" className="bg-popover text-popover-foreground border-border">
                     {[10, 20, 30, 40, 50, 100].map((pageSize) => (
-                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                      <SelectItem key={pageSize} value={`${pageSize}`} className="focus:bg-accent focus:text-accent-foreground">
                         {pageSize}
                       </SelectItem>
                     ))}
@@ -654,7 +769,7 @@ export function AdminDataTable<TData, TValue>({
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
+                  className="hidden h-8 w-8 p-0 lg:flex bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
                   onClick={() => table.setPageIndex(0)}
                   disabled={!table.getCanPreviousPage()}
                 >
@@ -663,7 +778,7 @@ export function AdminDataTable<TData, TValue>({
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
                 >
@@ -672,7 +787,7 @@ export function AdminDataTable<TData, TValue>({
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
                 >
@@ -681,7 +796,7 @@ export function AdminDataTable<TData, TValue>({
                 </Button>
                 <Button
                   variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
+                  className="hidden h-8 w-8 p-0 lg:flex bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
                   onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                   disabled={!table.getCanNextPage()}
                 >

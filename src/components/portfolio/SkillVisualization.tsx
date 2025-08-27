@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SearchField } from "@/components/ui/search-field";
 import { 
   Trophy, 
   Zap, 
@@ -432,16 +433,15 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
         <div className="space-y-4">
           {/* Search */}
           {showSearch && (
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <SearchField
+              placeholder="Search skills..."
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+              variant="glass"
+              size="md"
+              className="max-w-md"
+              showClearButton={true}
+            />
           )}
 
           {/* Filters and Sort */}

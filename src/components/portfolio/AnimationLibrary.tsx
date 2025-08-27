@@ -444,7 +444,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({
   return React.createElement(
     Component,
     {
-      ref: elementRef,
+      ref: elementRef as React.RefObject<HTMLDivElement>,
       className: combinedClassName
     },
     children
@@ -470,7 +470,7 @@ export const Parallax: React.FC<ParallaxProps> = ({
   return React.createElement(
     Component,
     {
-      ref: elementRef,
+      ref: elementRef as React.RefObject<HTMLDivElement>,
       className,
       style
     },
@@ -587,7 +587,7 @@ export const MorphAnimation: React.FC<MorphAnimationProps> = ({
 
   return (
     <div
-      ref={elementRef}
+      ref={elementRef as React.RefObject<HTMLDivElement>}
       className={cn("transition-all duration-1000 ease-in-out", className)}
       style={{
         clipPath: fromShape,

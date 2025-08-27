@@ -7,6 +7,8 @@ import { DataTable, ActionColumn, StatusBadge } from "@/components/ui/data-table
 import { validateProjectUpdate } from "@/lib/validation-schemas";
 import { format } from "date-fns";
 import type { ColumnDef } from "@tanstack/react-table";
+import { DataExportManager } from "@/components/admin/DataExportManager";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 import {
   BarChart3,
@@ -66,6 +68,10 @@ export function ProjectsManager() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [projectsToDelete, setProjectsToDelete] = useState<Project[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imagePath, setImagePath] = useState<string>("");
+  const [logoUrl, setLogoUrl] = useState<string>("");
+  const [logoPath, setLogoPath] = useState<string>("");
 
   // Data for filter dropdowns
   const categoryOptions = useMemo(() => {
@@ -90,9 +96,21 @@ export function ProjectsManager() {
   }, []);
 
   const handleDuplicateProject = useCallback(async (project: Project) => {
-    if (!db) return;
+    if (!db) {
+      toast({
+        title: "Service Unavailable",
+        description: "Firebase is not configured. Please check your environment settings.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
+      toast({
+        title: "Duplicating project...",
+        description: "Please wait while we create a copy of your project.",
+      });
+      
       const duplicatedProject = {
         ...project,
         title: `${project.title} (Copy)`,
@@ -107,14 +125,15 @@ export function ProjectsManager() {
       await addDoc(collection(db, PROJECTS_COLLECTION), projectData);
       
       toast({
-        title: "Project duplicated",
-        description: `"${project.title}" has been duplicated successfully.`,
+        title: "Project duplicated successfully",
+        description: `"${project.title}" has been duplicated and added to your portfolio.`,
       });
     } catch (error) {
       console.error("Error duplicating project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
-        title: "Error",
-        description: "Failed to duplicate project. Please try again.",
+        title: "Failed to duplicate project",
+        description: `Error: ${errorMessage}. Please try again or contact support if the issue persists.`,
         variant: "destructive",
       });
     }
@@ -124,27 +143,54 @@ export function ProjectsManager() {
     if (!db || !projectToDelete) return;
 
     try {
+      toast({
+        title: "Deleting project...",
+        description: "Please wait while we remove the project from your portfolio.",
+      });
+      
       await deleteDoc(doc(db, PROJECTS_COLLECTION, projectToDelete.id));
       setProjectToDelete(null);
       
       toast({
-        title: "Project deleted",
-        description: `"${projectToDelete.title}" has been deleted successfully.`,
+        title: "Project deleted successfully",
+        description: `"${projectToDelete.title}" has been permanently removed from your portfolio.`,
       });
     } catch (error) {
       console.error("Error deleting project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
+      // Provide specific error guidance
+      let userMessage = "Failed to delete project. Please try again.";
+      if (errorMessage.includes('permission')) {
+        userMessage = "You don't have permission to delete this project. Please check your access rights.";
+      } else if (errorMessage.includes('network')) {
+        userMessage = "Network error. Please check your internet connection and try again.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to delete project. Please try again.",
+        title: "Failed to delete project",
+        description: userMessage,
         variant: "destructive",
       });
     }
   }, [projectToDelete]);
 
   const handleBulkDelete = useCallback(async () => {
-    if (!db || projectsToDelete.length === 0) return;
+    if (!db || projectsToDelete.length === 0) {
+      toast({
+        title: "Nothing to delete",
+        description: "Please select projects to delete.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
+      toast({
+        title: "Deleting projects...",
+        description: `Removing ${projectsToDelete.length} projects from your portfolio.`,
+      });
+      
       const batch = writeBatch(db);
       
       projectsToDelete.forEach((project) => {
@@ -157,239 +203,69 @@ export function ProjectsManager() {
       setProjectsToDelete([]);
       
       toast({
-        title: "Projects deleted",
-        description: `${projectsToDelete.length} projects have been deleted successfully.`,
+        title: "Projects deleted successfully",
+        description: `${projectsToDelete.length} projects have been permanently removed from your portfolio.`,
       });
     } catch (error) {
       console.error("Error deleting projects:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
+      // Provide specific error guidance
+      let userMessage = "Failed to delete projects. Please try again.";
+      if (errorMessage.includes('permission')) {
+        userMessage = "You don't have permission to delete these projects. Please check your access rights.";
+      } else if (errorMessage.includes('network')) {
+        userMessage = "Network error. Please check your internet connection and try again.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to delete projects. Please try again.",
+        title: "Failed to delete projects",
+        description: userMessage,
         variant: "destructive",
       });
     }
   }, [projectsToDelete]);
 
-  const handleBulkUpdate = useCallback(async (projects: Project[], update: Partial<Project>) => {
-    if (!db || projects.length === 0) return;
-
-    try {
-      const batch = writeBatch(db);
-      
-      projects.forEach((project) => {
-        const projectRef = doc(db, PROJECTS_COLLECTION, project.id);
-        batch.update(projectRef, {
-          ...update,
-          updatedAt: Date.now(),
-        });
-      });
-
-      await batch.commit();
-      
-      toast({
-        title: "Projects updated",
-        description: `${projects.length} projects have been updated successfully.`,
-      });
-    } catch (error) {
-      console.error("Error updating projects:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update projects. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  const handleExport = useCallback((projects: Project[]) => {
-    try {
-      // Format projects for export
-      const exportData = projects.map(project => ({
-        title: project.title,
-        description: project.description,
-        category: project.category,
-        status: project.status,
-        technologies: project.technologies.join(', '),
-        liveUrl: project.liveUrl,
-        githubUrl: project.githubUrl,
-        featured: project.featured,
-        priority: project.priority,
-        startDate: project.startDate,
-        endDate: project.endDate,
-        createdAt: new Date(project.createdAt).toLocaleDateString(),
-      }));
-
-      // Create and download CSV
-      const csv = [
-        Object.keys(exportData[0]).join(','),
-        ...exportData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
-      ].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Export successful",
-        description: `${projects.length} projects exported to CSV.`,
-      });
-    } catch (error) {
-      console.error("Error exporting projects:", error);
-      toast({
-        title: "Error",
-        description: "Failed to export projects. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  const toggleProjectFeatured = useCallback(async (project: Project) => {
-    if (!db) return;
-
-    try {
-      await updateDoc(doc(db, PROJECTS_COLLECTION, project.id), {
-        featured: !project.featured,
-        updatedAt: Date.now(),
-      });
-      
-      toast({
-        title: project.featured ? "Project unfeatured" : "Project featured",
-        description: `${project.title} has been ${project.featured ? "unfeatured" : "featured"} successfully`,
-      });
-    } catch (error) {
-      console.error("Failed to update project:", error);
-      toast({
-        title: "Failed to update",
-        description: "There was an error updating the project",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  const toggleProjectVisibility = useCallback(async (project: Project) => {
-    if (!db) return;
-
-    try {
-      await updateDoc(doc(db, PROJECTS_COLLECTION, project.id), {
-        disabled: !project.disabled,
-        updatedAt: Date.now(),
-      });
-      
-      toast({
-        title: project.disabled ? "Project visible" : "Project hidden",
-        description: `${project.title} is now ${project.disabled ? "visible" : "hidden"} on the portfolio`,
-      });
-    } catch (error) {
-      console.error("Failed to update project:", error);
-      toast({
-        title: "Failed to update",
-        description: "There was an error updating the project",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  // Table columns definition
-  const columns = useMemo<ColumnDef<Project, unknown>[]>(() => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllPageRowsSelected()}
-          onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-          className="rounded border-gray-300"
-        />
-      ),
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={(e) => row.toggleSelected(e.target.checked)}
-          className="rounded border-gray-300"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+  // Columns definition
+  const columns: ColumnDef<Project>[] = [
     {
       accessorKey: "title",
-      header: "Project",
-      cell: ({ row }) => {
-        const project = row.original;
-        return (
-          <div className="flex items-start gap-2">
-            <div className="w-8 h-8 rounded-md flex-shrink-0 overflow-hidden bg-muted flex items-center justify-center">
-              {project.logo ? (
-                <img src={project.logo} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <Database className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
-            <div>
-              <div className="font-medium">{project.title}</div>
-              <div className="text-sm text-muted-foreground truncate max-w-[300px]">
-                {project.description.substring(0, 60)}
-                {project.description.length > 60 ? "..." : ""}
-              </div>
-            </div>
-          </div>
-        );
-      },
+      header: "Title",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("title")}</div>
+      ),
     },
     {
       accessorKey: "category",
       header: "Category",
       cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize">
-          {row.original.category}
+        <Badge variant="secondary" className="bg-secondary text-secondary-foreground">
+          {row.getValue("category")}
         </Badge>
       ),
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
     },
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status;
-        let variant: "default" | "secondary" | "destructive" | "outline" = "outline";
-        
-        if (status === "completed") variant = "default";
-        if (status === "in-progress") variant = "secondary";
-        if (status === "archived") variant = "destructive";
-        
-        return <StatusBadge status={status} variant={variant} />;
-      },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id));
-      },
+      cell: ({ row }) => (
+        <StatusBadge status={row.getValue("status")} />
+      ),
     },
     {
-      accessorKey: "technologies",
-      header: "Technologies",
+      accessorKey: "startDate",
+      header: "Start Date",
+      cell: ({ row }) => (
+        <div>{format(new Date(row.getValue("startDate")), 'MMM yyyy')}</div>
+      ),
+    },
+    {
+      accessorKey: "endDate",
+      header: "End Date",
       cell: ({ row }) => {
-        const techs = row.original.technologies;
-        const displayCount = 2;
-        
+        const endDate = row.getValue("endDate");
         return (
-          <div className="flex flex-wrap gap-1">
-            {techs.slice(0, displayCount).map((tech, i) => (
-              <Badge key={i} variant="outline" className="text-xs">
-                {tech}
-              </Badge>
-            ))}
-            {techs.length > displayCount && (
-              <Badge variant="outline" className="text-xs">
-                +{techs.length - displayCount}
-              </Badge>
-            )}
+          <div>
+            {endDate ? format(new Date(endDate as string), 'MMM yyyy') : 'Present'}
           </div>
         );
       },
@@ -398,93 +274,70 @@ export function ProjectsManager() {
       accessorKey: "featured",
       header: "Featured",
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          {row.original.featured ? (
-            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-          ) : (
-            <Star className="h-4 w-4 text-muted-foreground" />
-          )}
-        </div>
+        row.getValue("featured") ? 
+        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" /> : 
+        <Star className="h-4 w-4 text-muted-foreground" />
       ),
-    },
-    {
-      accessorKey: "disabled",
-      header: "Visible",
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          {row.original.disabled ? (
-            <EyeOff className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <Eye className="h-4 w-4 text-green-500" />
-          )}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "updatedAt",
-      header: "Last Updated",
-      cell: ({ row }) => {
-        const timestamp = row.original.updatedAt;
-        const date = new Date(timestamp);
-        return (
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{format(date, "dd MMM yyyy")}</span>
-          </div>
-        );
-      },
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        return (
-          <ActionColumn
-            row={row}
-            onView={() => handleViewProject(row.original)}
-            onEdit={() => handleEditProject(row.original)}
-            onDelete={() => setProjectToDelete(row.original)}
-            onDuplicate={() => handleDuplicateProject(row.original)}
-            onToggleFeatured={() => toggleProjectFeatured(row.original)}
-            onToggleVisibility={() => toggleProjectVisibility(row.original)}
-          />
-        );
-      },
+      header: "Actions",
+      cell: ({ row }) => (
+        <ActionColumn
+          row={row}
+          onView={() => handleViewProject(row.original)}
+          onEdit={() => handleEditProject(row.original)}
+          onDelete={() => setProjectToDelete(row.original)}
+          onDuplicate={() => handleDuplicateProject(row.original)}
+          onToggleStatus={async () => {
+            try {
+              const updatedProject = {
+                ...row.original,
+                featured: !row.original.featured,
+                updatedAt: Date.now(),
+              };
+              
+              if (db) {
+                await updateDoc(doc(db, PROJECTS_COLLECTION, row.original.id), updatedProject);
+                toast({
+                  title: "Project updated",
+                  description: `${row.original.title} featured status has been updated.`,
+                });
+              }
+            } catch (error) {
+              console.error("Error updating project:", error);
+              toast({
+                title: "Failed to update project",
+                description: "Please try again.",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+      ),
     },
-  ], [handleViewProject, handleEditProject, handleDuplicateProject, toggleProjectFeatured, toggleProjectVisibility]);
+  ];
 
   return (
-    <>
-      <Card className="border-0 shadow-medium">
+    <div className="space-y-6">
+      <DataExportManager />
+      
+      <Card className="border-0 shadow-medium bg-card text-card-foreground">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Project Management
-              </CardTitle>
+              <CardTitle className="text-2xl font-bold">Projects Management</CardTitle>
               <CardDescription>
-                Manage your portfolio projects with advanced filtering and bulk operations
+                Manage your portfolio projects
               </CardDescription>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-                className="hidden md:flex"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-              <Button 
-                size="sm"
-                onClick={() => window.dispatchEvent(new CustomEvent('add-project'))}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Project
-              </Button>
-            </div>
+            <Button 
+              onClick={() => window.dispatchEvent(new CustomEvent('create-project'))}
+              className="shadow-glow"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Project
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -493,231 +346,167 @@ export function ProjectsManager() {
             data={projects}
             loading={loading}
             searchPlaceholder="Search projects..."
-            onAdd={() => window.dispatchEvent(new CustomEvent('add-project'))}
-            onDelete={(projects) => {
-              setProjectsToDelete(projects);
-              setBulkDeleteOpen(true);
-            }}
-            onExport={handleExport}
-            onRefresh={() => window.location.reload()}
             filterFields={[
               {
                 key: "category",
                 title: "Category",
-                options: categoryOptions
+                options: categoryOptions,
               },
               {
                 key: "status",
                 title: "Status",
-                options: statusOptions
-              }
+                options: statusOptions,
+              },
             ]}
-            rowClassName={(row) => {
-              if (row.original.disabled) return "opacity-60";
-              if (row.original.featured) return "bg-yellow-50/30 dark:bg-yellow-950/20";
-              return "";
+            onRefresh={() => window.location.reload()}
+            onDelete={(items) => {
+              setProjectsToDelete(items as Project[]);
+              setBulkDeleteOpen(true);
             }}
+            onAdd={() => window.dispatchEvent(new CustomEvent('create-project'))}
+            emptyStateMessage="No projects found"
+            emptyStateDescription="Get started by adding a new project"
           />
         </CardContent>
       </Card>
 
       {/* Project Details Dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        {selectedProject && (
-          <DialogContent className="sm:max-w-[700px]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md flex-shrink-0 overflow-hidden bg-muted flex items-center justify-center">
-                    {selectedProject.logo ? (
-                      <img src={selectedProject.logo} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <Database className="h-5 w-5 text-muted-foreground" />
-                    )}
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
+          {selectedProject && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <DialogTitle className="text-2xl">{selectedProject.title}</DialogTitle>
+                    <DialogDescription>
+                      {selectedProject.category} • {selectedProject.status.replace(/-/g, ' ')}
+                    </DialogDescription>
                   </div>
-                  <span>{selectedProject.title}</span>
+                  {selectedProject.logo && (
+                    <img 
+                      src={selectedProject.logo} 
+                      alt={selectedProject.title} 
+                      className="w-16 h-16 object-contain rounded-lg border"
+                    />
+                  )}
                 </div>
-              </DialogTitle>
-              <DialogDescription>
-                Project details and information
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6">
-              {/* Image */}
-              {selectedProject.image && (
-                <div className="w-full h-48 rounded-lg overflow-hidden bg-muted">
-                  <img 
-                    src={selectedProject.image} 
-                    alt={selectedProject.title} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+              </DialogHeader>
               
-              {/* Metadata */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge className="capitalize">
-                  {selectedProject.category}
-                </Badge>
-                <StatusBadge status={selectedProject.status} />
+              <div className="space-y-6">
                 {selectedProject.featured && (
-                  <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                  <Badge className="w-fit bg-yellow-500 hover:bg-yellow-600 text-yellow-foreground">
                     <Star className="h-3 w-3 mr-1 fill-current" />
-                    Featured
+                    Featured Project
                   </Badge>
                 )}
-                {selectedProject.disabled && (
-                  <Badge variant="secondary" className="bg-red-500/10 text-red-600">
-                    <EyeOff className="h-3 w-3 mr-1" />
-                    Hidden
-                  </Badge>
+                
+                {selectedProject.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Description</h3>
+                    <p className="text-muted-foreground">{selectedProject.description}</p>
+                  </div>
                 )}
-              </div>
-              
-              {/* Description */}
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">Description</h3>
-                <p className="text-muted-foreground">
-                  {selectedProject.description}
-                </p>
-                {selectedProject.longDescription && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {selectedProject.longDescription}
-                  </p>
+                
+                {selectedProject.technologies && selectedProject.technologies.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Technologies</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProject.technologies.map((tech, index) => (
+                        <Badge key={index} variant="secondary" className="bg-secondary text-secondary-foreground">
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </div>
-              
-              {/* Technical Details */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <h3 className="text-md font-semibold">Technologies</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProject.technologies.map((tech, i) => (
-                      <Badge key={i} variant="outline">
-                        {tech}
-                      </Badge>
-                    ))}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Timeline</h3>
+                    <div className="space-y-2 text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>Started: {format(new Date(selectedProject.startDate), 'MMMM yyyy')}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          Ended: {selectedProject.endDate ? format(new Date(selectedProject.endDate), 'MMMM yyyy') : 'Present'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Links</h3>
+                    <div className="space-y-2">
+                      {selectedProject.githubUrl && (
+                        <Button variant="outline" size="sm" asChild className="w-full justify-start bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground">
+                          <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer">
+                            <Github className="h-4 w-4 mr-2" />
+                            GitHub Repository
+                          </a>
+                        </Button>
+                      )}
+                      {selectedProject.liveUrl && (
+                        <Button variant="outline" size="sm" asChild className="w-full justify-start bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground">
+                          <a href={selectedProject.liveUrl} target="_blank" rel="noopener noreferrer">
+                            <Globe className="h-4 w-4 mr-2" />
+                            Live Demo
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <h3 className="text-md font-semibold">Tags</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProject.tags.map((tag, i) => (
-                      <Badge key={i} variant="secondary" className="bg-muted">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Links */}
-              <div className="space-y-2">
-                <h3 className="text-md font-semibold">Links</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProject.liveUrl && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={selectedProject.liveUrl} target="_blank" rel="noopener noreferrer">
-                        <Globe className="h-4 w-4 mr-2" />
-                        Live Site
-                      </a>
-                    </Button>
-                  )}
-                  {selectedProject.githubUrl && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer">
-                        <Github className="h-4 w-4 mr-2" />
-                        GitHub
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </div>
-              
-              {/* Achievements */}
-              {selectedProject.achievements && selectedProject.achievements.length > 0 && (
-                <div className="space-y-2">
-                  <h3 className="text-md font-semibold">Key Achievements</h3>
-                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                    {selectedProject.achievements.map((achievement, i) => (
-                      <li key={i}>{achievement}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {/* Timeline */}
-              <div className="border-t pt-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2" />
-                    {selectedProject.startDate && `Started: ${selectedProject.startDate}`}
-                    {selectedProject.duration && ` • Duration: ${selectedProject.duration}`}
-                  </div>
+                {selectedProject.image && (
                   <div>
-                    Priority: {selectedProject.priority}
+                    <h3 className="text-lg font-semibold mb-2">Project Image</h3>
+                    <img 
+                      src={selectedProject.image} 
+                      alt={selectedProject.title} 
+                      className="w-full rounded-lg border object-cover max-h-96"
+                    />
                   </div>
-                </div>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => handleEditProject(selectedProject)}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Project
-              </Button>
-              <Button
-                variant={selectedProject.featured ? "default" : "outline"}
-                onClick={() => toggleProjectFeatured(selectedProject)}
-              >
-                <Star className={`h-4 w-4 mr-2 ${selectedProject.featured ? 'fill-current' : ''}`} />
-                {selectedProject.featured ? "Unfeature" : "Feature"}
-              </Button>
-              <Button
-                variant={selectedProject.disabled ? "default" : "outline"}
-                onClick={() => toggleProjectVisibility(selectedProject)}
-              >
-                {selectedProject.disabled ? (
-                  <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Show
-                  </>
-                ) : (
-                  <>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Hide
-                  </>
                 )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        )}
+              </div>
+              
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setDetailsOpen(false)}
+                  className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog 
-        open={!!projectToDelete} 
-        onOpenChange={(open) => !open && setProjectToDelete(null)}
-      >
-        <AlertDialogContent>
+      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+        <AlertDialogContent className="bg-background text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{projectToDelete?.title}"? This action cannot be undone.
+              This will permanently delete the project <strong>{projectToDelete?.title}</strong>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel 
+              onClick={() => setProjectToDelete(null)}
+              className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDeleteProject}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Trash className="h-4 w-4 mr-2" />
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -725,38 +514,30 @@ export function ProjectsManager() {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog 
-        open={bulkDeleteOpen} 
-        onOpenChange={setBulkDeleteOpen}
-      >
-        <AlertDialogContent>
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent className="bg-background text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle>Bulk Delete Projects</AlertDialogTitle>
+            <AlertDialogTitle>Delete Multiple Projects</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {projectsToDelete.length} projects? This action cannot be undone.
+              This will permanently delete <strong>{projectsToDelete.length}</strong> projects.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="max-h-[200px] overflow-y-auto">
-            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-              {projectsToDelete.map((project) => (
-                <li key={project.id}>{project.title}</li>
-              ))}
-            </ul>
-          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setProjectsToDelete([])}>
+            <AlertDialogCancel 
+              onClick={() => setBulkDeleteOpen(false)}
+              className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleBulkDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <Trash className="h-4 w-4 mr-2" />
               Delete All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

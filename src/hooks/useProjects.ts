@@ -119,11 +119,26 @@ export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Update online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
-    // Use local data when Firebase is not enabled (development mode)
-    if (!isFirebaseEnabled || !db) {
-      console.log('Using local project data - Firebase disabled in development');
+    // Use local data when Firebase is not enabled (development mode) or offline
+    if (!isFirebaseEnabled || !db || !isOnline) {
+      console.log('Using local project data - Firebase disabled or offline');
       const localProjects: Project[] = initialProjects.map((project, index) => ({
         id: `local-${index}`,
         ...project
@@ -156,6 +171,8 @@ export function useProjects() {
       },
       (err) => {
         console.error("Error fetching projects from Firebase:", err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+        setError(`Failed to load projects: ${errorMessage}. Showing local data instead.`);
         console.log('Falling back to local project data');
         // Fallback to local data on Firebase error
         const localProjects: Project[] = initialProjects.map((project, index) => ({
@@ -164,12 +181,11 @@ export function useProjects() {
         }));
         setProjects(localProjects);
         setLoading(false);
-        setError(null);
       }
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [isOnline]);
 
   const featured = useMemo(() => 
     projects.filter(project => project.featured && !project.disabled)

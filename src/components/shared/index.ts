@@ -155,7 +155,8 @@ export {
   AccessibleList,
   AccessibleListItem,
   AccessibleProgress,
-  FocusTrap
+  FocusTrap,
+  AccessibilityMenu
 } from "./AccessibleComponents";
 export type {
   AccessibleHeadingProps,
@@ -166,7 +167,8 @@ export type {
   AccessibleListProps,
   AccessibleListItemProps,
   AccessibleProgressProps,
-  FocusTrapProps
+  FocusTrapProps,
+  AccessibilityMenuProps
 } from "./AccessibleComponents";
 
 // Analytics and Charts

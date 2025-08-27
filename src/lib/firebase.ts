@@ -2,6 +2,7 @@ import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAuth, type Auth, connectAuthEmulator } from "firebase/auth";
 import { getAnalytics, type Analytics } from "firebase/analytics";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // Read config from Vite env vars. Create a .env or .env.local with these keys.
 const firebaseConfig = {
@@ -53,12 +54,14 @@ let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 let auth: Auth | undefined;
 let analytics: Analytics | undefined;
+let storage: FirebaseStorage | undefined;
 
 if (isFirebaseEnabled) {
   try {
     app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    storage = getStorage(app);
     
     // Initialize Analytics only in production
     if (typeof window !== 'undefined' && import.meta.env.PROD) {
@@ -88,7 +91,8 @@ if (isFirebaseEnabled) {
     db = undefined;
     auth = undefined;
     analytics = undefined;
+    storage = undefined;
   }
 }
 
-export { app, db, auth, analytics, firebaseConfig };
+export { app, db, auth, analytics, firebaseConfig, storage };

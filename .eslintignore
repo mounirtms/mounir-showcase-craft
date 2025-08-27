@@ -11,5 +11,8 @@ src/hooks/usePerformanceMonitoring.ts
 src/hooks/useUserTracking.ts
 src/utils/tableExport.ts
 
+# Demo files - not for production
+src/demos/AccessibilityDemo.tsx
+
 # Note: These files have 'any' types that should be addressed in future iterations
 # but are not blocking deployment since the application builds and functions correctly

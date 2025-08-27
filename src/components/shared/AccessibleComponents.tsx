@@ -11,8 +11,9 @@ import {
   useSkipLinks,
   AriaProps
 } from "@/hooks/useAccessibility";
+import { Accessibility, Eye, Keyboard, Volume2 } from "lucide-react";
 
-// Skip Links Component
+// Enhanced Skip Links Component with Better Design
 export const SkipLinks: React.FC<{
   links: Array<{ id: string; label: string; target: string }>;
   className?: string;
@@ -26,20 +27,29 @@ export const SkipLinks: React.FC<{
       className={cn("sr-only focus-within:not-sr-only", className)}
       aria-label="Skip navigation"
     >
-      <ul className="fixed top-4 left-4 z-[100] bg-primary text-primary-foreground p-3 space-y-2 rounded-lg shadow-lg border border-border/20">
-        {links.map((link) => (
-          <li key={link.id}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => skipTo(link.target)}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              {link.label}
-            </Button>
-          </li>
-        ))}
-      </ul>
+      {/* Enhanced design with glass morphism and better positioning */}
+      <div className="fixed top-6 left-6 z-[9999] max-w-sm">
+        <div className="bg-gradient-to-br from-slate-900/95 to-blue-900/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4">
+          <div className="flex items-center gap-2 mb-3 text-white/90">
+            <Accessibility className="w-4 h-4" />
+            <span className="text-sm font-medium">Skip Navigation</span>
+          </div>
+          <ul className="space-y-2">
+            {links.map((link) => (
+              <li key={link.id}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => skipTo(link.target)}
+                  className="w-full text-left text-white/90 hover:bg-white/10 hover:text-white transition-all duration-200 rounded-lg"
+                >
+                  {link.label}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </nav>
   );
 };
@@ -249,7 +259,9 @@ export const AccessibleCard = forwardRef<HTMLDivElement, AccessibleCardProps>(({
   });
 
   const combinedKeyDown = (e: React.KeyboardEvent) => {
-    handleKeyDown(e as any);
+    // Fix TypeScript issue by properly casting the event
+    const domEvent = e.nativeEvent as KeyboardEvent;
+    handleKeyDown(domEvent);
     onKeyDown?.(e);
   };
 
@@ -388,7 +400,10 @@ export const AccessibleListItem: React.FC<AccessibleListItemProps> = ({
         className
       )}
       onClick={!disabled ? onClick : undefined}
-      onKeyDown={!disabled ? handleKeyDown : undefined}
+      onKeyDown={!disabled ? (e: React.KeyboardEvent<HTMLLIElement>) => {
+        const domEvent = e.nativeEvent as KeyboardEvent;
+        handleKeyDown(domEvent);
+      } : undefined}
       tabIndex={onClick && !disabled ? 0 : undefined}
       {...ariaProps}
     >
@@ -472,7 +487,7 @@ export const AccessibleProgress: React.FC<AccessibleProgressProps> = ({
   );
 };
 
-// Focus Trap Component
+// Enhanced Focus Trap Component
 export interface FocusTrapProps {
   children: React.ReactNode;
   enabled?: boolean;
@@ -510,6 +525,103 @@ export const FocusTrap: React.FC<FocusTrapProps> = ({
   return (
     <div ref={containerRef} className={className}>
       {children}
+    </div>
+  );
+};
+
+// Accessibility Menu Component (Hidden by default)
+export interface AccessibilityMenuProps {
+  className?: string;
+  position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  showLabel?: boolean;
+  hidden?: boolean;
+}
+
+export const AccessibilityMenu: React.FC<AccessibilityMenuProps> = ({
+  className,
+  position = "top-right",
+  showLabel = true,
+  hidden = true // Hidden by default as requested
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { announce } = useScreenReader();
+  
+  // Don't render if hidden
+  if (hidden) {
+    return null;
+  }
+  
+  const positionClasses = {
+    "top-left": "top-6 left-6",
+    "top-right": "top-6 right-6", 
+    "bottom-left": "bottom-6 left-6",
+    "bottom-right": "bottom-6 right-6"
+  };
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+    announce(isOpen ? "Accessibility menu closed" : "Accessibility menu opened");
+  };
+
+  return (
+    <div className={cn("fixed z-[9998]", positionClasses[position], className)}>
+      {/* Accessibility Toggle Button with improved dark mode styling */}
+      <Button
+        onClick={toggleMenu}
+        size="sm"
+        variant="outline"
+        className="bg-background/90 backdrop-blur-sm border-border hover:bg-accent hover:text-accent-foreground shadow-lg transition-all duration-200"
+        aria-label="Open accessibility menu"
+        aria-expanded={isOpen}
+      >
+        <Accessibility className="w-4 h-4" />
+        {showLabel && <span className="ml-2 text-xs">A11y</span>}
+      </Button>
+
+      {/* Accessibility Options Panel with improved dark mode */}
+      {isOpen && (
+        <div className="absolute top-full mt-2 right-0 w-72 bg-background/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl p-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border">
+              <Eye className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-foreground">Accessibility Options</h3>
+            </div>
+            
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">High Contrast</span>
+                <Button size="sm" variant="outline" className="h-7 text-xs">
+                  Toggle
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Large Text</span>
+                <Button size="sm" variant="outline" className="h-7 text-xs">
+                  Toggle
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Reduced Motion</span>
+                <Button size="sm" variant="outline" className="h-7 text-xs">
+                  Toggle
+                </Button>
+              </div>
+            </div>
+            
+            <div className="pt-2 border-t border-border">
+              <Button 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={() => setIsOpen(false)}
+              >
+                Close Menu
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

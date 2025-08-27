@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchField } from "@/components/ui/search-field";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -53,7 +54,9 @@ import {
   Copy, 
   ExternalLink,
   Star,
-  EyeOff
+  EyeOff,
+  Settings,
+  Columns,
 } from "lucide-react";
 
 interface FilterOption {
@@ -78,6 +81,11 @@ interface DataTableProps<TData, TValue> {
   onRefresh?: () => void;
   filterFields?: FilterField[];
   rowClassName?: (row: { original: TData }) => string;
+  // New props for enhanced functionality
+  showColumnVisibility?: boolean;
+  showDensitySelector?: boolean;
+  density?: "comfortable" | "compact" | "spacious";
+  onDensityChange?: (density: "comfortable" | "compact" | "spacious") => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -91,11 +99,16 @@ export function DataTable<TData, TValue>({
   onRefresh,
   filterFields = [],
   rowClassName,
+  showColumnVisibility = true,
+  showDensitySelector = true,
+  density = "comfortable",
+  onDensityChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [columnVisibility, setColumnVisibility] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -108,12 +121,14 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     getPaginationRowModel: getPaginationRowModel(),
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
     globalFilterFn: "includesString",
     state: {
       sorting,
       columnFilters,
       rowSelection,
       globalFilter,
+      columnVisibility,
     },
     initialState: {
       pagination: {
@@ -125,20 +140,34 @@ export function DataTable<TData, TValue>({
   // Get selected rows using the correct API
   const selectedRows = table.getSelectedRowModel().rows.map(row => row.original);
 
+  // Density classes for table rows
+  const densityClasses = {
+    compact: "py-1",
+    comfortable: "py-2",
+    spacious: "py-3",
+  };
+
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={globalFilter}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className="pl-8 max-w-sm"
-            />
-          </div>
+      {/* Enhanced Toolbar */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          <SearchField
+            placeholder={searchPlaceholder}
+            value={globalFilter}
+            onValueChange={setGlobalFilter}
+            variant="modern"
+            size="md"
+            className="max-w-sm"
+            showClearButton={true}
+            showFilterButton={filterFields.length > 0}
+            filterOptions={filterFields.length > 0 ? [
+              ...filterFields.map(field => ({ 
+                label: field.title, 
+                value: field.key 
+              }))
+            ] : []}
+          />
           
           {/* Filter dropdowns */}
           {filterFields.map((field) => (
@@ -153,10 +182,10 @@ export function DataTable<TData, TValue>({
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder={field.title} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All {field.title}</SelectItem>
+              <SelectContent className="dropdown-modern">
+                <SelectItem value="all" className="dropdown-item">All {field.title}</SelectItem>
                 {field.options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} className="dropdown-item">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -165,7 +194,7 @@ export function DataTable<TData, TValue>({
           ))}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           {selectedRows.length > 0 && (
             <>
               <Badge variant="secondary" className="mr-2">
@@ -184,47 +213,126 @@ export function DataTable<TData, TValue>({
             </>
           )}
           
-          {onExport && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onExport(selectedRows.length > 0 ? selectedRows : data)}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          )}
-          
-          {onRefresh && (
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-          )}
-          
-          {onAdd && (
-            <Button size="sm" onClick={onAdd}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add New
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {showColumnVisibility && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Columns className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[150px] dropdown-modern">
+                  <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => {
+                      return (
+                        <DropdownMenuItem
+                          key={column.id}
+                          className="dropdown-item"
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            column.toggleVisibility(!column.getIsVisible());
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className={cn(
+                              "mr-2 h-4 w-4",
+                              column.getIsVisible() 
+                                ? "opacity-100" 
+                                : "opacity-30"
+                            )}>
+                              {column.getIsVisible() ? "✓" : "○"}
+                            </div>
+                            {column.id}
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {showDensitySelector && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[150px] dropdown-modern">
+                  <DropdownMenuLabel>Table density</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className={cn("dropdown-item", density === "compact" && "bg-accent")}
+                    onClick={() => onDensityChange?.("compact")}
+                  >
+                    Compact
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className={cn("dropdown-item", density === "comfortable" && "bg-accent")}
+                    onClick={() => onDensityChange?.("comfortable")}
+                  >
+                    Comfortable
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className={cn("dropdown-item", density === "spacious" && "bg-accent")}
+                    onClick={() => onDensityChange?.("spacious")}
+                  >
+                    Spacious
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {onExport && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onExport(selectedRows.length > 0 ? selectedRows : data)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            )}
+            
+            {onRefresh && (
+              <Button variant="outline" size="sm" onClick={onRefresh}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            )}
+            
+            {onAdd && (
+              <Button size="sm" onClick={onAdd}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add New
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
+      {/* Enhanced Table */}
+      <div className="rounded-md border bg-background/50 backdrop-blur-sm border-border/50 shadow-lg">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-background/80 backdrop-blur-sm border-b border-border/50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="relative">
+                    <TableHead 
+                      key={header.id} 
+                      className="relative font-semibold text-foreground"
+                      style={{ width: header.getSize() }}
+                    >
                       {header.isPlaceholder ? null : (
                         <div
                           className={cn(
                             "flex items-center space-x-2",
-                            header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 rounded p-1 -m-1"
+                            header.column.getCanSort() && "cursor-pointer select-none hover:bg-accent/50 rounded p-1 -m-1 transition-colors"
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                         >
@@ -262,10 +370,14 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={rowClassName ? rowClassName(row) : ""}
+                  className={cn(
+                    "border-b border-border/20 last:border-b-0 transition-colors hover:bg-accent/30",
+                    rowClassName ? rowClassName(row) : "",
+                    densityClasses[density]
+                  )}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="align-middle">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -285,15 +397,17 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
+      {/* Enhanced Pagination */}
+      <div className="flex flex-col sm:flex-row items-center justify-between px-2 gap-4">
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
+            <span>{table.getFilteredSelectedRowModel().rows.length} of</span>
+            <span>{table.getFilteredRowModel().rows.length} row(s) selected.</span>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -303,56 +417,58 @@ export function DataTable<TData, TValue>({
               <SelectTrigger className="h-8 w-[70px]">
                 <SelectValue placeholder={table.getState().pagination.pageSize} />
               </SelectTrigger>
-              <SelectContent side="top">
+              <SelectContent side="top" className="dropdown-modern">
                 {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                  <SelectItem key={pageSize} value={`${pageSize}`} className="dropdown-item">
                     {pageSize}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <span className="sr-only">Go to last page</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </div>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="outline"
+                className="hidden h-8 w-8 p-0 lg:flex"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span className="sr-only">Go to first page</span>
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="hidden h-8 w-8 p-0 lg:flex"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+              >
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -398,40 +514,40 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[160px]">
+      <DropdownMenuContent align="end" className="w-[180px] dropdown-modern">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
         {onView && (
-          <DropdownMenuItem onClick={() => onView(item)}>
+          <DropdownMenuItem onClick={() => onView(item)} className="dropdown-item">
             <Eye className="mr-2 h-4 w-4" />
             View Details
           </DropdownMenuItem>
         )}
         
         {onEdit && (
-          <DropdownMenuItem onClick={() => onEdit(item)}>
+          <DropdownMenuItem onClick={() => onEdit(item)} className="dropdown-item">
             <Edit className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
         )}
         
         {onDuplicate && (
-          <DropdownMenuItem onClick={() => onDuplicate(item)}>
+          <DropdownMenuItem onClick={() => onDuplicate(item)} className="dropdown-item">
             <Copy className="mr-2 h-4 w-4" />
             Duplicate
           </DropdownMenuItem>
         )}
         
         {onToggleFeatured && (
-          <DropdownMenuItem onClick={() => onToggleFeatured(item)}>
+          <DropdownMenuItem onClick={() => onToggleFeatured(item)} className="dropdown-item">
             <Star className={`mr-2 h-4 w-4 ${item.featured ? 'fill-current' : ''}`} />
             {item.featured ? 'Unfeature' : 'Feature'}
           </DropdownMenuItem>
         )}
         
         {onToggleVisibility && (
-          <DropdownMenuItem onClick={() => onToggleVisibility(item)}>
+          <DropdownMenuItem onClick={() => onToggleVisibility(item)} className="dropdown-item">
             {item.disabled ? (
               <>
                 <Eye className="mr-2 h-4 w-4" />
@@ -447,7 +563,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({
         )}
         
         {item.liveUrl && (
-          <DropdownMenuItem onClick={() => window.open(item.liveUrl, '_blank')}>
+          <DropdownMenuItem onClick={() => window.open(item.liveUrl, '_blank')} className="dropdown-item">
             <ExternalLink className="mr-2 h-4 w-4" />
             Open Live Site
           </DropdownMenuItem>
@@ -457,7 +573,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({
           <DropdownMenuItem 
             key={index} 
             onClick={() => action.onClick(item)}
-            className={action.variant === 'destructive' ? 'text-destructive' : ''}
+            className={cn("dropdown-item", action.variant === 'destructive' ? 'text-destructive' : '')}
           >
             {action.icon && <action.icon className="mr-2 h-4 w-4" />}
             {action.label}
@@ -469,7 +585,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={() => onDelete(item)}
-              className="text-destructive"
+              className="dropdown-item text-destructive"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete

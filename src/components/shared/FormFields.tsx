@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+// import { Calendar } from "@/components/ui/calendar";
+// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { 
   AlertCircle, 
@@ -48,6 +48,7 @@ export interface EnhancedInputProps extends BaseFieldProps {
     pattern?: RegExp;
     message?: string;
   };
+  variant?: "default" | "glass" | "modern";
 }
 
 export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(({
@@ -65,7 +66,8 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(({
   prefix,
   suffix,
   validation,
-  showValidation = true
+  showValidation = true,
+  variant = "modern"
 }, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   
@@ -115,6 +117,7 @@ export const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(({
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}
+          variant={variant}
           className={cn(
             prefix && "pl-10",
             (suffix || type === "password") && "pr-10",
@@ -278,6 +281,7 @@ export interface EnhancedTextareaProps extends BaseFieldProps {
   maxLength?: number;
   showCharCount?: boolean;
   autoResize?: boolean;
+  variant?: "default" | "glass" | "modern";
 }
 
 export const EnhancedTextarea: React.FC<EnhancedTextareaProps> = ({
@@ -292,7 +296,8 @@ export const EnhancedTextarea: React.FC<EnhancedTextareaProps> = ({
   rows = 3,
   maxLength,
   showCharCount = false,
-  autoResize = false
+  autoResize = false,
+  variant = "modern"
 }) => {
   const {
     field,
@@ -327,6 +332,7 @@ export const EnhancedTextarea: React.FC<EnhancedTextareaProps> = ({
         disabled={disabled}
         rows={rows}
         maxLength={maxLength}
+        variant={variant}
         className={cn(
           hasError && "border-red-500 focus:border-red-500",
           autoResize && "resize-none"
@@ -557,11 +563,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   );
 };
 
-export {
+export type {
   BaseFieldProps,
   EnhancedInputProps,
   EnhancedSelectProps,
   EnhancedTextareaProps,
-  DatePickerProps,
   FileUploadProps
 };

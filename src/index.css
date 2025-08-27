@@ -178,6 +178,71 @@ All colors MUST be HSL.
   .glow-danger {
     box-shadow: var(--glow-danger);
   }
+
+  /* Enhanced Form Fields */
+  .search-field {
+    @apply bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg;
+    @apply hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+  
+  .search-field.dark {
+    @apply bg-background/30 border-border/30;
+    @apply hover:bg-background/40 focus:bg-background/50;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .form-field-modern {
+    @apply border-2 border-border bg-background/80 backdrop-blur-sm rounded-lg;
+    @apply hover:border-primary/60 focus:border-primary;
+    @apply transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-lg;
+  }
+  
+  /* Modern dropdown styles */
+  .dropdown-modern {
+    @apply bg-background/95 backdrop-blur-md border border-border/50 rounded-lg shadow-xl;
+    @apply transition-all duration-200;
+  }
+  
+  .dropdown-item {
+    @apply transition-colors duration-150 hover:bg-accent/80 focus:bg-accent/80;
+    @apply rounded-sm text-foreground;
+  }
+  
+  /* Data table modern styling */
+  .data-table-modern {
+    @apply bg-background/80 backdrop-blur-sm border border-border/30 rounded-xl;
+    @apply shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .data-table-header {
+    @apply bg-background/50 backdrop-blur-sm border-b border-border/30;
+    @apply text-foreground font-medium;
+  }
+  
+  .data-table-row {
+    @apply hover:bg-accent/30 transition-colors duration-150;
+    @apply border-b border-border/20 last:border-b-0;
+  }
+  
+  .form-field-glass {
+    @apply border border-border/50 bg-background/50 backdrop-blur-sm rounded-lg;
+    @apply hover:bg-background/70 hover:border-primary/50;
+    @apply focus:bg-background/80 focus:border-primary;
+    @apply transition-all duration-200 shadow-sm;
+  }
+  
+  /* Dropdown enhancements */
+  .dropdown-modern {
+    @apply bg-background/95 backdrop-blur-md border border-border/50 rounded-lg shadow-xl;
+    @apply animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out;
+    @apply data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95;
+  }
+  
+  .dropdown-item {
+    @apply hover:bg-accent/50 focus:bg-accent/70 transition-colors duration-150;
+    @apply cursor-pointer rounded-md mx-1 px-2 py-1.5;
+  }
   
   /* Gradient Backgrounds */
   .bg-gradient-mesh {
@@ -307,4 +372,29 @@ All colors MUST be HSL.
   );
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Hide accessibility settings window by default */
+.accessibility-window {
+  @apply hidden;
+}
+
+/* Show only when specifically toggled */
+.accessibility-window.show {
+  @apply block;
+}
+
+/* Professional admin styling */
+.admin-container {
+  @apply bg-gradient-to-br from-background via-background to-muted/30;
+}
+
+.admin-card {
+  @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl;
+  @apply shadow-medium hover:shadow-large transition-all duration-300;
+}
+
+.admin-header {
+  @apply bg-background/80 backdrop-blur-md border-b border-border/30;
+  @apply sticky top-0 z-50;
 }
