@@ -7,6 +7,8 @@ export { AdminDataTableTest } from './AdminDataTableTest';
 // Re-export existing admin components
 export { ProjectsManager } from './ProjectsManager';
 export { SkillsManager } from './SkillsManager';
+export { GoogleAnalyticsInfo } from './GoogleAnalyticsInfo';
+export { default as GoogleAnalyticsVerification } from './GoogleAnalyticsVerification';
 
 // New modular components
 export * from './projects';

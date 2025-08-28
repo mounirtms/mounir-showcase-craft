@@ -1,22 +1,115 @@
 {
-  "name": "Mounir Abderrahmani - Portfolio",
+  "name": "Mounir Abderrahmani - Senior Full-Stack Developer",
   "short_name": "Mounir Portfolio",
-  "description": "Senior Full-Stack Developer & Software Engineer Portfolio",
+  "description": "Senior Full-Stack Developer & Software Engineer specializing in React, Node.js, and modern web technologies. Explore my portfolio of innovative projects and professional experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#4361ee",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["developer", "portfolio", "technology", "software"],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop view of Mounir's portfolio"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile view of Mounir's portfolio"
+    }
+  ],
   "icons": [
     {
-      "src": "/mounir-icon.svg",
+      "src": "/mounir-icon-simple.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/mounir-icon-simple.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
-  "theme_color": "#8b5cf6",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/"
+  "shortcuts": [
+    {
+      "name": "Projects",
+      "url": "/#projects",
+      "description": "View my latest projects",
+      "icons": [
+        {
+          "src": "/mounir-icon-simple.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "url": "/#contact",
+      "description": "Get in touch",
+      "icons": [
+        {
+          "src": "/mounir-icon-simple.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Resume",
+      "url": "/Mounir_CV_2025.pdf",
+      "description": "Download my resume",
+      "icons": [
+        {
+          "src": "/mounir-icon-simple.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
 }

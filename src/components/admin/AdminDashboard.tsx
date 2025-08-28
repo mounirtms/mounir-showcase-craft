@@ -22,6 +22,7 @@ import { DataExportManager } from "@/components/admin/DataExportManager";
 import { SkillsManager } from "@/components/admin/SkillsManager";
 import { ProjectsManager } from "@/components/admin/ProjectsManager";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { GoogleAnalyticsInfo } from "@/components/admin/GoogleAnalyticsInfo";
 import { AdminNavigation } from "@/components/admin/AdminNavigation";
 
 export function AdminDashboard() {
@@ -152,7 +153,7 @@ export function AdminDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-muted">
+        <TabsList className="grid w-full grid-cols-5 bg-muted">
           <TabsTrigger 
             value="overview" 
             className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
@@ -177,6 +178,12 @@ export function AdminDashboard() {
           >
             Analytics
           </TabsTrigger>
+          <TabsTrigger 
+            value="ga-config" 
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            GA Config
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
@@ -194,6 +201,10 @@ export function AdminDashboard() {
         
         <TabsContent value="analytics">
           <AnalyticsDashboard />
+        </TabsContent>
+        
+        <TabsContent value="ga-config">
+          <GoogleAnalyticsInfo />
         </TabsContent>
       </Tabs>
     </div>

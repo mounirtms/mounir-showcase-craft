@@ -40,11 +40,11 @@ export const Navigation = () => {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => scrollToSection("#home")}>
-            <Logo size="md" className="text-primary" />
+          <div className="flex items-center space-x-3 cursor-pointer transition-transform duration-300 hover:scale-105" onClick={() => scrollToSection("#home")}>
+            <Logo size="lg" className="text-primary" animate={true} />
             <div className="hidden sm:block">
-              <div className="font-bold text-lg text-foreground">Mounir</div>
-              <div className="text-xs text-muted-foreground -mt-1">Full-Stack Developer</div>
+              <div className="font-bold text-lg text-foreground leading-none">Mounir</div>
+              <div className="text-xs text-muted-foreground leading-none mt-0.5">Full-Stack Developer</div>
             </div>
           </div>
 

@@ -46,9 +46,9 @@ class MemoryCache<T> {
 }
 
 // Global cache instances
-export const projectCache = new MemoryCache();
-export const skillCache = new MemoryCache();
-export const imageCache = new MemoryCache();
+export const projectCache = new MemoryCache<any>();
+export const skillCache = new MemoryCache<any>();
+export const imageCache = new MemoryCache<HTMLImageElement>();
 
 // Debounce function for user input
 export function debounce<T extends (...args: any[]) => any>(
@@ -103,8 +103,8 @@ export function memoize<T extends (...args: any[]) => any>(
 // Image preloader with caching
 export function preloadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const cached = imageCache.get(src) as HTMLImageElement | null;
-    if (cached) {
+    const cached = imageCache.get(src);
+    if (cached && cached instanceof HTMLImageElement) {
       resolve(cached);
       return;
     }
@@ -178,9 +178,8 @@ export class ConnectionMonitor {
 
   private startMonitoring(): void {
     // Monitor network information if available
-    const nav: any = navigator;
-    if (nav.connection) {
-      const connection = nav.connection;
+    if ('connection' in navigator) {
+      const connection = (navigator as any).connection;
       
       const updateQuality = () => {
         const effectiveType = connection.effectiveType;
