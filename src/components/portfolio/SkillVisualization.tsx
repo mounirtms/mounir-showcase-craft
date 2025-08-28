@@ -55,10 +55,13 @@ export interface SkillVisualizationProps {
   showSearch?: boolean;
   defaultCategory?: string | null;
   layout?: "grid" | "list" | "circles";
-  sortBy?: typeof sortBy;
-  sortOrder?: typeof sortOrder;
+  sortBy?: "level" | "name" | "experience"; // Fixed type definition
+  sortOrder?: "asc" | "desc"; // Fixed type definition
   animationDuration?: number;
   enableClick?: boolean;
+  enableHover?: boolean; // Added missing prop
+  onSkillClick?: (skill: Skill) => void; // Added missing prop
+  onSkillHover?: (skill: Skill) => void; // Added missing prop
 }
 
 // Category configuration
@@ -230,16 +233,35 @@ const SkillCard: React.FC<{
   layout: "grid" | "list" | "circles";
   animationDuration: number;
   enableClick: boolean;
-}> = ({ skill, category, layout, animationDuration, enableClick }) => {
+  enableHover?: boolean; // Added missing prop
+  onSkillClick?: (skill: Skill) => void; // Added missing prop
+  onSkillHover?: (skill: Skill) => void; // Added missing prop
+}> = ({ skill, category, layout, animationDuration, enableClick, enableHover, onSkillClick, onSkillHover }) => {
   const [isHovered, setIsHovered] = useState(false);
   const reducedMotion = useReducedMotion();
 
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
+  const handleMouseEnter = () => {
+    if (enableHover) { // Only set hover state if enableHover is true
+      setIsHovered(true);
+      if (onSkillHover) {
+        onSkillHover(skill);
+      }
+    }
+  };
+  
+  const handleMouseLeave = () => {
+    if (enableHover) { // Only set hover state if enableHover is true
+      setIsHovered(false);
+    }
+  };
+  
   const handleClick = () => {
     if (enableClick) {
       // Handle click event if needed
       trackButtonClick('skill_card_click', { skill: skill.name });
+      if (onSkillClick) {
+        onSkillClick(skill);
+      }
     }
   };
 
@@ -340,7 +362,10 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
   sortBy: initialSortBy = "level",
   sortOrder: initialSortOrder = "desc",
   animationDuration = 1000,
-  enableClick = false
+  enableClick = false,
+  enableHover = false, // Added missing prop with default value
+  onSkillClick, // Added missing prop
+  onSkillHover // Added missing prop
 }) => {
   // Handle either skills array or categories array
   const allSkills = externalCategories ? externalCategories.flatMap(cat => cat.skills) : externalSkills || [];
@@ -376,15 +401,15 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
           aValue = a.name.toLowerCase();
           bValue = b.name.toLowerCase();
           break;
+        case "level":
+          aValue = a.level;
+          bValue = b.level;
+          break;
         case "experience":
-          aValue = a.experience;
-          bValue = b.experience;
+          aValue = a.experience.toLowerCase();
+          bValue = b.experience.toLowerCase();
           break;
-        case "projects":
-          aValue = a.projects || 0;
-          bValue = b.projects || 0;
-          break;
-        default: // level
+        default:
           aValue = a.level;
           bValue = b.level;
       }
@@ -410,8 +435,8 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
 
   // Set default category to frontend if available
   useEffect(() => {
-    if (defaultCategory && skillCategories.includes(defaultCategory.toLowerCase())) {
-      setSelectedCategory(defaultCategory.toLowerCase());
+    if (defaultCategory && skillCategories.includes(defaultCategory as any)) {
+      setSelectedCategory(defaultCategory);
     } else if (skillCategories.length > 0) {
       setSelectedCategory(skillCategories[0]);
     }
@@ -486,7 +511,7 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
                 <select
                   value={`${currentSort.by}-${currentSort.order}`}
                   onChange={(e) => {
-                    const [by, order] = e.target.value.split('-') as [typeof sortBy, typeof sortOrder];
+                    const [by, order] = e.target.value.split('-') as ["level" | "name" | "experience", "asc" | "desc"];
                     setCurrentSort({ by, order });
                   }}
                   className="px-3 py-1 border rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -509,31 +534,43 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
         layoutClasses[layout],
         "transition-all duration-500 ease-out"
       )}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {filteredSkills.length > 0 ? (
-            filteredSkills.map((skill, index) => (
-              <motion.div
-                key={`${skill.id}-${selectedCategory}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{
-                  duration: 0.4,
-                  delay: index * 0.05,
-                  ease: "easeOut"
-                }}
-              >
-                <SkillCard 
-                  skill={skill} 
-                  layout={layout}
-                  enableHover={enableHover}
-                  enableClick={enableClick}
-                  onSkillClick={onSkillClick}
-                  onSkillHover={onSkillHover}
-                  animationDuration={animationDuration}
-                />
-              </motion.div>
-            ))
+            filteredSkills.map((skill, index) => {
+              // Get category configuration
+              const categoryKey = skill.category as keyof typeof CATEGORY_CONFIG;
+              const category = CATEGORY_CONFIG[categoryKey] || {
+                label: skill.category,
+                icon: <Code2 className="w-4 h-4" />,
+                color: "bg-gray-500",
+                lightColor: "bg-gray-100"
+              };
+              
+              return (
+                <motion.div
+                  key={`${skill.id}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.05,
+                    ease: "easeOut"
+                  }}
+                >
+                  <SkillCard 
+                    skill={skill} 
+                    category={category}
+                    layout={layout}
+                    enableHover={enableHover}
+                    enableClick={enableClick}
+                    onSkillClick={onSkillClick}
+                    onSkillHover={onSkillHover}
+                    animationDuration={animationDuration}
+                  />
+                </motion.div>
+              )
+            })
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
@@ -548,30 +585,13 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Reset Filters */}
-      {(searchTerm || selectedCategory !== null) && (
-        <div className="flex justify-center pt-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory(null);
-            }}
-            className="gap-2"
-          >
-            <X className="w-4 h-4" />
-            Reset Filters
-          </Button>
-        </div>
-      )}
-
       {/* Stats Summary */}
       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
         <span>{filteredSkills.length} skills shown</span>
         <span>•</span>
         <span>Average level: {Math.round(filteredSkills.reduce((sum, skill) => sum + skill.level, 0) / filteredSkills.length)}%</span>
         <span>•</span>
-        <span>{categories.length} categories</span>
+        <span>{skillCategories.length} categories</span>
       </div>
     </div>
   );
