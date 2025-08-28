@@ -14,6 +14,26 @@
       gtag('config', 'G-96R4Z44Y80');
     </script>
 
+    <!-- Single Page App for GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...)
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+
     <!-- Primary Meta Tags -->
     <title>Mounir Abderrahmani | Senior Full-Stack Developer & Software Engineer</title>
     <meta name="title" content="Mounir Abderrahmani | Senior Full-Stack Developer & Software Engineer">
@@ -388,7 +408,7 @@
     <meta property="business:contact_data:phone_number" content="+213674094855">
     <meta property="business:contact_data:website" content="https://mounir1.github.io">
 
-    <script type="module" crossorigin src="/assets/index-BSsQwFNe.js"></script>
+    <script type="module" crossorigin src="/assets/index-CmmHEbxy.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-Z2Iecplj.js">
     <link rel="modulepreload" crossorigin href="/assets/ui-BVuK6MkH.js">
     <link rel="modulepreload" crossorigin href="/assets/firebase-C2afjNii.js">

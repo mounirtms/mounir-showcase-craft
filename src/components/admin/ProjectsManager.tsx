@@ -137,7 +137,7 @@ const formSchema = z.object({
   clientInfo: z.object({
     name: z.string().optional(),
     industry: z.string().optional(),
-    size: z.enum(["small", "medium", "large"]).optional(),
+    size: z.enum(["startup", "small", "medium", "large", "enterprise"]).optional(),
     location: z.string().optional(),
     website: z.string().optional(),
     isPublic: z.boolean().default(false),
@@ -369,7 +369,7 @@ export function ProjectsManager() {
       clientInfo: {
         name: project.clientInfo?.name || "",
         industry: project.clientInfo?.industry || "",
-        size: project.clientInfo?.size === "startup" || project.clientInfo?.size === "enterprise" ? "medium" : (project.clientInfo?.size || "medium"),
+        size: project.clientInfo?.size || "medium",
         location: project.clientInfo?.location || "",
         website: project.clientInfo?.website || "",
         isPublic: project.clientInfo?.isPublic || false,
@@ -1027,6 +1027,352 @@ export function ProjectsManager() {
                     </FormItem>
                   )}
                 />
+                
+                <FormField
+                  control={form.control}
+                  name="demoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Demo URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://demo.project.com" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        URL to the project demo
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="caseStudyUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Case Study URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://casestudy.project.com" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        URL to the project case study
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Achievements */}
+              <FormField
+                control={form.control}
+                name="achievements"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Achievements</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="List key achievements (one per line)..."
+                        className="min-h-[100px] bg-background text-foreground border-input"
+                        value={field.value?.join("\n") || ""}
+                        onChange={(e) => field.onChange(e.target.value.split("\n").map(a => a.trim()).filter(a => a))}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Key accomplishments and results from this project (one per line)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Challenges and Solutions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="challenges"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Challenges</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="List main challenges faced (one per line)..."
+                          className="min-h-[100px] bg-background text-foreground border-input"
+                          value={field.value?.join("\n") || ""}
+                          onChange={(e) => field.onChange(e.target.value.split("\n").map(c => c.trim()).filter(c => c))}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Key challenges encountered during the project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="solutions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Solutions</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="List solutions implemented (one per line)..."
+                          className="min-h-[100px] bg-background text-foreground border-input"
+                          value={field.value?.join("\n") || ""}
+                          onChange={(e) => field.onChange(e.target.value.split("\n").map(s => s.trim()).filter(s => s))}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        How challenges were addressed and solved
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Client Information Section */}
+              <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
+                <h3 className="text-lg font-semibold">Client Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client Name</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Client or company name" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Name of the client or organization
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.industry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Industry</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Technology, Healthcare, Finance..." 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Industry or sector of the client
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.size"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Size</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-background text-foreground border-input">
+                              <SelectValue placeholder="Select company size" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-popover text-popover-foreground border-border">
+                            <SelectItem value="startup">Startup (1-10 employees)</SelectItem>
+                            <SelectItem value="small">Small (11-50 employees)</SelectItem>
+                            <SelectItem value="medium">Medium (51-250 employees)</SelectItem>
+                            <SelectItem value="large">Large (251-1000 employees)</SelectItem>
+                            <SelectItem value="enterprise">Enterprise (1000+ employees)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Size of the client organization
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="City, Country" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Geographic location of the client
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client Website</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="https://client.com" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Client's official website
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="clientInfo.isPublic"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Public Client
+                        </FormLabel>
+                        <FormDescription>
+                          Can the client information be displayed publicly?
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              
+              {/* Project Metrics Section */}
+              <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
+                <h3 className="text-lg font-semibold">Project Metrics & Impact</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="metrics.usersReached"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Users Reached</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            placeholder="10000" 
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Number of users who benefited from this project
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="metrics.performanceImprovement"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Performance Improvement</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="50% faster loading times" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Measurable performance improvements achieved
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="metrics.revenueImpact"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Revenue Impact</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="$100K+ annual savings" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Financial impact or revenue generated
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="metrics.uptime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>System Uptime</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="99.9%" 
+                            {...field} 
+                            className="bg-background text-foreground border-input"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          System availability and reliability metrics
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">

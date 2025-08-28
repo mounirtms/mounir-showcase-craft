@@ -24,7 +24,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route 
-                  path="/myadmin" 
+                  path="/admin/*" 
                   element={
                     <ErrorBoundary>
                       <Admin />
