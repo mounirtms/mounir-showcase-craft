@@ -26,20 +26,14 @@ export {
 export {
   Parallax,
   StaggeredAnimation,
-  useSmoothScroll,
-  useScrollSpy,
-  useInView,
-  smoothScrollTo
+ 
 } from "./AnimationLibrary";
 
 export { default as ScrollAnimationsDemo } from "./ScrollAnimationsDemo";
 export type {
   ScrollAnimationConfig as OriginalScrollAnimationConfig,
-  ParallaxConfig as OriginalParallaxConfig,
   ScrollAnimationProps as OriginalScrollAnimationProps,
-  ParallaxProps as OriginalParallaxProps,
-  StaggeredAnimationProps as OriginalStaggeredAnimationProps,
-  ScrollProgressProps
+
 } from "./ScrollAnimations";
 
 // Task 16: Portfolio Identity Components

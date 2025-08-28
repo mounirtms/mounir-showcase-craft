@@ -29,57 +29,89 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>('light');
+  const [theme, setTheme] = React.useState<Theme>(() => {
+    if (typeof window === 'undefined') return defaultTheme;
+    
+    try {
+      const storedTheme = localStorage.getItem(storageKey);
+      return storedTheme ? (storedTheme as Theme) : defaultTheme;
+    } catch {
+      return defaultTheme;
+    }
+  });
 
   const [actualTheme, setActualTheme] = React.useState<"dark" | "light">("light");
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const root = window.document.documentElement
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
 
-    root.classList.remove("light", "dark")
+    let resolvedTheme: "dark" | "light" = "light";
+    
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      resolvedTheme = systemTheme;
+    } else {
+      resolvedTheme = theme;
+    }
 
-    const resolvedTheme: "dark" | "light" = "light"
-    root.classList.add("light")
-
-    setActualTheme(resolvedTheme)
+    root.classList.add(resolvedTheme);
+    setActualTheme(resolvedTheme);
 
     // Add theme-specific CSS variables
-    root.style.setProperty('--theme-transition', 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)')
+    root.style.setProperty('--theme-transition', 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)');
     
     if (resolvedTheme === 'dark') {
-      root.style.setProperty('--glass-bg', 'rgba(15, 23, 42, 0.7)')
-      root.style.setProperty('--glass-border', 'rgba(148, 163, 184, 0.1)')
-      root.style.setProperty('--glow-color', 'rgba(139, 92, 246, 0.3)')
-      root.style.setProperty('--gradient-start', '#0f172a')
-      root.style.setProperty('--gradient-end', '#1e293b')
-      root.style.setProperty('--card-bg', 'rgba(30, 41, 59, 0.8)')
+      root.style.setProperty('--glass-bg', 'rgba(15, 23, 42, 0.7)');
+      root.style.setProperty('--glass-border', 'rgba(148, 163, 184, 0.1)');
+      root.style.setProperty('--glow-color', 'rgba(139, 92, 246, 0.3)');
+      root.style.setProperty('--gradient-start', '#0f172a');
+      root.style.setProperty('--gradient-end', '#1e293b');
+      root.style.setProperty('--card-bg', 'rgba(30, 41, 59, 0.8)');
       
       // Admin dashboard specific variables
-      root.style.setProperty('--admin-bg', '#0f172a')
-      root.style.setProperty('--admin-card-bg', 'rgba(30, 41, 59, 0.8)')
-      root.style.setProperty('--admin-border', 'rgba(148, 163, 184, 0.1)')
-      root.style.setProperty('--admin-text', '#f1f5f9')
-      root.style.setProperty('--admin-text-muted', '#94a3b8')
+      root.style.setProperty('--admin-bg', '#0f172a');
+      root.style.setProperty('--admin-card-bg', 'rgba(30, 41, 59, 0.8)');
+      root.style.setProperty('--admin-border', 'rgba(148, 163, 184, 0.1)');
+      root.style.setProperty('--admin-text', '#f1f5f9');
+      root.style.setProperty('--admin-text-muted', '#94a3b8');
     } else {
-      root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.7)')
-      root.style.setProperty('--glass-border', 'rgba(15, 23, 42, 0.1)')
-      root.style.setProperty('--glow-color', 'rgba(139, 92, 246, 0.2)')
-      root.style.setProperty('--gradient-start', '#ffffff')
-      root.style.setProperty('--gradient-end', '#f8fafc')
-      root.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.9)')
+      root.style.setProperty('--glass-bg', 'rgba(255, 255, 255, 0.7)');
+      root.style.setProperty('--glass-border', 'rgba(15, 23, 42, 0.1)');
+      root.style.setProperty('--glow-color', 'rgba(139, 92, 246, 0.2)');
+      root.style.setProperty('--gradient-start', '#ffffff');
+      root.style.setProperty('--gradient-end', '#f8fafc');
+      root.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.9)');
       
       // Admin dashboard specific variables
-      root.style.setProperty('--admin-bg', '#f8fafc')
-      root.style.setProperty('--admin-card-bg', 'rgba(255, 255, 255, 0.9)')
-      root.style.setProperty('--admin-border', 'rgba(15, 23, 42, 0.1)')
-      root.style.setProperty('--admin-text', '#0f172a')
-      root.style.setProperty('--admin-text-muted', '#64748b')
+      root.style.setProperty('--admin-bg', '#f8fafc');
+      root.style.setProperty('--admin-card-bg', 'rgba(255, 255, 255, 0.9)');
+      root.style.setProperty('--admin-border', 'rgba(15, 23, 42, 0.1)');
+      root.style.setProperty('--admin-text', '#0f172a');
+      root.style.setProperty('--admin-text-muted', '#64748b');
     }
-  }, [theme])
+  }, [theme]);
 
-  // Removed dark theme listener to force light theme only
+  // Listen for system theme changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = () => {
+      if (theme === "system") {
+        const newTheme = mediaQuery.matches ? "dark" : "light";
+        setActualTheme(newTheme);
+        window.document.documentElement.classList.remove("light", "dark");
+        window.document.documentElement.classList.add(newTheme);
+      }
+    };
+    
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [theme]);
 
   const value = {
     theme,

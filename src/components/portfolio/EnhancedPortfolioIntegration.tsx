@@ -9,16 +9,13 @@ import {
   ScrollAnimation,
   Parallax,
   StaggeredAnimation,
-  ScrollProgress,
   ProfessionalAvatar,
   DynamicTypingEffect,
-  TestimonialsCarousel,
   InteractiveTimeline,
   ContactForm,
   ThemeToggle,
   type Skill,
   type Project,
-  type Testimonial,
   type TimelineItem
 } from "./index";
 import { 
@@ -299,7 +296,6 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
     { id: "skills", label: "Skills", icon: <Zap className="w-4 h-4" /> },
     { id: "projects", label: "Projects", icon: <Monitor className="w-4 h-4" /> },
     { id: "experience", label: "Experience", icon: <Clock className="w-4 h-4" /> },
-    ...(adminSettings.showTestimonials ? [{ id: "testimonials", label: "Testimonials", icon: <Heart className="w-4 h-4" /> }] : []),
     ...(adminSettings.showContactForm ? [{ id: "contact", label: "Contact", icon: <Mail className="w-4 h-4" /> }] : [])
   ];
 
@@ -317,7 +313,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
 
       {/* Hero Section with Parallax */}
       <ScrollAnimation animation="fadeIn">
-        <Parallax speed={0.5}>
+        <Parallax config={{ speed: 0.5 }}>
           <HeroSection 
             name={config.hero.name}
             title={config.hero.titles[currentTitleIndex]}
@@ -339,7 +335,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       </ScrollAnimation>
 
       {/* Skills Section */}
-      <section id="skills" className="py-16 sm:py-24 relative">
+      <section id="skills" className="py-16 sm:py-24 relative" ref={el => sectionsRef.current.skills = el}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <ScrollAnimation animation="slideInUp">
             <div className="text-center mb-12 sm:mb-16">
@@ -354,8 +350,11 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
 
           <SkillVisualization 
             categories={config.skills.categories}
-            layout="circles"
-            defaultCategory="Frontend"
+            layout="grid"
+            defaultCategory={null}
+            showCategories={true}
+            showFilters={true}
+            showSearch={true}
             className="mb-16"
           />
 
@@ -402,7 +401,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
               <h3 className="text-xl sm:text-2xl font-bold font-heading">Key Achievements</h3>
               <div className="space-y-4">
                 {config.experience.achievements.map((achievement, index) => (
-                  <ScrollAnimation key={index} animation="fadeIn" delay={index * 100}>
+                  <ScrollAnimation key={index} animation="fadeIn" config={{ delay: index * 100 }}>
                     <div className="glass-card p-4 sm:p-5 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300">
                       <div className="flex items-start gap-3">
                         <div className="mt-1 text-primary">
@@ -455,29 +454,10 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
         </div>
       </section>
 
-      {/* Testimonials */}
-      {adminSettings.showTestimonials && (
-        <section className="py-16 sm:py-24 bg-gradient-to-br from-card/30 via-card/50 to-card/30 backdrop-blur-sm border-y border-border/50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <ScrollAnimation animation="slideInUp">
-              <div className="text-center mb-12 sm:mb-16">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
-                  Client Testimonials
-                </h2>
-                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
-                  What industry leaders say about working with me
-                </p>
-              </div>
-            </ScrollAnimation>
-
-            <TestimonialsCarousel testimonials={config.testimonials} />
-          </div>
-        </section>
-      )}
 
       {/* Contact Section */}
       {adminSettings.showContactForm && (
-        <section id="contact" className="py-16 sm:py-24 relative">
+        <section id="contact" className="py-12 sm:py-16 relative">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <ScrollAnimation animation="slideInUp">
               <div className="text-center mb-12 sm:mb-16">

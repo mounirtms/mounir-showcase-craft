@@ -276,9 +276,9 @@ const SkillCard: React.FC<{
     >
       <Card
         className={cn(
-          "transition-all duration-300 hover:shadow-lg",
+          "transition-all duration-300 hover:shadow-lg border-border/50",
           enableClick && "cursor-pointer",
-          isHovered && "shadow-xl",
+          isHovered && enableHover && "shadow-xl border-primary/30 transform scale-[1.01]",
           layout === "list" && "flex items-center"
         )}
         onMouseEnter={handleMouseEnter}
@@ -307,36 +307,36 @@ const SkillCard: React.FC<{
               layout === "grid" && "text-center",
               layout === "list" && "flex-1"
             )}>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 justify-center md:justify-start">
                 {category.icon}
                 <h3 className="font-semibold">{skill.name}</h3>
                 {skill.trending && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="px-1.5 py-0.5">
                     <TrendingUp className="w-3 h-3 mr-1" />
-                    Trending
+                    <span className="text-xs">Trending</span>
                   </Badge>
                 )}
               </div>
               
-              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-2 text-center md:text-left">
                 {skill.description}
               </p>
               
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground justify-center md:justify-start">
                 <div className="flex items-center gap-1">
                   <Zap className="w-3 h-3" />
                   <span>{skill.experience}</span>
                 </div>
                 
                 {skill.projects && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5">
                     {skill.projects} projects
                   </Badge>
                 )}
               </div>
               
               {skill.certifications && skill.certifications.length > 0 && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 justify-center md:justify-start">
                   <Trophy className="w-3 h-3" />
                   <span>{skill.certifications.length} cert{skill.certifications.length > 1 ? 's' : ''}</span>
                 </div>
@@ -357,23 +357,24 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
   showCategories = true,
   showFilters = true,
   showSearch = true,
-  defaultCategory = "Frontend",
+  defaultCategory = null,
   layout = "grid",
   sortBy: initialSortBy = "level",
   sortOrder: initialSortOrder = "desc",
   animationDuration = 1000,
   enableClick = false,
-  enableHover = false, // Added missing prop with default value
-  onSkillClick, // Added missing prop
-  onSkillHover // Added missing prop
+  enableHover = true,
+  onSkillClick,
+  onSkillHover
 }) => {
   // Handle either skills array or categories array
   const allSkills = externalCategories ? externalCategories.flatMap(cat => cat.skills) : externalSkills || [];
   const [filteredSkills, setFilteredSkills] = useState(allSkills);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(defaultCategory);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentSort, setCurrentSort] = useState({ by: initialSortBy, order: initialSortOrder });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Filter and sort skills
   useEffect(() => {
@@ -388,7 +389,8 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
     if (searchTerm) {
       filtered = filtered.filter(skill => 
         skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (skill.description && skill.description.toLowerCase().includes(searchTerm.toLowerCase()))
+        (skill.description && skill.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        skill.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -433,12 +435,14 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
   // Get unique categories
   const skillCategories = Array.from(new Set(allSkills.map(skill => skill.category)));
 
-  // Set default category to frontend if available
+  // Set default category to frontend if available and no default is set
   useEffect(() => {
-    if (defaultCategory && skillCategories.includes(defaultCategory as any)) {
+    if (defaultCategory === null && skillCategories.length > 0) {
+      // Default to frontend category if it exists, otherwise first category
+      const frontendCategory = skillCategories.find(cat => cat === "frontend");
+      setSelectedCategory(frontendCategory || skillCategories[0]);
+    } else if (defaultCategory && skillCategories.includes(defaultCategory as any)) {
       setSelectedCategory(defaultCategory);
-    } else if (skillCategories.length > 0) {
-      setSelectedCategory(skillCategories[0]);
     }
   }, [defaultCategory, skillCategories]);
 
@@ -532,7 +536,9 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
       {/* Skills Grid */}
       <div className={cn(
         layoutClasses[layout],
-        "transition-all duration-500 ease-out"
+        "transition-all duration-500 ease-out",
+        showMobileFilters ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden",
+        "md:max-h-screen md:opacity-100 md:overflow-visible"
       )}>
         <AnimatePresence>
           {filteredSkills.length > 0 ? (
@@ -586,12 +592,25 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
       </div>
 
       {/* Stats Summary */}
-      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-        <span>{filteredSkills.length} skills shown</span>
-        <span>•</span>
-        <span>Average level: {Math.round(filteredSkills.reduce((sum, skill) => sum + skill.level, 0) / filteredSkills.length)}%</span>
-        <span>•</span>
-        <span>{skillCategories.length} categories</span>
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground border-t pt-4 mt-6">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="rounded-full">
+            {filteredSkills.length}
+          </Badge>
+          <span>Skills shown</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="rounded-full">
+            {Math.round(filteredSkills.reduce((sum, skill) => sum + skill.level, 0) / filteredSkills.length)}%
+          </Badge>
+          <span>Average proficiency</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="rounded-full">
+            {skillCategories.length}
+          </Badge>
+          <span>Categories</span>
+        </div>
       </div>
     </div>
   );

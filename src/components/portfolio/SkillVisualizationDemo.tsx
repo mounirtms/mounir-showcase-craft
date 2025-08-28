@@ -374,40 +374,40 @@ const Sidebar: React.FC<{
 
 // Demo component
 export const SkillVisualizationDemo: React.FC = () => {
-  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list" | "circles">("grid");
+  const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
 
-  const stats = useMemo(() => ({
-    totalSkills: SAMPLE_SKILLS.length,
-    averageLevel: Math.round(SAMPLE_SKILLS.reduce((sum, skill) => sum + skill.level, 0) / SAMPLE_SKILLS.length),
-    expertSkills: SAMPLE_SKILLS.filter(skill => skill.level >= 90).length,
-    trendingSkills: SAMPLE_SKILLS.filter(skill => skill.trending).length,
-    totalProjects: SAMPLE_SKILLS.reduce((sum, skill) => sum + (skill.projects || 0), 0),
-    totalCertifications: SAMPLE_SKILLS.reduce((sum, skill) => sum + (skill.certifications?.length || 0), 0)
-  }), []);
+  const handleSkillClick = (skill: Skill) => {
+    setSelectedSkill(skill);
+  };
+
+  const handleSkillHover = (skill: Skill) => {
+    setHoveredSkill(skill);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <DemoHeader />
-        <Statistics stats={stats} />
-        <LayoutControls currentLayout={currentLayout} setCurrentLayout={setCurrentLayout} />
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          <div className="xl:col-span-3">
-            <MainContent 
-              currentLayout={currentLayout} 
-              handleSkillClick={setSelectedSkill} 
-              handleSkillHover={setHoveredSkill} 
-            />
-          </div>
-          <Sidebar 
-            hoveredSkill={hoveredSkill} 
-            selectedSkill={selectedSkill} 
-            setSelectedSkill={setSelectedSkill} 
-          />
-        </div>
+    <div className="space-y-6">
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl font-bold tracking-tight">Skills Showcase</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Explore my technical expertise across various domains and technologies
+        </p>
       </div>
+
+      {/* Performance Note: The 'circles' layout can be performance-intensive with a large number of skills. */}
+      <SkillVisualization
+        skills={SAMPLE_SKILLS}
+        layout={currentLayout}
+        showCategories={true}
+        showFilters={true}
+        showSearch={true}
+        enableHover={true}
+        enableClick={true}
+        onSkillClick={handleSkillClick}
+        onSkillHover={handleSkillHover}
+        animationDuration={500}
+      />
     </div>
   );
 };
