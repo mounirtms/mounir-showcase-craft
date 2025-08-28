@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor } from "lucide-react"
+import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,7 +9,12 @@ import {
 import { useTheme } from "./theme-provider"
 
 export function ThemeToggle() {
-  const { setTheme, theme, actualTheme } = useTheme()
+  const { setTheme, theme } = useTheme()
+
+  // Always use light theme as requested
+  const toggleTheme = () => {
+    setTheme("light")
+  }
 
   return (
     <DropdownMenu>
@@ -20,16 +25,8 @@ export function ThemeToggle() {
           className="relative h-9 w-9 px-0 hover:bg-primary/10 transition-all duration-300 group border border-border/50 hover:border-primary/30"
         >
           <div className="relative">
-            <Sun className={`h-[1.2rem] w-[1.2rem] transition-all duration-500 text-amber-500 ${
-              actualTheme === 'dark' 
-                ? 'rotate-90 scale-0 opacity-0' 
-                : 'rotate-0 scale-100 opacity-100'
-            }`} />
-            <Moon className={`absolute inset-0 h-[1.2rem] w-[1.2rem] transition-all duration-500 text-blue-400 ${
-              actualTheme === 'dark' 
-                ? 'rotate-0 scale-100 opacity-100' 
-                : '-rotate-90 scale-0 opacity-0'
-            }`} />
+            <Sun className={`h-[1.2rem] w-[1.2rem] transition-all duration-500 text-amber-500 rotate-0 scale-100 opacity-100`} />
+            <Moon className={`absolute inset-0 h-[1.2rem] w-[1.2rem] transition-all duration-500 text-blue-400 -rotate-90 scale-0 opacity-0`} />
           </div>
           <span className="sr-only">Toggle theme</span>
           
@@ -39,7 +36,7 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-48 border border-border/50 bg-background/95 backdrop-blur-md shadow-xl"
+        className="w-32 sm:w-48 border border-border/50 bg-background/95 backdrop-blur-md shadow-xl"
       >
         <DropdownMenuItem 
           onClick={() => setTheme("light")}
@@ -49,24 +46,6 @@ export function ThemeToggle() {
         >
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setTheme("dark")}
-          className={`cursor-pointer transition-all duration-200 ${
-            theme === 'dark' ? 'bg-accent/50' : ''
-          }`}
-        >
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setTheme("system")}
-          className={`cursor-pointer transition-all duration-200 ${
-            theme === 'system' ? 'bg-accent/50' : ''
-          }`}
-        >
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>System</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

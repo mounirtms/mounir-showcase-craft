@@ -20,16 +20,18 @@ export type {
 
 export {
   ScrollAnimation,
+  useScrollAnimation
+} from "./ScrollAnimations";
+
+export {
   Parallax,
   StaggeredAnimation,
-  ScrollProgress,
-  useScrollAnimation,
-  useParallax,
   useSmoothScroll,
   useScrollSpy,
   useInView,
   smoothScrollTo
-} from "./ScrollAnimations";
+} from "./AnimationLibrary";
+
 export { default as ScrollAnimationsDemo } from "./ScrollAnimationsDemo";
 export type {
   ScrollAnimationConfig as OriginalScrollAnimationConfig,

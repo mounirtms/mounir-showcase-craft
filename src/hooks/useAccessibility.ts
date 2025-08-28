@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useId } from "react";
 
 // ARIA utilities
 export interface AriaProps {
@@ -65,7 +65,11 @@ export const useFocusManagement = () => {
     }
   }, []);
 
-  // Trap focus within container
+  /**
+   * Traps focus within a given container.
+   * @param container The container element to trap focus within.
+   * @returns A cleanup function to remove the event listener.
+   */
   const trapFocus = useCallback((container: HTMLElement) => {
     trapContainerRef.current = container;
 
@@ -110,13 +114,14 @@ export const useFocusManagement = () => {
 // Get focusable elements
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
   const selector = [
-    'button:not([disabled]):not([tabindex="-1"])',
-    'input:not([disabled]):not([tabindex="-1"])',
-    'select:not([disabled]):not([tabindex="-1"])',
-    'textarea:not([disabled]):not([tabindex="-1"])',
-    'a[href]:not([tabindex="-1"])',
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
     '[tabindex]:not([tabindex="-1"])',
-    '[contenteditable]:not([tabindex="-1"])'
+    'details',
+    '[contenteditable="true"]'
   ].join(",");
 
   return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
@@ -197,8 +202,8 @@ export const useKeyboardNavigation = (options: {
 
 // Screen reader announcements hook
 export const useScreenReader = () => {
-  const [announcements, setAnnouncements] = useState<string[]>([]);
-  const liveRegionRef = useRef<HTMLElement | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const liveRegionRef = useRef<HTMLDivElement | null>(null);
 
   // Create live region for announcements
   useEffect(() => {
@@ -206,18 +211,6 @@ export const useScreenReader = () => {
     liveRegion.setAttribute("aria-live", "polite");
     liveRegion.setAttribute("aria-atomic", "true");
     liveRegion.className = "sr-only";
-    liveRegion.style.cssText = `
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
-    `;
-    
     document.body.appendChild(liveRegion);
     liveRegionRef.current = liveRegion;
 
@@ -228,20 +221,17 @@ export const useScreenReader = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = announcement;
+    }
+  }, [announcement]);
+
   const announce = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
     if (!liveRegionRef.current || !message.trim()) return;
 
     liveRegionRef.current.setAttribute("aria-live", priority);
-    liveRegionRef.current.textContent = message;
-
-    setAnnouncements(prev => [...prev, message]);
-
-    // Clear after announcement
-    setTimeout(() => {
-      if (liveRegionRef.current) {
-        liveRegionRef.current.textContent = "";
-      }
-    }, 1000);
+    setAnnouncement(message);
   }, []);
 
   const announceError = useCallback((message: string) => {
@@ -261,15 +251,15 @@ export const useScreenReader = () => {
     announceError,
     announceSuccess,
     announceLoading,
-    announcements
   };
 };
 
 // ARIA utilities
 export const useAriaAttributes = () => {
+  const reactUseId = useId();
   const generateId = useCallback((prefix: string = "element") => {
-    return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
-  }, []);
+    return `${prefix}-${reactUseId}`;
+  }, [reactUseId]);
 
   const createAriaProps = useCallback((config: {
     label?: string;
@@ -408,6 +398,43 @@ export const useColorScheme = () => {
   return colorScheme;
 };
 
+export const useRovingTabIndex = (containerRef: React.RefObject<HTMLElement>) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!containerRef.current) return;
+      const focusableElements = getFocusableElements(containerRef.current);
+      if (focusableElements.length === 0) return;
+
+      let newIndex = activeIndex;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        newIndex = (activeIndex + 1) % focusableElements.length;
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        newIndex = (activeIndex - 1 + focusableElements.length) % focusableElements.length;
+      }
+
+      if (newIndex !== activeIndex) {
+        event.preventDefault();
+        focusableElements[newIndex].focus();
+        setActiveIndex(newIndex);
+      }
+    },
+    [activeIndex, containerRef]
+  );
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const focusableElements = getFocusableElements(containerRef.current);
+    focusableElements.forEach((element, index) => {
+      element.tabIndex = index === activeIndex ? 0 : -1;
+    });
+  }, [activeIndex, containerRef]);
+
+  return { activeIndex, handleKeyDown };
+};
+
+
 export default {
   useFocusManagement,
   useKeyboardNavigation,
@@ -416,5 +443,6 @@ export default {
   useSkipLinks,
   useReducedMotion,
   useHighContrast,
-  useColorScheme
+  useColorScheme,
+  useRovingTabIndex,
 };

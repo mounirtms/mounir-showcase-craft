@@ -58,104 +58,100 @@ export function useSkills() {
     };
   }, []);
 
-  useEffect(() => {
+  const setupFirebaseListener = useCallback(() => {
     let unsubscribe: (() => void) | undefined;
     let retryTimeout: NodeJS.Timeout;
     let retryCount = 0;
     const maxRetries = 3;
     const retryDelay = 2000; // 2 seconds
 
-    const setupFirebaseListener = () => {
-      // Use local data when Firebase is not enabled (development mode) or offline
-      if (!isFirebaseEnabled || !db || !isOnline) {
-        console.log('Using local skills data - Firebase disabled or offline');
-        const localSkills: Skill[] = initialSkills.map((skill, index) => ({
-          id: `local-skill-${index}`,
-          ...skill
-        }));
-        setSkills(localSkills);
-        setLoading(false);
-        setError(null);
-        return;
-      }
+    // Use local data when Firebase is not enabled (development mode) or offline
+    if (!isFirebaseEnabled || !db || !isOnline) {
+      console.log('Using local skills data - Firebase disabled or offline');
+      const localSkills: Skill[] = initialSkills.map((skill, index) => ({
+        id: `local-skill-${index}`,
+        ...skill
+      }));
+      setSkills(localSkills);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-      // Enhanced Firebase query with better error handling
-      try {
-        const q = query(
-          collection(db, SKILLS_COLLECTION),
-          where("disabled", "==", false),
-          orderBy("priority", "desc"),
-          orderBy("level", "desc")
-        );
+    // Enhanced Firebase query with better error handling
+    try {
+      const q = query(
+        collection(db, SKILLS_COLLECTION),
+        where("disabled", "==", false),
+        orderBy("priority", "desc"),
+        orderBy("level", "desc")
+      );
 
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            try {
-              const skillsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-              })) as Skill[];
-              
-              // Validate and sanitize data
-              const validSkills = skillsData.filter(skill => 
-                skill.name && skill.category && skill.level !== undefined
-              );
-              
-              setSkills(validSkills);
-              setLoading(false);
-              setError(null);
-              retryCount = 0; // Reset retry count on success
-              console.log(`✅ Loaded ${validSkills.length} skills from Firebase`);
-            } catch (processingError) {
-              console.error("Error processing Firebase data:", processingError);
-              setError("Error processing skill data");
-            }
-          },
-          (err) => {
-            console.error("Firebase listener error:", err);
-            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          try {
+            const skillsData = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            })) as Skill[];
             
-            // Implement retry logic for transient errors
-            if (retryCount < maxRetries && (
-              errorMessage.includes('network') || 
-              errorMessage.includes('timeout') ||
-              errorMessage.includes('unavailable')
-            )) {
-              retryCount++;
-              console.log(`🔄 Retrying Firebase connection (attempt ${retryCount}/${maxRetries})`);
-              retryTimeout = setTimeout(() => {
-                setupFirebaseListener();
-              }, retryDelay * retryCount); // Exponential backoff
-              return;
-            }
+            // Validate and sanitize data
+            const validSkills = skillsData.filter(skill => 
+              skill.name && skill.category && skill.level !== undefined
+            );
             
-            setError(`Failed to load skills: ${errorMessage}. Showing local data instead.`);
-            console.log('Falling back to local skills data due to Firebase error');
-            
-            // Fallback to local data on Firebase error
-            const localSkills: Skill[] = initialSkills.map((skill, index) => ({
-              id: `fallback-skill-${index}`,
-              ...skill
-            }));
-            setSkills(localSkills);
+            setSkills(validSkills);
             setLoading(false);
+            setError(null);
+            retryCount = 0; // Reset retry count on success
+            console.log(`✅ Loaded ${validSkills.length} skills from Firebase`);
+          } catch (processingError) {
+            console.error("Error processing Firebase data:", processingError);
+            setError("Error processing skill data");
           }
-        );
-      } catch (setupError) {
-        console.error("Error setting up Firebase listener:", setupError);
-        setError("Failed to initialize data connection");
-        // Fallback to local data
-        const localSkills: Skill[] = initialSkills.map((skill, index) => ({
-          id: `setup-fallback-skill-${index}`,
-          ...skill
-        }));
-        setSkills(localSkills);
-        setLoading(false);
-      }
-    };
-
-    setupFirebaseListener();
+        },
+        (err) => {
+          console.error("Firebase listener error:", err);
+          const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+          
+          // Implement retry logic for transient errors
+          if (retryCount < maxRetries && (
+            errorMessage.includes('network') || 
+            errorMessage.includes('timeout') ||
+            errorMessage.includes('unavailable')
+          )) {
+            retryCount++;
+            console.log(`🔄 Retrying Firebase connection (attempt ${retryCount}/${maxRetries})`);
+            retryTimeout = setTimeout(() => {
+              setupFirebaseListener();
+            }, retryDelay * retryCount); // Exponential backoff
+            return;
+          }
+          
+          setError(`Failed to load skills: ${errorMessage}. Showing local data instead.`);
+          console.log('Falling back to local skills data due to Firebase error');
+          
+          // Fallback to local data on Firebase error
+          const localSkills: Skill[] = initialSkills.map((skill, index) => ({
+            id: `fallback-skill-${index}`,
+            ...skill
+          }));
+          setSkills(localSkills);
+          setLoading(false);
+        }
+      );
+    } catch (setupError) {
+      console.error("Error setting up Firebase listener:", setupError);
+      setError("Failed to initialize data connection");
+      // Fallback to local data
+      const localSkills: Skill[] = initialSkills.map((skill, index) => ({
+        id: `setup-fallback-skill-${index}`,
+        ...skill
+      }));
+      setSkills(localSkills);
+      setLoading(false);
+    }
 
     return () => {
       if (unsubscribe) {
@@ -166,6 +162,11 @@ export function useSkills() {
       }
     };
   }, [isOnline]);
+
+  useEffect(() => {
+    const cleanup = setupFirebaseListener();
+    return cleanup;
+  }, [setupFirebaseListener]);
 
   const skillsByCategory = useMemo(() => {
     const grouped = skills.reduce((acc, skill) => {
@@ -294,6 +295,7 @@ export function useSkills() {
     updateSkill,
     deleteSkill,
     getStats,
-    isOnline
+    isOnline,
+    refetch: setupFirebaseListener,
   };
 }

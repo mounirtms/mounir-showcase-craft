@@ -135,104 +135,100 @@ export function useProjects() {
     };
   }, []);
 
-  useEffect(() => {
+  const setupFirebaseListener = useCallback(() => {
     let unsubscribe: (() => void) | undefined;
     let retryTimeout: NodeJS.Timeout;
     let retryCount = 0;
     const maxRetries = 3;
     const retryDelay = 2000; // 2 seconds
 
-    const setupFirebaseListener = () => {
-      // Use local data when Firebase is not enabled (development mode) or offline
-      if (!isFirebaseEnabled || !db || !isOnline) {
-        console.log('Using local project data - Firebase disabled or offline');
-        const localProjects: Project[] = initialProjects.map((project, index) => ({
-          id: `local-${index}`,
-          ...project
-        }));
-        setProjects(localProjects);
-        setLoading(false);
-        setError(null);
-        return;
-      }
+    // Use local data when Firebase is not enabled (development mode) or offline
+    if (!isFirebaseEnabled || !db || !isOnline) {
+      console.log('Using local project data - Firebase disabled or offline');
+      const localProjects: Project[] = initialProjects.map((project, index) => ({
+        id: `local-${index}`,
+        ...project
+      }));
+      setProjects(localProjects);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-      // Enhanced Firebase query with better error handling
-      try {
-        const q = query(
-          collection(db, PROJECTS_COLLECTION),
-          where("disabled", "==", false),
-          orderBy("priority", "desc"),
-          orderBy("createdAt", "desc")
-        );
+    // Enhanced Firebase query with better error handling
+    try {
+      const q = query(
+        collection(db, PROJECTS_COLLECTION),
+        where("disabled", "==", false),
+        orderBy("priority", "desc"),
+        orderBy("createdAt", "desc")
+      );
 
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            try {
-              const projectsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-              })) as Project[];
-              
-              // Validate and sanitize data
-              const validProjects = projectsData.filter(project => 
-                project.title && project.description && project.category
-              );
-              
-              setProjects(validProjects);
-              setLoading(false);
-              setError(null);
-              retryCount = 0; // Reset retry count on success
-              console.log(`✅ Loaded ${validProjects.length} projects from Firebase`);
-            } catch (processingError) {
-              console.error("Error processing Firebase data:", processingError);
-              setError("Error processing project data");
-            }
-          },
-          (err) => {
-            console.error("Firebase listener error:", err);
-            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          try {
+            const projectsData = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            })) as Project[];
             
-            // Implement retry logic for transient errors
-            if (retryCount < maxRetries && (
-              errorMessage.includes('network') || 
-              errorMessage.includes('timeout') ||
-              errorMessage.includes('unavailable')
-            )) {
-              retryCount++;
-              console.log(`🔄 Retrying Firebase connection (attempt ${retryCount}/${maxRetries})`);
-              retryTimeout = setTimeout(() => {
-                setupFirebaseListener();
-              }, retryDelay * retryCount); // Exponential backoff
-              return;
-            }
+            // Validate and sanitize data
+            const validProjects = projectsData.filter(project => 
+              project.title && project.description && project.category
+            );
             
-            setError(`Failed to load projects: ${errorMessage}. Showing local data instead.`);
-            console.log('Falling back to local project data due to Firebase error');
-            
-            // Fallback to local data on Firebase error
-            const localProjects: Project[] = initialProjects.map((project, index) => ({
-              id: `fallback-${index}`,
-              ...project
-            }));
-            setProjects(localProjects);
+            setProjects(validProjects);
             setLoading(false);
+            setError(null);
+            retryCount = 0; // Reset retry count on success
+            console.log(`✅ Loaded ${validProjects.length} projects from Firebase`);
+          } catch (processingError) {
+            console.error("Error processing Firebase data:", processingError);
+            setError("Error processing project data");
           }
-        );
-      } catch (setupError) {
-        console.error("Error setting up Firebase listener:", setupError);
-        setError("Failed to initialize data connection");
-        // Fallback to local data
-        const localProjects: Project[] = initialProjects.map((project, index) => ({
-          id: `setup-fallback-${index}`,
-          ...project
-        }));
-        setProjects(localProjects);
-        setLoading(false);
-      }
-    };
-
-    setupFirebaseListener();
+        },
+        (err) => {
+          console.error("Firebase listener error:", err);
+          const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+          
+          // Implement retry logic for transient errors
+          if (retryCount < maxRetries && (
+            errorMessage.includes('network') || 
+            errorMessage.includes('timeout') ||
+            errorMessage.includes('unavailable')
+          )) {
+            retryCount++;
+            console.log(`🔄 Retrying Firebase connection (attempt ${retryCount}/${maxRetries})`);
+            retryTimeout = setTimeout(() => {
+              setupFirebaseListener();
+            }, retryDelay * retryCount); // Exponential backoff
+            return;
+          }
+          
+          setError(`Failed to load projects: ${errorMessage}. Showing local data instead.`);
+          console.log('Falling back to local project data due to Firebase error');
+          
+          // Fallback to local data on Firebase error
+          const localProjects: Project[] = initialProjects.map((project, index) => ({
+            id: `fallback-${index}`,
+            ...project
+          }));
+          setProjects(localProjects);
+          setLoading(false);
+        }
+      );
+    } catch (setupError) {
+      console.error("Error setting up Firebase listener:", setupError);
+      setError("Failed to initialize data connection");
+      // Fallback to local data
+      const localProjects: Project[] = initialProjects.map((project, index) => ({
+        id: `setup-fallback-${index}`,
+        ...project
+      }));
+      setProjects(localProjects);
+      setLoading(false);
+    }
 
     return () => {
       if (unsubscribe) {
@@ -243,6 +239,11 @@ export function useProjects() {
       }
     };
   }, [isOnline]);
+
+  useEffect(() => {
+    const cleanup = setupFirebaseListener();
+    return cleanup;
+  }, [setupFirebaseListener]);
 
   const featured = useMemo(() => 
     projects.filter(project => project.featured && !project.disabled)
@@ -350,6 +351,7 @@ export function useProjects() {
     addProject,
     updateProject,
     deleteProject,
-    isOnline
+    isOnline,
+    refetch: setupFirebaseListener,
   };
 }

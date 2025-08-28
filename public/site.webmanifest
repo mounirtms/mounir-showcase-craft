@@ -28,13 +28,13 @@
   ],
   "icons": [
     {
-      "src": "/mounir-icon-simple.svg",
+      "src": "/mounir-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/mounir-icon-simple.svg",
+      "src": "/mounir-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -81,7 +81,7 @@
       "description": "View my latest projects",
       "icons": [
         {
-          "src": "/mounir-icon-simple.svg",
+          "src": "/mounir-icon.svg",
           "sizes": "96x96",
           "type": "image/svg+xml"
         }
@@ -93,7 +93,7 @@
       "description": "Get in touch",
       "icons": [
         {
-          "src": "/mounir-icon-simple.svg",
+          "src": "/mounir-icon.svg",
           "sizes": "96x96",
           "type": "image/svg+xml"
         }
@@ -105,7 +105,7 @@
       "description": "Download my resume",
       "icons": [
         {
-          "src": "/mounir-icon-simple.svg",
+          "src": "/mounir-icon.svg",
           "sizes": "96x96",
           "type": "image/svg+xml"
         }

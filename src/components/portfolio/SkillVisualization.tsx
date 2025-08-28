@@ -14,10 +14,13 @@ import {
   Globe,
   Filter,
   Search,
-  SortAsc
+  SortAsc,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useAccessibility";
+import { motion, AnimatePresence } from "framer-motion";
+import { trackButtonClick } from "@/utils/analytics";
 
 // Skill data interface
 export interface Skill {
@@ -34,21 +37,28 @@ export interface Skill {
   color?: string;
 }
 
+// Category data interface
+interface SkillCategory {
+  name: string;
+  skills: Skill[];
+  icon: React.ReactNode;
+  color: string;
+}
+
 // Component props
 export interface SkillVisualizationProps {
-  skills: Skill[];
+  skills?: Skill[];
+  categories?: SkillCategory[];
   className?: string;
   showCategories?: boolean;
   showFilters?: boolean;
   showSearch?: boolean;
+  defaultCategory?: string | null;
   layout?: "grid" | "list" | "circles";
+  sortBy?: typeof sortBy;
+  sortOrder?: typeof sortOrder;
   animationDuration?: number;
-  enableHover?: boolean;
   enableClick?: boolean;
-  onSkillClick?: (skill: Skill) => void;
-  onSkillHover?: (skill: Skill | null) => void;
-  sortBy?: "level" | "name" | "experience" | "projects";
-  sortOrder?: "asc" | "desc";
 }
 
 // Category configuration
@@ -214,196 +224,135 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
 };
 
 // Individual skill card component
-interface SkillCardProps {
+const SkillCard: React.FC<{
   skill: Skill;
+  category: typeof CATEGORY_CONFIG.frontend;
   layout: "grid" | "list" | "circles";
-  enableHover: boolean;
-  enableClick: boolean;
-  onSkillClick?: (skill: Skill) => void;
-  onSkillHover?: (skill: Skill | null) => void;
   animationDuration: number;
-}
-
-const SkillCard: React.FC<SkillCardProps> = ({
-  skill,
-  layout,
-  enableHover,
-  enableClick,
-  onSkillClick,
-  onSkillHover,
-  animationDuration
-}) => {
+  enableClick: boolean;
+}> = ({ skill, category, layout, animationDuration, enableClick }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const category = CATEGORY_CONFIG[skill.category];
+  const reducedMotion = useReducedMotion();
 
-  const handleMouseEnter = () => {
-    if (enableHover) {
-      setIsHovered(true);
-      onSkillHover?.(skill);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (enableHover) {
-      setIsHovered(false);
-      onSkillHover?.(null);
-    }
-  };
-
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
   const handleClick = () => {
     if (enableClick) {
-      onSkillClick?.(skill);
+      // Handle click event if needed
+      trackButtonClick('skill_card_click', { skill: skill.name });
     }
   };
 
-  if (layout === "circles") {
-    return (
-      <div 
+  return (
+    <motion.div
+      whileHover={{ 
+        y: reducedMotion ? 0 : -5,
+        scale: reducedMotion ? 1 : 1.03
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+    >
+      <Card
         className={cn(
-          "relative group cursor-pointer transition-all duration-300",
-          isHovered && "scale-110 z-10"
+          "transition-all duration-300 hover:shadow-lg",
+          enableClick && "cursor-pointer",
+          isHovered && "shadow-xl",
+          layout === "list" && "flex items-center"
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
       >
-        <div className="flex flex-col items-center space-y-2">
-          <ProgressRing
-            progress={skill.level}
-            color={skill.color || SKILL_COLORS[skill.id] || category.color.replace('bg-', '#')}
-            animated={true}
-            duration={animationDuration}
-            size={100}
-            className="drop-shadow-lg"
-          />
-          
-          <div className="text-center">
-            <h3 className="font-semibold text-sm font-heading">{skill.name}</h3>
-            <p className="text-xs text-muted-foreground font-sans">{skill.experience}</p>
-          </div>
-          
-          {skill.trending && (
-            <Badge variant="secondary" className="absolute -top-2 -right-2">
-              <TrendingUp className="w-3 h-3" />
-            </Badge>
-          )}
-        </div>
-        
-        {/* Hover tooltip */}
-        {isHovered && skill.description && (
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg border whitespace-nowrap z-20">
-            {skill.description}
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-popover"></div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <Card
-      className={cn(
-        "transition-all duration-300 hover:shadow-lg",
-        enableClick && "cursor-pointer",
-        isHovered && "shadow-xl scale-[1.02]",
-        layout === "list" && "flex items-center"
-      )}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-    >
-      <CardContent className={cn(
-        "p-4",
-        layout === "list" && "flex items-center space-x-4 w-full"
-      )}>
-        <div className={cn(
-          layout === "grid" && "flex flex-col items-center space-y-4",
-          layout === "list" && "flex items-center space-x-4 flex-1"
+        <CardContent className={cn(
+          "p-4",
+          layout === "list" && "flex items-center space-x-4 w-full"
         )}>
-          {/* Progress Ring */}
-          <ProgressRing
-            progress={skill.level}
-            color={skill.color || SKILL_COLORS[skill.id] || category.color.replace('bg-', '#')}
-            animated={true}
-            duration={animationDuration}
-            size={layout === "list" ? 60 : 80}
-          />
-          
-          {/* Skill Info */}
           <div className={cn(
-            layout === "grid" && "text-center",
-            layout === "list" && "flex-1"
+            layout === "grid" && "flex flex-col items-center space-y-4",
+            layout === "list" && "flex items-center space-x-4 flex-1"
           )}>
-            <div className="flex items-center gap-2 mb-1">
-              {category.icon}
-              <h3 className="font-semibold">{skill.name}</h3>
-              {skill.trending && (
-                <Badge variant="secondary">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Trending
-                </Badge>
-              )}
-            </div>
+            {/* Progress Ring */}
+            <ProgressRing
+              progress={skill.level}
+              color={skill.color || SKILL_COLORS[skill.id] || category.color.replace('bg-', '#')}
+              animated={true}
+              duration={animationDuration}
+              size={layout === "list" ? 60 : 80}
+            />
             
-            <p className="text-sm text-muted-foreground mb-2">{skill.experience}</p>
-            
-            {skill.description && (
-              <p className="text-xs text-muted-foreground mb-2">{skill.description}</p>
-            )}
-            
-            <div className="flex flex-wrap gap-1 mb-2">
-              <Badge 
-                variant="outline" 
-                className={cn(category.lightColor, "text-xs")}
-              >
-                {category.label}
-              </Badge>
-              
-              {skill.projects && (
-                <Badge variant="outline" className="text-xs">
-                  {skill.projects} projects
-                </Badge>
-              )}
-            </div>
-            
-            {skill.certifications && skill.certifications.length > 0 && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Trophy className="w-3 h-3" />
-                <span>{skill.certifications.length} cert{skill.certifications.length > 1 ? 's' : ''}</span>
+            {/* Skill Info */}
+            <div className={cn(
+              layout === "grid" && "text-center",
+              layout === "list" && "flex-1"
+            )}>
+              <div className="flex items-center gap-2 mb-1">
+                {category.icon}
+                <h3 className="font-semibold">{skill.name}</h3>
+                {skill.trending && (
+                  <Badge variant="secondary">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Trending
+                  </Badge>
+                )}
               </div>
-            )}
+              
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                {skill.description}
+              </p>
+              
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Zap className="w-3 h-3" />
+                  <span>{skill.experience}</span>
+                </div>
+                
+                {skill.projects && (
+                  <Badge variant="outline" className="text-xs">
+                    {skill.projects} projects
+                  </Badge>
+                )}
+              </div>
+              
+              {skill.certifications && skill.certifications.length > 0 && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <Trophy className="w-3 h-3" />
+                  <span>{skill.certifications.length} cert{skill.certifications.length > 1 ? 's' : ''}</span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
 // Main skill visualization component
-export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
-  skills,
+export const SkillVisualization: React.FC<SkillVisualizationProps> = ({ 
+  skills: externalSkills,
+  categories: externalCategories,
   className,
   showCategories = true,
   showFilters = true,
   showSearch = true,
+  defaultCategory = "Frontend",
   layout = "grid",
-  animationDuration = 2000,
-  enableHover = true,
-  enableClick = true,
-  onSkillClick,
-  onSkillHover,
-  sortBy = "level",
-  sortOrder = "desc"
+  sortBy: initialSortBy = "level",
+  sortOrder: initialSortOrder = "desc",
+  animationDuration = 1000,
+  enableClick = false
 }) => {
-  const [filteredSkills, setFilteredSkills] = useState(skills);
+  // Handle either skills array or categories array
+  const allSkills = externalCategories ? externalCategories.flatMap(cat => cat.skills) : externalSkills || [];
+  const [filteredSkills, setFilteredSkills] = useState(allSkills);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentSort, setCurrentSort] = useState({ by: sortBy, order: sortOrder });
+  const [currentSort, setCurrentSort] = useState({ by: initialSortBy, order: initialSortOrder });
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Filter and sort skills
   useEffect(() => {
-    let filtered = [...skills];
+    let filtered = [...allSkills];
 
     // Filter by category
     if (selectedCategory) {
@@ -412,39 +361,61 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(skill =>
+      filtered = filtered.filter(skill => 
         skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        skill.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        (skill.description && skill.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
     // Sort skills
     filtered.sort((a, b) => {
-      let comparison = 0;
+      let aValue, bValue;
       
       switch (currentSort.by) {
-        case "level":
-          comparison = a.level - b.level;
-          break;
         case "name":
-          comparison = a.name.localeCompare(b.name);
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
           break;
         case "experience":
-          comparison = parseInt(a.experience) - parseInt(b.experience);
+          aValue = a.experience;
+          bValue = b.experience;
           break;
         case "projects":
-          comparison = (a.projects || 0) - (b.projects || 0);
+          aValue = a.projects || 0;
+          bValue = b.projects || 0;
           break;
+        default: // level
+          aValue = a.level;
+          bValue = b.level;
       }
       
-      return currentSort.order === "desc" ? -comparison : comparison;
+      if (currentSort.order === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
     });
 
     setFilteredSkills(filtered);
-  }, [skills, selectedCategory, searchTerm, currentSort]);
+  }, [allSkills, selectedCategory, searchTerm, currentSort]);
+
+  // Reset filters
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory(null);
+  };
 
   // Get unique categories
-  const categories = Array.from(new Set(skills.map(skill => skill.category)));
+  const skillCategories = Array.from(new Set(allSkills.map(skill => skill.category)));
+
+  // Set default category to frontend if available
+  useEffect(() => {
+    if (defaultCategory && skillCategories.includes(defaultCategory.toLowerCase())) {
+      setSelectedCategory(defaultCategory.toLowerCase());
+    } else if (skillCategories.length > 0) {
+      setSelectedCategory(skillCategories[0]);
+    }
+  }, [defaultCategory, skillCategories]);
 
   // Layout classes
   const layoutClasses = {
@@ -484,8 +455,15 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
                   >
                     All Categories
                   </Button>
-                  {categories.map(category => {
-                    const config = CATEGORY_CONFIG[category];
+                  {skillCategories.map(category => {
+                    const categoryKey = category as keyof typeof CATEGORY_CONFIG;
+                    const config = CATEGORY_CONFIG[categoryKey] || {
+                      label: category,
+                      icon: <Filter className="w-4 h-4" />,
+                      color: "bg-gray-500",
+                      lightColor: "bg-gray-100"
+                    };
+                    
                     return (
                       <Button
                         key={category}
@@ -495,7 +473,7 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
                         className="gap-2"
                       >
                         {config.icon}
-                        {config.label}
+                        <span className="capitalize">{config.label}</span>
                       </Button>
                     );
                   })}
@@ -515,12 +493,10 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
                 >
                   <option value="level-desc">Level (High to Low)</option>
                   <option value="level-asc">Level (Low to High)</option>
-                  <option value="name-asc">Name (A to Z)</option>
-                  <option value="name-desc">Name (Z to A)</option>
-                  <option value="experience-desc">Experience (Most to Least)</option>
-                  <option value="experience-asc">Experience (Least to Most)</option>
-                  <option value="projects-desc">Projects (Most to Least)</option>
-                  <option value="projects-asc">Projects (Least to Most)</option>
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="name-desc">Name (Z-A)</option>
+                  <option value="experience-desc">Experience (High to Low)</option>
+                  <option value="experience-asc">Experience (Low to High)</option>
                 </select>
               </div>
             </div>
@@ -529,39 +505,62 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
       )}
 
       {/* Skills Grid */}
-      <div className={layoutClasses[layout]}>
-        {filteredSkills.map((skill) => (
-          <SkillCard
-            key={skill.id}
-            skill={skill}
-            layout={layout}
-            enableHover={enableHover}
-            enableClick={enableClick}
-            onSkillClick={onSkillClick}
-            onSkillHover={onSkillHover}
-            animationDuration={animationDuration}
-          />
-        ))}
+      <div className={cn(
+        layoutClasses[layout],
+        "transition-all duration-500 ease-out"
+      )}>
+        <AnimatePresence mode="wait">
+          {filteredSkills.length > 0 ? (
+            filteredSkills.map((skill, index) => (
+              <motion.div
+                key={`${skill.id}-${selectedCategory}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: "easeOut"
+                }}
+              >
+                <SkillCard 
+                  skill={skill} 
+                  layout={layout}
+                  enableHover={enableHover}
+                  enableClick={enableClick}
+                  onSkillClick={onSkillClick}
+                  onSkillHover={onSkillHover}
+                  animationDuration={animationDuration}
+                />
+              </motion.div>
+            ))
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="col-span-full text-center py-12"
+            >
+              <div className="text-muted-foreground">
+                No skills found matching your criteria
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Empty state */}
-      {filteredSkills.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-            <Search className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No skills found</h3>
-          <p className="text-muted-foreground mb-4">
-            Try adjusting your search terms or category filters.
-          </p>
+      {/* Reset Filters */}
+      {(searchTerm || selectedCategory !== null) && (
+        <div className="flex justify-center pt-4">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             onClick={() => {
               setSearchTerm("");
               setSelectedCategory(null);
             }}
+            className="gap-2"
           >
-            Clear Filters
+            <X className="w-4 h-4" />
+            Reset Filters
           </Button>
         </div>
       )}

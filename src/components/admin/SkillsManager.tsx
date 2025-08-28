@@ -3,7 +3,8 @@ import { toast } from "@/hooks/use-toast";
 import { useSkills, type Skill, type SkillCategory } from "@/hooks/useSkills";
 import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { DataTable, ActionColumn } from "@/components/ui/data-table";
+import { AdminDataTable } from "@/components/admin/AdminDataTable";
+import { createActionColumnDef } from "@/components/admin/ActionColumn";
 import { validateSkillUpdate } from "@/lib/validation-schemas";
 import { getSkillIcon, getSkillColor } from "@/lib/skill-icons";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -121,7 +122,7 @@ const formSchema = z.object({
 });
 
 export function SkillsManager() {
-  const { skills, loading, addSkill, updateSkill, deleteSkill } = useSkills();
+  const { skills, loading, addSkill, updateSkill, deleteSkill, refetch } = useSkills();
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
   const [skillToEdit, setSkillToEdit] = useState<Skill | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -208,6 +209,7 @@ export function SkillsManager() {
       resetForm();
       setIconUrl("");
       setIconPath("");
+      refetch();
     } catch (error) {
       console.error("Error saving skill:", error);
       let errorMessage = "Unknown error occurred";
@@ -291,6 +293,7 @@ export function SkillsManager() {
         description: `${skillToDelete.name} has been deleted successfully.`,
       });
       setSkillToDelete(null);
+      refetch();
     } catch (error) {
       console.error("Error deleting skill:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -300,7 +303,7 @@ export function SkillsManager() {
         variant: "destructive",
       });
     }
-  }, [skillToDelete, deleteSkill]);
+  }, [skillToDelete, deleteSkill, refetch]);
 
   // Handle bulk delete
   const handleBulkDelete = useCallback((skills: Skill[]) => {
@@ -343,6 +346,7 @@ export function SkillsManager() {
       
       setBulkDeleteOpen(false);
       setSkillsToDelete([]);
+      refetch();
     } catch (error) {
       console.error("Error deleting skills:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -352,7 +356,7 @@ export function SkillsManager() {
         variant: "destructive",
       });
     }
-  }, [skillsToDelete]);
+  }, [skillsToDelete, refetch]);
 
   // Columns definition
   const columns: ColumnDef<Skill>[] = [
@@ -412,28 +416,10 @@ export function SkillsManager() {
         <Badge variant="default" className="bg-green-500 hover:bg-green-600">Active</Badge>
       ),
     },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditSkill(row.original)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDeleteSkill(row.original)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
+    createActionColumnDef({
+      onEdit: handleEditSkill,
+      onDelete: handleDeleteSkill,
+    }),
   ];
 
   // Filter options
@@ -467,7 +453,7 @@ export function SkillsManager() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable
+          <AdminDataTable
             columns={columns}
             data={skills}
             loading={loading}
@@ -484,11 +470,8 @@ export function SkillsManager() {
                 options: statusOptions,
               },
             ]}
-            onRefresh={() => window.location.reload()}
-            onDelete={(items) => {
-              setSkillsToDelete(items);
-              setBulkDeleteOpen(true);
-            }}
+            onRefresh={refetch}
+            onDelete={handleBulkDelete}
             onAdd={() => setIsFormOpen(true)}
           />
         </CardContent>

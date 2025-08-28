@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Read the SVG content
-const svgPath = path.join(__dirname, 'public', 'mounir-icon-simple.svg');
+const svgPath = path.join(__dirname, 'public', 'mounir-icon.svg');
 const svgContent = fs.readFileSync(svgPath, 'utf8');
 
 // Create PNG placeholders (since we can't generate actual PNG files without additional libraries)

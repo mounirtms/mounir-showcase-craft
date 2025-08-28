@@ -25,6 +25,7 @@ import {
   Star
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackButtonClick, trackFormSubmit } from "@/utils/analytics";
 
 // Validation schemas
 interface ValidationRule {
@@ -491,6 +492,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     if (!validateAllFields()) {
       setSubmitStatus("error");
       setSubmitMessage("Please fix the errors above before submitting.");
+      trackFormSubmit('contact_form', { status: 'validation_error' });
       return;
     }
 
@@ -507,6 +509,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
       
       setSubmitStatus("success");
       setSubmitMessage("Thank you for your message! I'll get back to you within 24 hours.");
+      trackFormSubmit('contact_form', { status: 'success' });
       
       if (showSuccessMessage) {
         // Reset form after success
@@ -519,6 +522,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     } catch (error) {
       setSubmitStatus("error");
       setSubmitMessage("Sorry, there was an error sending your message. Please try again.");
+      trackFormSubmit('contact_form', { status: 'error', error: error.message });
     } finally {
       setIsSubmitting(false);
     }

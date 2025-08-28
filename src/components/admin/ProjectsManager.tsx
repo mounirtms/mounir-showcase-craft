@@ -3,7 +3,9 @@ import { toast } from "@/hooks/use-toast";
 import { useProjects, PROJECTS_COLLECTION, type Project } from "@/hooks/useProjects";
 import { addDoc, collection, doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { DataTable, ActionColumn, StatusBadge } from "@/components/ui/data-table";
+import { AdminDataTable } from "@/components/admin/AdminDataTable";
+import { createActionColumnDef } from "@/components/admin/ActionColumn";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { validateProjectUpdate } from "@/lib/validation-schemas";
 import { format } from "date-fns";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -57,23 +59,23 @@ import {
   Copy
 } from "lucide-react";
 
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -154,7 +156,7 @@ const formSchema = z.object({
 });
 
 export function ProjectsManager() {
-  const { projects, loading } = useProjects();
+  const { projects, loading, refetch } = useProjects();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -272,6 +274,7 @@ export function ProjectsManager() {
       setImagePath("");
       setLogoUrl("");
       setLogoPath("");
+      refetch();
     } catch (error) {
       console.error("Error saving project:", error);
       let errorMessage = "Unknown error occurred";
@@ -424,6 +427,7 @@ export function ProjectsManager() {
         title: "Project duplicated successfully",
         description: `"${project.title}" has been duplicated and added to your portfolio.`,
       });
+      refetch();
     } catch (error) {
       console.error("Error duplicating project:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -433,7 +437,7 @@ export function ProjectsManager() {
         variant: "destructive",
       });
     }
-  }, []);
+  }, [refetch]);
 
   // Handle delete project with enhanced validation and error handling
   const handleDeleteProject = useCallback(async () => {
@@ -463,6 +467,7 @@ export function ProjectsManager() {
         title: "Project deleted successfully",
         description: `"${projectToDelete.title}" has been permanently removed from your portfolio and synced to Firebase.`,
       });
+      refetch();
     } catch (error) {
       console.error("Error deleting project:", error);
       let errorMessage = "Failed to delete project. Please try again.";
@@ -483,9 +488,9 @@ export function ProjectsManager() {
         variant: "destructive",
       });
     }
-  }, [projectToDelete]);
+  }, [projectToDelete, refetch]);
 
-  const handleBulkDelete = useCallback(async () => {
+  const handleBulkDelete = useCallback(async (projectsToDelete: Project[]) => {
     if (!db || projectsToDelete.length === 0) {
       toast({
         title: "Nothing to delete",
@@ -516,6 +521,7 @@ export function ProjectsManager() {
         title: "Projects deleted successfully",
         description: `${projectsToDelete.length} projects have been permanently removed from your portfolio.`,
       });
+      refetch();
     } catch (error) {
       console.error("Error deleting projects:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
@@ -534,7 +540,7 @@ export function ProjectsManager() {
         variant: "destructive",
       });
     }
-  }, [projectsToDelete]);
+  }, [refetch]);
 
   // Data for filter dropdowns
   const categoryOptions = useMemo(() => {
@@ -575,20 +581,27 @@ export function ProjectsManager() {
     {
       accessorKey: "startDate",
       header: "Start Date",
-      cell: ({ row }) => (
-        <div>{format(new Date(row.getValue("startDate")), 'MMM yyyy')}</div>
-      ),
+      cell: ({ row }) => {
+        const date = row.getValue("startDate");
+        if (!date || typeof date !== 'string') return null;
+        try {
+          return <div>{format(new Date(date), 'MMM yyyy')}</div>
+        } catch (e) {
+          return <div>Invalid Date</div>
+        }
+      },
     },
     {
       accessorKey: "endDate",
       header: "End Date",
       cell: ({ row }) => {
         const endDate = row.getValue("endDate");
-        return (
-          <div>
-            {endDate ? format(new Date(endDate as string), 'MMM yyyy') : 'Present'}
-          </div>
-        );
+        if (!endDate || typeof endDate !== 'string') return <div>Present</div>;
+        try {
+          return <div>{format(new Date(endDate), 'MMM yyyy')}</div>
+        } catch (e) {
+          return <div>Invalid Date</div>
+        }
       },
     },
     {
@@ -600,45 +613,10 @@ export function ProjectsManager() {
         <Star className="h-4 w-4 text-muted-foreground" />
       ),
     },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSelectedProject(row.original);
-              setDetailsOpen(true);
-            }}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditProject(row.original)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setProjectToDelete(row.original)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDuplicateProject(row.original)}
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
+    createActionColumnDef({
+      onEdit: handleEditProject,
+      onDelete: (item) => setProjectToDelete(item),
+    }),
   ];
 
   return (
@@ -661,7 +639,7 @@ export function ProjectsManager() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable
+          <AdminDataTable
             columns={columns}
             data={projects}
             loading={loading}
@@ -678,11 +656,8 @@ export function ProjectsManager() {
                 options: statusOptions,
               },
             ]}
-            onRefresh={() => window.location.reload()}
-            onDelete={(items) => {
-              setProjectsToDelete(items as Project[]);
-              setBulkDeleteOpen(true);
-            }}
+            onRefresh={refetch}
+            onDelete={handleBulkDelete}
             onAdd={() => setIsFormOpen(true)}
           />
         </CardContent>
@@ -1550,7 +1525,7 @@ export function ProjectsManager() {
                     <div className="space-y-2 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        <span>Started: {format(new Date(selectedProject.startDate), 'MMMM yyyy')}</span>
+                        <span>Started: {selectedProject.startDate ? format(new Date(selectedProject.startDate), 'MMMM yyyy') : 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
@@ -1653,7 +1628,7 @@ export function ProjectsManager() {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleBulkDelete}
+              onClick={() => handleBulkDelete(projectsToDelete)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete All

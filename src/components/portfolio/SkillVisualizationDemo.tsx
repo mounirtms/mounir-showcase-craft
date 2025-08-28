@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,9 @@ import {
   Layout,
   Grid3X3,
   List,
-  Circle
+  Circle,
+  TrendingUp,
+  Trophy
 } from "lucide-react";
 
 // Sample skill data
@@ -200,300 +202,210 @@ const SAMPLE_SKILLS: Skill[] = [
   }
 ];
 
+// Header Component
+const DemoHeader = () => (
+  <div className="text-center space-y-4">
+    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      Interactive Skill Visualization
+    </h1>
+    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      Explore technical skills with animated progress rings and interactive filters
+    </p>
+  </div>
+);
+
+// Statistics Component
+const Statistics: React.FC<{ stats: any }> = ({ stats }) => (
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-blue-600">{stats.totalSkills}</div>
+        <div className="text-sm text-muted-foreground">Total Skills</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-green-600">{stats.averageLevel}%</div>
+        <div className="text-sm text-muted-foreground">Avg Level</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-purple-600">{stats.expertSkills}</div>
+        <div className="text-sm text-muted-foreground">Expert Level</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-orange-600">{stats.trendingSkills}</div>
+        <div className="text-sm text-muted-foreground">Trending</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-red-600">{stats.totalProjects}</div>
+        <div className="text-sm text-muted-foreground">Projects</div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-4 text-center">
+        <div className="text-2xl font-bold text-indigo-600">{stats.totalCertifications}</div>
+        <div className="text-sm text-muted-foreground">Certifications</div>
+      </CardContent>
+    </Card>
+  </div>
+);
+
+// Layout Controls Component
+const LayoutControls: React.FC<{ currentLayout: string; setCurrentLayout: (layout: any) => void }> = ({ currentLayout, setCurrentLayout }) => (
+  <div className="flex justify-center">
+    <div className="flex rounded-lg border bg-background">
+      <Button
+        variant={currentLayout === "grid" ? "default" : "ghost"}
+        size="sm"
+        onClick={() => setCurrentLayout("grid")}
+        className="rounded-r-none"
+        aria-label="Grid Layout"
+      >
+        <Grid3X3 className="w-4 h-4 mr-2" />
+        Grid
+      </Button>
+      <Button
+        variant={currentLayout === "list" ? "default" : "ghost"}
+        size="sm"
+        onClick={() => setCurrentLayout("list")}
+        className="rounded-none border-x"
+        aria-label="List Layout"
+      >
+        <List className="w-4 h-4 mr-2" />
+        List
+      </Button>
+      <Button
+        variant={currentLayout === "circles" ? "default" : "ghost"}
+        size="sm"
+        onClick={() => setCurrentLayout("circles")}
+        className="rounded-l-none"
+        aria-label="Circles Layout"
+      >
+        <Circle className="w-4 h-4 mr-2" />
+        Circles
+      </Button>
+    </div>
+  </div>
+);
+
+// Main Content Component
+const MainContent: React.FC<{ 
+  currentLayout: any;
+  handleSkillClick: (skill: Skill) => void;
+  handleSkillHover: (skill: Skill | null) => void;
+}> = ({ currentLayout, handleSkillClick, handleSkillHover }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <Layout className="w-5 h-5" />
+        Skills Overview - {currentLayout.charAt(0).toUpperCase() + currentLayout.slice(1)} Layout
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      {/* Performance Note: The 'circles' layout can be performance-intensive with a large number of skills. */}
+      <SkillVisualization
+        skills={SAMPLE_SKILLS}
+        layout={currentLayout}
+        showCategories={true}
+        showFilters={true}
+        showSearch={true}
+        enableHover={true}
+        enableClick={true}
+        onSkillClick={handleSkillClick}
+        onSkillHover={handleSkillHover}
+        animationDuration={2000}
+      />
+    </CardContent>
+  </Card>
+);
+
+// Sidebar Component
+const Sidebar: React.FC<{ 
+  hoveredSkill: Skill | null;
+  selectedSkill: Skill | null;
+  setSelectedSkill: (skill: Skill | null) => void;
+}> = ({ hoveredSkill, selectedSkill, setSelectedSkill }) => (
+  <div className="space-y-6">
+    {hoveredSkill && (
+      <Card className="border-blue-200 bg-blue-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            {hoveredSkill.icon}
+            {hoveredSkill.name}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Proficiency</span>
+            <Badge variant="secondary">{hoveredSkill.level}%</Badge>
+          </div>
+        </CardContent>
+      </Card>
+    )}
+    {selectedSkill && (
+      <Card className="border-green-200 bg-green-50/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Star className="w-4 h-4" />
+            Selected Skill
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="font-medium">{selectedSkill.name}</div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedSkill(null)}
+            className="w-full"
+          >
+            Clear Selection
+          </Button>
+        </CardContent>
+      </Card>
+    )}
+  </div>
+);
+
 // Demo component
 export const SkillVisualizationDemo: React.FC = () => {
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
   const [currentLayout, setCurrentLayout] = useState<"grid" | "list" | "circles">("grid");
 
-  const handleSkillClick = (skill: Skill) => {
-    setSelectedSkill(skill);
-  };
-
-  const handleSkillHover = (skill: Skill | null) => {
-    setHoveredSkill(skill);
-  };
-
-  // Calculate statistics
-  const stats = {
+  const stats = useMemo(() => ({
     totalSkills: SAMPLE_SKILLS.length,
     averageLevel: Math.round(SAMPLE_SKILLS.reduce((sum, skill) => sum + skill.level, 0) / SAMPLE_SKILLS.length),
     expertSkills: SAMPLE_SKILLS.filter(skill => skill.level >= 90).length,
     trendingSkills: SAMPLE_SKILLS.filter(skill => skill.trending).length,
     totalProjects: SAMPLE_SKILLS.reduce((sum, skill) => sum + (skill.projects || 0), 0),
     totalCertifications: SAMPLE_SKILLS.reduce((sum, skill) => sum + (skill.certifications?.length || 0), 0)
-  };
+  }), []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Interactive Skill Visualization
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore technical skills with animated progress rings and interactive filters
-          </p>
-        </div>
-
-        {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalSkills}</div>
-              <div className="text-sm text-muted-foreground">Total Skills</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.averageLevel}%</div>
-              <div className="text-sm text-muted-foreground">Avg Level</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.expertSkills}</div>
-              <div className="text-sm text-muted-foreground">Expert Level</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">{stats.trendingSkills}</div>
-              <div className="text-sm text-muted-foreground">Trending</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-red-600">{stats.totalProjects}</div>
-              <div className="text-sm text-muted-foreground">Projects</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-indigo-600">{stats.totalCertifications}</div>
-              <div className="text-sm text-muted-foreground">Certifications</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Layout Controls */}
-        <div className="flex justify-center">
-          <div className="flex rounded-lg border bg-background">
-            <Button
-              variant={currentLayout === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentLayout("grid")}
-              className="rounded-r-none"
-            >
-              <Grid3X3 className="w-4 h-4 mr-2" />
-              Grid
-            </Button>
-            <Button
-              variant={currentLayout === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentLayout("list")}
-              className="rounded-none border-x"
-            >
-              <List className="w-4 h-4 mr-2" />
-              List
-            </Button>
-            <Button
-              variant={currentLayout === "circles" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setCurrentLayout("circles")}
-              className="rounded-l-none"
-            >
-              <Circle className="w-4 h-4 mr-2" />
-              Circles
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
+        <DemoHeader />
+        <Statistics stats={stats} />
+        <LayoutControls currentLayout={currentLayout} setCurrentLayout={setCurrentLayout} />
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          {/* Skill Visualization */}
           <div className="xl:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layout className="w-5 h-5" />
-                  Skills Overview - {currentLayout.charAt(0).toUpperCase() + currentLayout.slice(1)} Layout
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SkillVisualization
-                  skills={SAMPLE_SKILLS}
-                  layout={currentLayout}
-                  showCategories={true}
-                  showFilters={true}
-                  showSearch={true}
-                  enableHover={true}
-                  enableClick={true}
-                  onSkillClick={handleSkillClick}
-                  onSkillHover={handleSkillHover}
-                  animationDuration={2000}
-                />
-              </CardContent>
-            </Card>
+            <MainContent 
+              currentLayout={currentLayout} 
+              handleSkillClick={setSelectedSkill} 
+              handleSkillHover={setHoveredSkill} 
+            />
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Hovered Skill */}
-            {hoveredSkill && (
-              <Card className="border-blue-200 bg-blue-50/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {hoveredSkill.icon}
-                    {hoveredSkill.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Proficiency</span>
-                    <span className="font-semibold">{hoveredSkill.level}%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Experience</span>
-                    <span className="font-semibold">{hoveredSkill.experience}</span>
-                  </div>
-                  {hoveredSkill.projects && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Projects</span>
-                      <span className="font-semibold">{hoveredSkill.projects}</span>
-                    </div>
-                  )}
-                  {hoveredSkill.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {hoveredSkill.description}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Selected Skill Detail */}
-            {selectedSkill && (
-              <Card className="border-green-200 bg-green-50/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {selectedSkill.icon}
-                    {selectedSkill.name}
-                    <Badge variant="secondary" className="ml-auto">
-                      Selected
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Level</span>
-                      <span className="font-semibold">{selectedSkill.level}%</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div
-                        className="bg-green-500 h-2 rounded-full transition-all duration-1000"
-                        style={{ width: `${selectedSkill.level}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Experience</span>
-                    <span className="font-semibold">{selectedSkill.experience}</span>
-                  </div>
-
-                  {selectedSkill.projects && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Projects</span>
-                      <span className="font-semibold">{selectedSkill.projects}</span>
-                    </div>
-                  )}
-
-                  {selectedSkill.description && (
-                    <div>
-                      <span className="text-sm text-muted-foreground block mb-1">Description</span>
-                      <p className="text-sm">{selectedSkill.description}</p>
-                    </div>
-                  )}
-
-                  {selectedSkill.certifications && selectedSkill.certifications.length > 0 && (
-                    <div>
-                      <span className="text-sm text-muted-foreground block mb-2">Certifications</span>
-                      <div className="space-y-1">
-                        {selectedSkill.certifications.map((cert, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {cert}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedSkill.trending && (
-                    <Badge variant="secondary" className="w-full justify-center">
-                      🔥 Trending Skill
-                    </Badge>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedSkill(null)}
-                    className="w-full"
-                  >
-                    Close Details
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const expertSkills = SAMPLE_SKILLS.filter(skill => skill.level >= 90);
-                    if (expertSkills.length > 0) {
-                      setSelectedSkill(expertSkills[Math.floor(Math.random() * expertSkills.length)]);
-                    }
-                  }}
-                  className="w-full justify-start"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  View Expert Skills
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const trendingSkills = SAMPLE_SKILLS.filter(skill => skill.trending);
-                    if (trendingSkills.length > 0) {
-                      setSelectedSkill(trendingSkills[Math.floor(Math.random() * trendingSkills.length)]);
-                    }
-                  }}
-                  className="w-full justify-start"
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Show Trending
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedSkill(null)}
-                  className="w-full justify-start"
-                >
-                  Clear Selection
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <Sidebar 
+            hoveredSkill={hoveredSkill} 
+            selectedSkill={selectedSkill} 
+            setSelectedSkill={setSelectedSkill} 
+          />
         </div>
       </div>
     </div>

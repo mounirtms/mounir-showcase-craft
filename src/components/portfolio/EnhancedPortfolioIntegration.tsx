@@ -26,6 +26,7 @@ import {
   ArrowRight, Download, Play, Pause, Award, Trophy, Github, Briefcase
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackButtonClick } from "@/utils/analytics";
 
 // Optimized Portfolio Configuration
 interface PortfolioConfig {
@@ -209,27 +210,40 @@ export interface EnhancedPortfolioIntegrationProps {
   };
 }
 
-export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegrationProps> = ({
-  config: userConfig,
+export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegrationProps> = ({ 
   className,
-  adminSettings = {
-    showTestimonials: false,
-    showContactForm: true,
-    enableAnimations: true
-  }
+  config: userConfig, 
+  adminSettings = { showTestimonials: true, showContactForm: true, enableAnimations: true } 
 }) => {
   const [activeSection, setActiveSection] = useState("hero");
-  const [animationsEnabled, setAnimationsEnabled] = useState(adminSettings.enableAnimations ?? true);
+  const [animationsEnabled, setAnimationsEnabled] = useState(adminSettings.enableAnimations);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(adminSettings.showContactForm);
 
   const sectionsRef = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  const config = useMemo(() => ({
-    ...portfolioConfig,
-    ...userConfig
-  }), [userConfig]);
+  const config = useMemo(() => {
+    const mergedConfig = { ...portfolioConfig, ...userConfig };
+    
+    if (userConfig?.hero) {
+      mergedConfig.hero = { ...portfolioConfig.hero, ...userConfig.hero };
+    }
+    if (userConfig?.skills) {
+      mergedConfig.skills = { ...portfolioConfig.skills, ...userConfig.skills };
+    }
+    if (userConfig?.projects) {
+      mergedConfig.projects = { ...portfolioConfig.projects, ...userConfig.projects };
+    }
+    if (userConfig?.experience) {
+      mergedConfig.experience = { ...portfolioConfig.experience, ...userConfig.experience };
+    }
+    if (userConfig?.testimonials) {
+      mergedConfig.testimonials = userConfig.testimonials;
+    }
+
+    return mergedConfig;
+  }, [userConfig]);
 
   // Detect motion preferences
   useEffect(() => {
@@ -289,404 +303,266 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
     ...(adminSettings.showContactForm ? [{ id: "contact", label: "Contact", icon: <Mail className="w-4 h-4" /> }] : [])
   ];
 
+  // State for contact details visibility
+  const [showContactDetails, setShowContactDetails] = useState(false);
+
   return (
-    <div className={cn("relative min-h-screen bg-background text-foreground", className)}>
-      {/* Scroll Progress */}
-      {animationsEnabled && <ScrollProgress className="z-50" />}
+    <div className={cn("relative", className)}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-gradient-to-r from-amber-400/10 to-orange-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-6s' }} />
+      </div>
 
-      <main>
-        {/* Hero Section */}
-        <section 
-          id="hero"
-          ref={el => sectionsRef.current.hero = el}
-          className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background/95 to-muted/30"
-        >
-          {animationsEnabled && (
-            <Parallax config={{ speed: 0.2, direction: "up" }}>
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }} />
+      {/* Hero Section with Parallax */}
+      <ScrollAnimation animation="fadeIn">
+        <Parallax speed={0.5}>
+          <HeroSection 
+            name={config.hero.name}
+            title={config.hero.titles[currentTitleIndex]}
+            description={config.hero.description}
+            location={config.hero.location}
+            skills={["ETL Architecture", "Data Integration", "Full-Stack Development", "Cloud Solutions"]}
+            socialLinks={{
+              github: "https://github.com/mounir1",
+              linkedin: "https://linkedin.com/in/mounir1badi",
+              email: "mailto:mounir.webdev@gmail.com",
+              resume: "/Mounir_CV_2025.pdf"
+            }}
+            avatar={config.hero.avatar}
+            enableParticles={animationsEnabled}
+            enableTypingEffect={animationsEnabled}
+            className="pt-24 pb-16 sm:pt-32 sm:pb-24"
+          />
+        </Parallax>
+      </ScrollAnimation>
+
+      {/* Skills Section */}
+      <section id="skills" className="py-16 sm:py-24 relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <ScrollAnimation animation="slideInUp">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
+                Technical Expertise
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
+                Specialized skills in ETL platforms, data integration, and full-stack development
+              </p>
+            </div>
+          </ScrollAnimation>
+
+          <SkillVisualization 
+            categories={config.skills.categories}
+            layout="circles"
+            defaultCategory="Frontend"
+            className="mb-16"
+          />
+
+          {/* Stats Section */}
+          <ScrollAnimation animation="fadeIn">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto">
+              {Object.entries(config.hero.stats).map(([key, value], index) => (
+                <div 
+                  key={index} 
+                  className="glass-card p-4 sm:p-6 rounded-xl text-center border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift"
+                >
+                  <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">{value}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                </div>
+              ))}
+            </div>
+          </ScrollAnimation>
+        </div>
+      </section>
+
+      {/* Experience Timeline */}
+      <section id="experience" className="py-16 sm:py-24 bg-gradient-to-br from-card/30 via-card/50 to-card/30 backdrop-blur-sm border-y border-border/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <ScrollAnimation animation="slideInUp">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
+                Professional Journey
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
+                Key milestones and achievements in my career
+              </p>
+            </div>
+          </ScrollAnimation>
+
+          <div className="grid lg:grid-cols-3 gap-8 sm:gap-12">
+            <div className="lg:col-span-2">
+              <InteractiveTimeline 
+                items={config.experience.timeline}
+                className="h-full"
+              />
+            </div>
+            
+            <div className="space-y-6">
+              <h3 className="text-xl sm:text-2xl font-bold font-heading">Key Achievements</h3>
+              <div className="space-y-4">
+                {config.experience.achievements.map((achievement, index) => (
+                  <ScrollAnimation key={index} animation="fadeIn" delay={index * 100}>
+                    <div className="glass-card p-4 sm:p-5 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-1 text-primary">
+                          {achievement.icon}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-foreground mb-1">{achievement.title}</h4>
+                          <p className="text-sm sm:text-base text-muted-foreground mb-2">{achievement.description}</p>
+                          <div className="text-xs font-medium text-primary">{achievement.year}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollAnimation>
+                ))}
               </div>
-            </Parallax>
-          )}
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div className="text-center lg:text-left space-y-8">
-                {animationsEnabled ? (
-                  <StaggeredAnimation staggerDelay={200}>
-                    <ScrollAnimation animation="fadeIn">
-                      <div className="mb-6">
-                        <Badge variant="outline" className="mb-4 px-4 py-2 text-sm font-medium">
-                          🚀 ETL Platform Specialist
-                        </Badge>
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight font-heading">
-                          <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            {config.hero.name.split(" ")[0]}
-                          </span>
-                          <br />
-                          <span className="text-foreground/90 font-semibold">
-                            {config.hero.name.split(" ").slice(1).join(" ")}
-                          </span>
-                        </h1>
+      {/* Projects Showcase */}
+      <section id="projects" className="py-16 sm:py-24 relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <ScrollAnimation animation="slideInUp">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
+                Featured Projects
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
+                Enterprise solutions and innovative applications
+              </p>
+            </div>
+          </ScrollAnimation>
+
+          <ProjectShowcase 
+            projects={config.projects.featured}
+            className="mb-12"
+          />
+
+          <ScrollAnimation animation="fadeIn">
+            <div className="text-center">
+              <Button size="lg" className="shadow-glow hover:shadow-large transition-all duration-300" asChild>
+                <a href="#contact">
+                  <Mail className="w-5 h-5 mr-2" />
+                  Discuss Your Project
+                </a>
+              </Button>
+            </div>
+          </ScrollAnimation>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      {adminSettings.showTestimonials && (
+        <section className="py-16 sm:py-24 bg-gradient-to-br from-card/30 via-card/50 to-card/30 backdrop-blur-sm border-y border-border/50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <ScrollAnimation animation="slideInUp">
+              <div className="text-center mb-12 sm:mb-16">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
+                  Client Testimonials
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
+                  What industry leaders say about working with me
+                </p>
+              </div>
+            </ScrollAnimation>
+
+            <TestimonialsCarousel testimonials={config.testimonials} />
+          </div>
+        </section>
+      )}
+
+      {/* Contact Section */}
+      {adminSettings.showContactForm && (
+        <section id="contact" className="py-16 sm:py-24 relative">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <ScrollAnimation animation="slideInUp">
+              <div className="text-center mb-12 sm:mb-16">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
+                  Get In Touch
+                </h2>
+                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-sans">
+                  Let's discuss how I can help transform your data challenges into scalable solutions
+                </p>
+              </div>
+            </ScrollAnimation>
+
+            <div className="grid lg:grid-cols-2 gap-8 sm:gap-12">
+              <div>
+                <ContactForm />
+              </div>
+              
+              <div className="space-y-6">
+                <h3 className="text-xl sm:text-2xl font-bold font-heading">Get In Touch</h3>
+                
+                {showContactDetails ? (
+                  <>
+                    <p className="text-muted-foreground font-sans">
+                      I'm always interested in discussing new opportunities, innovative projects, 
+                      and ways to solve complex data challenges. Reach out and let's start a conversation.
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                          <Mail className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Email</div>
+                          <a href="mailto:mounir.webdev@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                            mounir.webdev@gmail.com
+                          </a>
+                        </div>
                       </div>
-                    </ScrollAnimation>
-
-                    <ScrollAnimation animation="slideUp" config={{ delay: 300 }}>
-                      <div className="h-16 flex items-center justify-center lg:justify-start">
-                        <DynamicTypingEffect
-                          texts={config.hero.titles}
-                          config={{
-                            typeSpeed: 100,
-                            deleteSpeed: 50
-                          }}
-                          className="text-2xl md:text-3xl font-medium text-primary"
-                        />
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                          <MapPin className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="font-medium">Location</div>
+                          <div className="text-muted-foreground">Algeria • Remote Worldwide</div>
+                        </div>
                       </div>
-                    </ScrollAnimation>
-
-                    <ScrollAnimation animation="slideUp" config={{ delay: 600 }}>
-                      <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl font-medium">
-                        {config.hero.description}
-                      </p>
-                    </ScrollAnimation>
-
-                    <ScrollAnimation animation="slideUp" config={{ delay: 900 }}>
-                      <div className="flex items-center gap-3 justify-center lg:justify-start text-sm text-muted-foreground bg-muted/30 rounded-full px-6 py-3 w-fit">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{config.hero.location}</span>
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span className="text-green-600 font-medium">Available</span>
-                      </div>
-                    </ScrollAnimation>
-
-                    <ScrollAnimation animation="slideUp" config={{ delay: 1200 }}>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-6">
-                        <Button size="lg" className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 px-8 py-3 text-lg" onClick={() => scrollToSection("projects")}>
-                          View My Work <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                        <Button variant="outline" size="lg" className="border-2 hover:bg-muted/50 px-8 py-3 text-lg font-medium" onClick={handleDownloadCV}>
-                          <Download className="mr-2 h-5 w-5" /> Download CV
-                        </Button>
-                      </div>
-                    </ScrollAnimation>
-
-                    <ScrollAnimation animation="fadeIn" config={{ delay: 1500 }}>
-                      <div className="grid grid-cols-4 gap-6 pt-12 justify-center lg:justify-start">
-                        {Object.entries(config.hero.stats).map(([key, value], index) => (
-                          <div key={key} className="text-center group hover:scale-105 transition-transform duration-300">
-                            <div className="bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-2xl p-4 mb-2 group-hover:from-primary/20 group-hover:to-blue-500/20 transition-colors">
-                              <div className="text-2xl md:text-3xl font-bold text-primary mb-1 group-hover:scale-110 transition-transform">
-                                {value}
-                              </div>
-                              <div className="text-xs md:text-sm text-muted-foreground font-medium capitalize">
-                                {key === "satisfaction" ? "Client Satisfaction" : key}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollAnimation>
-                  </StaggeredAnimation>
-                ) : (
-                  <div className="space-y-8">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold">
-                      <span className="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                        {config.hero.name}
-                      </span>
-                    </h1>
-                    <h2 className="text-2xl md:text-3xl font-medium text-primary">
-                      {config.hero.titles[currentTitleIndex]}
-                    </h2>
-                    <p className="text-xl text-muted-foreground">{config.hero.description}</p>
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                      <Button size="lg" onClick={() => scrollToSection("projects")}>
-                        View My Work <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                      <Button variant="outline" size="lg" onClick={handleDownloadCV}>
-                        <Download className="mr-2 h-5 w-5" /> Download CV
+                    </div>
+                    
+                    <div className="pt-4">
+                      <Button 
+                        size="lg" 
+                        variant="outline" 
+                        className="shadow-medium hover:shadow-large transition-all duration-300"
+                        asChild
+                        onClick={() => trackButtonClick('download_cv')}
+                      >
+                        <a href="/Mounir_CV_2025.pdf" download>
+                          <Download className="w-5 h-5 mr-2" />
+                          Download CV
+                        </a>
                       </Button>
                     </div>
+                  </>
+                ) : (
+                  <div className="pt-4">
+                    <Button 
+                      size="lg" 
+                      onClick={() => {
+                        setShowContactDetails(true);
+                        trackButtonClick('show_contact_details');
+                      }}
+                      className="shadow-medium hover:shadow-large transition-all duration-300"
+                    >
+                      Show Contact Details
+                    </Button>
                   </div>
                 )}
               </div>
-
-              <div className="flex justify-center lg:justify-end">
-                <div className="relative">
-                  {animationsEnabled && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-full blur-2xl animate-pulse" />
-                  )}
-                  <ProfessionalAvatar
-                    avatar={{
-                      src: config.hero.avatar,
-                      alt: config.hero.name,
-                      size: "2xl",
-                      shape: "circle",
-                      borderStyle: "gradient",
-                      hoverEffect: animationsEnabled ? "scale" : "none"
-                    }}
-                    name={config.hero.name}
-                    title={config.hero.titles[0]}
-                    location={config.hero.location}
-                    enableAnimations={animationsEnabled}
-                    layout="compact"
-                    className="relative z-10 shadow-2xl"
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </section>
-
-        {/* Skills Section */}
-        <section 
-          id="skills"
-          ref={el => sectionsRef.current.skills = el}
-          className="py-24 px-6 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30 dark:from-slate-900/50 dark:via-background dark:to-slate-800/30"
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-20">
-              <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium">
-                🛠️ Technical Expertise
-              </Badge>
-              <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent">
-                Skills & Expertise
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Comprehensive technical skills honed through years of building enterprise-grade ETL platforms and data solutions
-              </p>
-            </div>
-
-            <Tabs defaultValue="frontend" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-12 bg-white/50 dark:bg-slate-800/50 p-2 rounded-2xl border shadow-lg">
-                {config.skills.categories.map(category => (
-                  <TabsTrigger 
-                    key={category.name} 
-                    value={category.name.toLowerCase().replace(" & ", "-").replace(" ", "-")} 
-                    className="flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-md dark:data-[state=active]:bg-slate-700"
-                  >
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color}`}>
-                      {category.icon}
-                    </div>
-                    <span className="hidden sm:inline">{category.name}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {config.skills.categories.map(category => (
-                <TabsContent 
-                  key={category.name} 
-                  value={category.name.toLowerCase().replace(" & ", "-").replace(" ", "-")}
-                  className="mt-8"
-                >
-                  <div className="bg-white/30 dark:bg-slate-800/30 rounded-3xl p-8 backdrop-blur-sm border shadow-xl">
-                    <SkillVisualization
-                      skills={category.skills}
-                      layout="circles"
-                      enableHover={true}
-                      enableClick={true}
-                    />
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </div>
-        </section>
-
-        {/* Projects Section */}
-        <section 
-          id="projects"
-          ref={el => sectionsRef.current.projects = el}
-          className="py-24 px-6 bg-gradient-to-br from-white via-blue-50/30 to-slate-50 dark:from-background dark:via-slate-900/50 dark:to-slate-800/30"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-              <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium">
-                🚀 Featured Work
-              </Badge>
-              <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent">
-                Featured Projects
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Innovative ETL solutions and data platforms that drive business transformation and operational excellence
-              </p>
-            </div>
-
-            <div className="bg-white/40 dark:bg-slate-800/40 rounded-3xl p-8 backdrop-blur-sm border shadow-xl">
-              <ProjectShowcase
-                projects={config.projects.featured}
-                enableHover3D={animationsEnabled}
-                showFilters={true}
-                layout="grid"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Experience Section */}
-        <section 
-          id="experience"
-          ref={el => sectionsRef.current.experience = el}
-          className="py-24 px-6 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30 dark:from-slate-900/50 dark:via-background dark:to-slate-800/30"
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-20">
-              <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium">
-                📈 Professional Journey
-              </Badge>
-              <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent">
-                Experience & Growth
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                A decade of continuous learning, innovation, and delivering impactful solutions in the data engineering space
-              </p>
-            </div>
-
-            <div className="bg-white/40 dark:bg-slate-800/40 rounded-3xl p-8 backdrop-blur-sm border shadow-xl mb-16">
-              <InteractiveTimeline
-                items={config.experience.timeline}
-              />
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {config.experience.achievements.map((achievement, index) => (
-                <div key={index} className="group text-center p-8 rounded-2xl bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:shadow-xl transition-all duration-300 border backdrop-blur-sm">
-                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary/20 to-blue-500/20 rounded-2xl flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                    {achievement.icon}
-                  </div>
-                  <h4 className="font-bold text-lg mb-3 text-foreground">{achievement.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{achievement.description}</p>
-                  <Badge variant="outline" className="bg-primary/5">{achievement.year}</Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        {adminSettings.showTestimonials && (
-          <section 
-            id="testimonials"
-            ref={el => sectionsRef.current.testimonials = el}
-            className="py-24 px-6 bg-gradient-to-br from-white via-blue-50/30 to-slate-50 dark:from-background dark:via-slate-900/50 dark:to-slate-800/30"
-          >
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-20">
-                <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium font-sans">
-                  💬 Client Feedback
-                </Badge>
-                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent font-heading">
-                  Client Testimonials
-                </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-sans">
-                  What clients and colleagues say about working with me on complex data integration projects
-                </p>
-              </div>
-
-              <div className="bg-white/40 dark:bg-slate-800/40 rounded-3xl p-8 backdrop-blur-sm border shadow-xl">
-                <TestimonialsCarousel
-                  testimonials={config.testimonials}
-                  cardVariant="detailed"
-                  config={{
-                    autoPlay: true,
-                    autoPlayInterval: 7000,
-                    showArrows: true,
-                    showDots: true,
-                    infinite: true
-                  }}
-                  showFilters={true}
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Contact Section */}
-        {adminSettings.showContactForm && (
-          <section 
-            id="contact"
-            ref={el => sectionsRef.current.contact = el}
-            className="py-24 px-6 bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30 dark:from-slate-900/50 dark:via-background dark:to-slate-800/30"
-          >
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-20">
-                <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium">
-                  🚀 Let's Connect
-                </Badge>
-                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent">
-                  Let's Work Together
-                </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-                  Ready to transform your data infrastructure? Let's discuss how I can help build your next ETL platform.
-                </p>
-                
-                {/* Contact Button */}
-                <Button 
-                  size="lg" 
-                  onClick={() => setShowContactForm(!showContactForm)}
-                  className="px-8 py-4 text-lg font-medium bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  {showContactForm ? 'Hide Contact Form' : 'Get In Touch'}
-                  <Mail className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Contact Form - Animated Show/Hide */}
-              <div className={cn(
-                "transition-all duration-500 ease-in-out overflow-hidden",
-                showContactForm ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-              )}>
-                <div className="bg-white/60 dark:bg-slate-800/60 rounded-3xl p-12 backdrop-blur-sm border shadow-2xl">
-                  <ContactForm
-                    onSubmit={async (data) => {
-                      console.log("Contact form submitted:", data);
-                      // Handle form submission
-                    }}
-                    enableSocialLinks={true}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Quick Contact Options - Always Visible */}
-              <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="group text-center p-6 rounded-2xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-300 border backdrop-blur-sm">
-                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-blue-500/20 to-primary/20 rounded-xl flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                    <Mail className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Email</h4>
-                  <p className="text-sm text-muted-foreground">mounir@technostationery.com</p>
-                </div>
-                
-                <div className="group text-center p-6 rounded-2xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-300 border backdrop-blur-sm">
-                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform">
-                    <Phone className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Phone</h4>
-                  <p className="text-sm text-muted-foreground">+213 555 123 456</p>
-                </div>
-                
-                <div className="group text-center p-6 rounded-2xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-300 border backdrop-blur-sm">
-                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Location</h4>
-                  <p className="text-sm text-muted-foreground">Algeria • Remote</p>
-                </div>
-                
-                <div className="group text-center p-6 rounded-2xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-300 border backdrop-blur-sm">
-                  <div className="w-12 h-12 mx-auto bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center text-orange-600 mb-4 group-hover:scale-110 transition-transform">
-                    <Clock className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-semibold mb-2">Response</h4>
-                  <p className="text-sm text-muted-foreground">Within 24 hours</p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-      </main>
+      )}
     </div>
   );
 };
