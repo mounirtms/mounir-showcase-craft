@@ -61,10 +61,12 @@ const portfolioConfig: PortfolioConfig = {
         icon: <Monitor className="w-5 h-5" />,
         color: "from-blue-500 to-cyan-500",
         skills: [
-          { id: "react", name: "React", level: 95, category: "frontend", experience: "6 years", description: "Advanced React with hooks, context, performance optimization" },
-          { id: "typescript", name: "TypeScript", level: 92, category: "frontend", experience: "5 years", description: "Strong typing and modern TypeScript patterns" },
-          { id: "nextjs", name: "Next.js", level: 90, category: "frontend", experience: "4 years", description: "Full-stack React framework with SSR/SSG" },
-          { id: "tailwind", name: "Tailwind CSS", level: 94, category: "frontend", experience: "3 years", description: "Utility-first CSS framework" }
+          { id: "react", name: "React", level: 95, category: "frontend", experience: "6 years", description: "Advanced React with hooks, context, performance optimization", projects: 85, trending: true },
+          { id: "typescript", name: "TypeScript", level: 92, category: "frontend", experience: "5 years", description: "Strong typing and modern TypeScript patterns", projects: 78 },
+          { id: "nextjs", name: "Next.js", level: 90, category: "frontend", experience: "4 years", description: "Full-stack React framework with SSR/SSG", projects: 42, trending: true },
+          { id: "tailwind", name: "Tailwind CSS", level: 94, category: "frontend", experience: "3 years", description: "Utility-first CSS framework", projects: 65 },
+          { id: "vue", name: "Vue.js", level: 85, category: "frontend", experience: "4 years", description: "Progressive JavaScript framework", projects: 32 },
+          { id: "angular", name: "Angular", level: 80, category: "frontend", experience: "5 years", description: "Platform for building mobile and desktop web applications", projects: 28 }
         ]
       },
       {
@@ -72,10 +74,12 @@ const portfolioConfig: PortfolioConfig = {
         icon: <Code className="w-5 h-5" />,
         color: "from-green-500 to-emerald-500",
         skills: [
-          { id: "nodejs", name: "Node.js", level: 94, category: "backend", experience: "7 years", description: "Server-side JavaScript runtime and ETL frameworks" },
-          { id: "python", name: "Python", level: 88, category: "backend", experience: "5 years", description: "Data processing, ETL pipelines, and analytics" },
-          { id: "postgresql", name: "PostgreSQL", level: 89, category: "backend", experience: "6 years", description: "Advanced database design and data warehousing" },
-          { id: "mongodb", name: "MongoDB", level: 85, category: "backend", experience: "4 years", description: "NoSQL document database for data lakes" }
+          { id: "nodejs", name: "Node.js", level: 94, category: "backend", experience: "7 years", description: "Server-side JavaScript runtime and ETL frameworks", projects: 92, trending: true },
+          { id: "python", name: "Python", level: 88, category: "backend", experience: "5 years", description: "Data processing, ETL pipelines, and analytics", projects: 65 },
+          { id: "postgresql", name: "PostgreSQL", level: 89, category: "backend", experience: "6 years", description: "Advanced database design and data warehousing", projects: 78 },
+          { id: "mongodb", name: "MongoDB", level: 85, category: "backend", experience: "4 years", description: "NoSQL document database for data lakes", projects: 45 },
+          { id: "kafka", name: "Apache Kafka", level: 82, category: "backend", experience: "3 years", description: "Distributed streaming platform", projects: 32 },
+          { id: "airflow", name: "Apache Airflow", level: 87, category: "backend", experience: "4 years", description: "Platform to programmatically author, schedule and monitor workflows", projects: 48, trending: true }
         ]
       },
       {
@@ -83,9 +87,12 @@ const portfolioConfig: PortfolioConfig = {
         icon: <Settings className="w-5 h-5" />,
         color: "from-purple-500 to-pink-500",
         skills: [
-          { id: "docker", name: "Docker", level: 90, category: "tools", experience: "4 years", description: "Containerization for ETL workflows" },
-          { id: "aws", name: "AWS", level: 87, category: "tools", experience: "4 years", description: "Cloud data services and infrastructure" },
-          { id: "firebase", name: "Firebase", level: 88, category: "tools", experience: "4 years", description: "Real-time data synchronization" }
+          { id: "docker", name: "Docker", level: 90, category: "tools", experience: "4 years", description: "Containerization for ETL workflows", projects: 65, trending: true },
+          { id: "aws", name: "AWS", level: 87, category: "tools", experience: "4 years", description: "Cloud data services and infrastructure", projects: 58 },
+          { id: "firebase", name: "Firebase", level: 88, category: "tools", experience: "4 years", description: "Real-time data synchronization", projects: 42 },
+          { id: "kubernetes", name: "Kubernetes", level: 83, category: "tools", experience: "3 years", description: "Container orchestration platform", projects: 28 },
+          { id: "terraform", name: "Terraform", level: 80, category: "tools", experience: "3 years", description: "Infrastructure as Code tool", projects: 35 },
+          { id: "jenkins", name: "Jenkins", level: 78, category: "tools", experience: "5 years", description: "Automation server for CI/CD pipelines", projects: 52 }
         ]
       }
     ]
@@ -148,11 +155,45 @@ const portfolioConfig: PortfolioConfig = {
       name: "Sarah Johnson",
       role: "CTO",
       company: "TechCorp International",
-      content: "Mounir delivered exceptional results on our enterprise platform. His technical expertise and problem-solving skills are outstanding.",
+      content: "Mounir delivered exceptional results on our enterprise ETL platform. His technical expertise in data integration and problem-solving skills are outstanding. He transformed our data processing pipeline, reducing processing time by 70%.",
       rating: 5,
+      date: "2024-03-15",
+      projectType: "Enterprise ETL Platform",
+      skills: ["Node.js", "PostgreSQL", "Apache Airflow", "AWS"],
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
       verified: true,
-      featured: true
+      featured: true,
+      tags: ["ETL", "Data Integration", "Performance"]
+    },
+    {
+      id: "michael-chen",
+      name: "Michael Chen",
+      role: "Product Manager",
+      company: "DataFlow Solutions",
+      content: "Working with Mounir on our real-time analytics dashboard was a game-changer. His ability to understand complex business requirements and translate them into elegant technical solutions is impressive. The dashboard he built provides actionable insights that have driven a 25% increase in our operational efficiency.",
+      rating: 5,
+      date: "2023-11-22",
+      projectType: "Real-time Analytics Dashboard",
+      skills: ["React", "Python", "TensorFlow", "Redis"],
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      verified: true,
+      featured: true,
+      tags: ["Analytics", "Dashboard", "Real-time"]
+    },
+    {
+      id: "emma-rodriguez",
+      name: "Emma Rodriguez",
+      role: "Engineering Director",
+      company: "CloudTech Innovations",
+      content: "Mounir's expertise in cloud architecture and data engineering helped us scale our platform to handle 10x more traffic. His proactive approach to identifying potential bottlenecks and implementing robust solutions saved us countless hours of troubleshooting. A true professional who delivers beyond expectations.",
+      rating: 5,
+      date: "2023-08-30",
+      projectType: "Cloud Infrastructure Scaling",
+      skills: ["AWS", "Docker", "Kubernetes", "PostgreSQL"],
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face",
+      verified: true,
+      featured: false,
+      tags: ["Cloud", "Scalability", "Infrastructure"]
     }
   ]
 };
@@ -172,7 +213,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
   config: userConfig,
   className,
   adminSettings = {
-    showTestimonials: true,
+    showTestimonials: false,
     showContactForm: true,
     enableAnimations: true
   }
@@ -253,34 +294,6 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {/* Scroll Progress */}
       {animationsEnabled && <ScrollProgress className="z-50" />}
 
-      {/* Navigation */}
-      <nav className="fixed top-4 right-4 z-40 bg-background/95 backdrop-blur-sm border rounded-lg p-2 shadow-lg">
-        {navigationSections.map(section => (
-          <Button
-            key={section.id}
-            variant={activeSection === section.id ? "default" : "ghost"}
-            size="sm"
-            onClick={() => scrollToSection(section.id)}
-            className="w-full justify-start gap-2 text-xs mb-1"
-          >
-            {section.icon}
-            {section.label}
-          </Button>
-        ))}
-        <div className="border-t pt-2 space-y-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setAnimationsEnabled(!animationsEnabled)}
-            className="w-full justify-start gap-2 text-xs"
-          >
-            {animationsEnabled ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {animationsEnabled ? "Pause" : "Play"}
-          </Button>
-          <ThemeToggle />
-        </div>
-      </nav>
-
       <main>
         {/* Hero Section */}
         <section 
@@ -308,7 +321,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
                         <Badge variant="outline" className="mb-4 px-4 py-2 text-sm font-medium">
                           🚀 ETL Platform Specialist
                         </Badge>
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight font-heading">
                           <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">
                             {config.hero.name.split(" ")[0]}
                           </span>
@@ -470,7 +483,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
                   <div className="bg-white/30 dark:bg-slate-800/30 rounded-3xl p-8 backdrop-blur-sm border shadow-xl">
                     <SkillVisualization
                       skills={category.skills}
-                      layout="grid"
+                      layout="circles"
                       enableHover={true}
                       enableClick={true}
                     />
@@ -560,13 +573,13 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
           >
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-20">
-                <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium">
+                <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium font-sans">
                   💬 Client Feedback
                 </Badge>
-                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent">
+                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-slate-700 dark:from-slate-100 dark:via-blue-200 dark:to-slate-300 bg-clip-text text-transparent font-heading">
                   Client Testimonials
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-sans">
                   What clients and colleagues say about working with me on complex data integration projects
                 </p>
               </div>
@@ -574,6 +587,15 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
               <div className="bg-white/40 dark:bg-slate-800/40 rounded-3xl p-8 backdrop-blur-sm border shadow-xl">
                 <TestimonialsCarousel
                   testimonials={config.testimonials}
+                  cardVariant="detailed"
+                  config={{
+                    autoPlay: true,
+                    autoPlayInterval: 7000,
+                    showArrows: true,
+                    showDots: true,
+                    infinite: true
+                  }}
+                  showFilters={true}
                 />
               </div>
             </div>

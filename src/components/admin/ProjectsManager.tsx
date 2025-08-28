@@ -31,6 +31,30 @@ import {
   Trash,
   AlertCircle,
   CheckCircle2,
+  Link,
+  Users,
+  Target,
+  TrendingUp,
+  Code,
+  Server,
+  Palette,
+  Layers,
+  Building2,
+  Briefcase,
+  MapPin,
+  Phone,
+  Mail,
+  FileText as FileTextIcon,
+  Check,
+  X,
+  AlertTriangle,
+  Zap,
+  Shield,
+  Sparkles,
+  Crown,
+  Cpu,
+  LineChart,
+  Copy
 } from "lucide-react";
 
 import { 
@@ -42,6 +66,16 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +93,65 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { ProjectSchema, type ProjectInput } from "@/lib/validation-schemas";
+
+// Schema for the project form
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  longDescription: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  status: z.string().min(1, "Status is required"),
+  achievements: z.array(z.string()).optional(),
+  technologies: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  image: z.string().optional(),
+  logo: z.string().optional(),
+  icon: z.string().optional(),
+  liveUrl: z.string().optional(),
+  githubUrl: z.string().optional(),
+  demoUrl: z.string().optional(),
+  caseStudyUrl: z.string().optional(),
+  featured: z.boolean().default(false),
+  disabled: z.boolean().default(false),
+  priority: z.number().min(1).max(100).default(50),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  duration: z.string().optional(),
+  teamSize: z.number().min(1).default(1),
+  role: z.string().min(1, "Role is required"),
+  clientInfo: z.object({
+    name: z.string().optional(),
+    industry: z.string().optional(),
+    size: z.enum(["small", "medium", "large"]).optional(),
+    location: z.string().optional(),
+    website: z.string().optional(),
+    isPublic: z.boolean().default(false),
+  }).optional(),
+  metrics: z.object({
+    usersReached: z.number().optional(),
+    performanceImprovement: z.string().optional(),
+    revenueImpact: z.string().optional(),
+    uptime: z.string().optional(),
+    customMetrics: z.record(z.string()).optional(),
+  }).optional(),
+  challenges: z.array(z.string()).optional(),
+  solutions: z.array(z.string()).optional(),
+});
 
 export function ProjectsManager() {
   const { projects, loading } = useProjects();
@@ -68,32 +160,236 @@ export function ProjectsManager() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [projectsToDelete, setProjectsToDelete] = useState<Project[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imagePath, setImagePath] = useState<string>("");
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [logoPath, setLogoPath] = useState<string>("");
 
-  // Data for filter dropdowns
-  const categoryOptions = useMemo(() => {
-    const categories = [...new Set(projects.map(p => p.category))];
-    return categories.map(cat => ({ label: cat, value: cat }));
-  }, [projects]);
+  // Form setup
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      longDescription: "",
+      category: "Web Application",
+      status: "completed",
+      achievements: [],
+      technologies: [],
+      tags: [],
+      image: "",
+      logo: "",
+      icon: "",
+      liveUrl: "",
+      githubUrl: "",
+      demoUrl: "",
+      caseStudyUrl: "",
+      featured: false,
+      disabled: false,
+      priority: 50,
+      startDate: "",
+      endDate: "",
+      duration: "",
+      teamSize: 1,
+      role: "Full-Stack Developer",
+      clientInfo: {
+        name: "",
+        industry: "",
+        size: "medium",
+        location: "",
+        website: "",
+        isPublic: false,
+      },
+      metrics: {
+        usersReached: 0,
+        performanceImprovement: "",
+        revenueImpact: "",
+        uptime: "",
+        customMetrics: {},
+      },
+      challenges: [],
+      solutions: [],
+    },
+  });
 
-  const statusOptions = useMemo(() => {
-    const statuses = [...new Set(projects.map(p => p.status))];
-    return statuses.map(status => ({ label: status.replace(/-/g, ' '), value: status }));
-  }, [projects]);
+  // Handle form submission with better validation and error handling
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      // Show loading state
+      const loadingToast = toast({
+        title: projectToEdit ? "Updating project..." : "Creating project...",
+        description: "Please wait while we save your project.",
+      });
 
-  // Callback functions for table actions (moved before columns definition)
-  const handleViewProject = useCallback((project: Project) => {
-    setSelectedProject(project);
-    setDetailsOpen(true);
-  }, []);
+      if (projectToEdit) {
+        // Check if this is a local project (can't be updated in Firebase)
+        if (projectToEdit.id.startsWith('local-') || projectToEdit.id.startsWith('fallback-')) {
+          toast({
+            title: "Cannot Edit Local Project",
+            description: "This is a local/demo project. Please create a new project instead.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Update existing project
+        await updateDoc(doc(db, PROJECTS_COLLECTION, projectToEdit.id), {
+          ...values,
+          image: imageUrl || values.image,
+          logo: logoUrl || values.logo,
+          updatedAt: Date.now(),
+          version: (projectToEdit.version || 1) + 1,
+        } as Partial<Project>);
+        
+        toast({
+          title: "Project updated successfully",
+          description: `"${values.title}" has been updated and synced to Firebase.`,
+        });
+      } else {
+        // Add new project
+        const newProject = {
+          ...values,
+          image: imageUrl || values.image,
+          logo: logoUrl || values.logo,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          version: 1,
+        } as ProjectInput;
+        
+        const docRef = await addDoc(collection(db, PROJECTS_COLLECTION), newProject);
+        
+        toast({
+          title: "Project created successfully",
+          description: `"${values.title}" has been added to your portfolio and synced to Firebase.`,
+        });
+      }
+      
+      setIsFormOpen(false);
+      resetForm();
+      setImageUrl("");
+      setImagePath("");
+      setLogoUrl("");
+      setLogoPath("");
+    } catch (error) {
+      console.error("Error saving project:", error);
+      let errorMessage = "Unknown error occurred";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        if (errorMessage.includes('permission')) {
+          errorMessage = "You don't have permission to modify projects. Please check your access rights.";
+        } else if (errorMessage.includes('network')) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        }
+      }
+      
+      toast({
+        title: "Failed to save project",
+        description: `Error: ${errorMessage}. Please try again or contact support if the issue persists.`,
+        variant: "destructive",
+      });
+    }
+  };
 
+  // Reset form
+  const resetForm = useCallback(() => {
+    form.reset({
+      title: "",
+      description: "",
+      longDescription: "",
+      category: "Web Application",
+      status: "completed",
+      achievements: [],
+      technologies: [],
+      tags: [],
+      image: "",
+      logo: "",
+      icon: "",
+      liveUrl: "",
+      githubUrl: "",
+      demoUrl: "",
+      caseStudyUrl: "",
+      featured: false,
+      disabled: false,
+      priority: 50,
+      startDate: "",
+      endDate: "",
+      duration: "",
+      teamSize: 1,
+      role: "Full-Stack Developer",
+      clientInfo: {
+        name: "",
+        industry: "",
+        size: "medium",
+        location: "",
+        website: "",
+        isPublic: false,
+      },
+      metrics: {
+        usersReached: 0,
+        performanceImprovement: "",
+        revenueImpact: "",
+        uptime: "",
+        customMetrics: {},
+      },
+      challenges: [],
+      solutions: [],
+    });
+  }, [form]);
+
+  // Handle edit project
   const handleEditProject = useCallback((project: Project) => {
-    // Navigate to edit project page or open edit dialog
-    window.dispatchEvent(new CustomEvent('edit-project', { detail: project }));
-  }, []);
+    setProjectToEdit(project);
+    form.reset({
+      title: project.title,
+      description: project.description || "",
+      longDescription: project.longDescription || "",
+      category: project.category,
+      status: project.status,
+      achievements: project.achievements || [],
+      technologies: project.technologies || [],
+      tags: project.tags || [],
+      image: project.image || "",
+      logo: project.logo || "",
+      icon: project.icon || "",
+      liveUrl: project.liveUrl || "",
+      githubUrl: project.githubUrl || "",
+      demoUrl: project.demoUrl || "",
+      caseStudyUrl: project.caseStudyUrl || "",
+      featured: project.featured,
+      disabled: project.disabled,
+      priority: project.priority,
+      startDate: project.startDate || "",
+      endDate: project.endDate || "",
+      duration: project.duration || "",
+      teamSize: project.teamSize || 1,
+      role: project.role || "Full-Stack Developer",
+      clientInfo: {
+        name: project.clientInfo?.name || "",
+        industry: project.clientInfo?.industry || "",
+        size: project.clientInfo?.size === "startup" || project.clientInfo?.size === "enterprise" ? "medium" : (project.clientInfo?.size || "medium"),
+        location: project.clientInfo?.location || "",
+        website: project.clientInfo?.website || "",
+        isPublic: project.clientInfo?.isPublic || false,
+      },
+      metrics: {
+        usersReached: project.metrics?.usersReached || 0,
+        performanceImprovement: project.metrics?.performanceImprovement || "",
+        revenueImpact: project.metrics?.revenueImpact || "",
+        uptime: project.metrics?.uptime || "",
+        customMetrics: project.metrics?.customMetrics ? Object.fromEntries(
+          Object.entries(project.metrics.customMetrics).map(([key, value]) => [key, String(value)])
+        ) : {},
+      },
+      challenges: project.challenges || [],
+      solutions: project.solutions || [],
+    });
+    setImageUrl(project.image || "");
+    setLogoUrl(project.logo || "");
+    setIsFormOpen(true);
+  }, [form]);
 
   const handleDuplicateProject = useCallback(async (project: Project) => {
     if (!db) {
@@ -139,11 +435,23 @@ export function ProjectsManager() {
     }
   }, []);
 
+  // Handle delete project with enhanced validation and error handling
   const handleDeleteProject = useCallback(async () => {
     if (!db || !projectToDelete) return;
 
-    try {
+    // Check if this is a local project (can't be deleted from Firebase)
+    if (projectToDelete.id.startsWith('local-') || projectToDelete.id.startsWith('fallback-')) {
       toast({
+        title: "Cannot Delete Local Project",
+        description: "This is a local/demo project and cannot be deleted from Firebase. It will only be hidden in local mode.",
+        variant: "destructive",
+      });
+      setProjectToDelete(null);
+      return;
+    }
+
+    try {
+      const loadingToast = toast({
         title: "Deleting project...",
         description: "Please wait while we remove the project from your portfolio.",
       });
@@ -153,23 +461,25 @@ export function ProjectsManager() {
       
       toast({
         title: "Project deleted successfully",
-        description: `"${projectToDelete.title}" has been permanently removed from your portfolio.`,
+        description: `"${projectToDelete.title}" has been permanently removed from your portfolio and synced to Firebase.`,
       });
     } catch (error) {
       console.error("Error deleting project:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      let errorMessage = "Failed to delete project. Please try again.";
       
-      // Provide specific error guidance
-      let userMessage = "Failed to delete project. Please try again.";
-      if (errorMessage.includes('permission')) {
-        userMessage = "You don't have permission to delete this project. Please check your access rights.";
-      } else if (errorMessage.includes('network')) {
-        userMessage = "Network error. Please check your internet connection and try again.";
+      if (error instanceof Error) {
+        if (error.message.includes('permission')) {
+          errorMessage = "You don't have permission to delete this project. Please check your access rights.";
+        } else if (error.message.includes('network')) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        } else if (error.message.includes('not-found')) {
+          errorMessage = "Project not found. It may have already been deleted.";
+        }
       }
       
       toast({
         title: "Failed to delete project",
-        description: userMessage,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -225,6 +535,17 @@ export function ProjectsManager() {
       });
     }
   }, [projectsToDelete]);
+
+  // Data for filter dropdowns
+  const categoryOptions = useMemo(() => {
+    const categories = [...new Set(projects.map(p => p.category))];
+    return categories.map(cat => ({ label: cat, value: cat }));
+  }, [projects]);
+
+  const statusOptions = useMemo(() => {
+    const statuses = [...new Set(projects.map(p => p.status))];
+    return statuses.map(status => ({ label: status.replace(/-/g, ' '), value: status }));
+  }, [projects]);
 
   // Columns definition
   const columns: ColumnDef<Project>[] = [
@@ -283,37 +604,39 @@ export function ProjectsManager() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <ActionColumn
-          row={row}
-          onView={() => handleViewProject(row.original)}
-          onEdit={() => handleEditProject(row.original)}
-          onDelete={() => setProjectToDelete(row.original)}
-          onDuplicate={() => handleDuplicateProject(row.original)}
-          onToggleStatus={async () => {
-            try {
-              const updatedProject = {
-                ...row.original,
-                featured: !row.original.featured,
-                updatedAt: Date.now(),
-              };
-              
-              if (db) {
-                await updateDoc(doc(db, PROJECTS_COLLECTION, row.original.id), updatedProject);
-                toast({
-                  title: "Project updated",
-                  description: `${row.original.title} featured status has been updated.`,
-                });
-              }
-            } catch (error) {
-              console.error("Error updating project:", error);
-              toast({
-                title: "Failed to update project",
-                description: "Please try again.",
-                variant: "destructive",
-              });
-            }
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedProject(row.original);
+              setDetailsOpen(true);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditProject(row.original)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setProjectToDelete(row.original)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDuplicateProject(row.original)}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -326,15 +649,12 @@ export function ProjectsManager() {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold">Projects Management</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold font-heading">Projects Management</CardTitle>
+              <CardDescription className="font-sans leading-relaxed">
                 Manage your portfolio projects
               </CardDescription>
             </div>
-            <Button 
-              onClick={() => window.dispatchEvent(new CustomEvent('create-project'))}
-              className="shadow-glow"
-            >
+            <Button onClick={() => setIsFormOpen(true)} className="shadow-glow">
               <Plus className="h-4 w-4 mr-2" />
               Add Project
             </Button>
@@ -363,12 +683,469 @@ export function ProjectsManager() {
               setProjectsToDelete(items as Project[]);
               setBulkDeleteOpen(true);
             }}
-            onAdd={() => window.dispatchEvent(new CustomEvent('create-project'))}
-            emptyStateMessage="No projects found"
-            emptyStateDescription="Get started by adding a new project"
+            onAdd={() => setIsFormOpen(true)}
           />
         </CardContent>
       </Card>
+
+      {/* Project Form Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
+          <DialogHeader>
+            <DialogTitle>{projectToEdit ? "Edit Project" : "Add Project"}</DialogTitle>
+            <DialogDescription>
+              {projectToEdit 
+                ? "Update the project details below" 
+                : "Fill in the details for your new project"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Project title" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The name of your project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background text-foreground border-input">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover text-popover-foreground border-border">
+                          <SelectItem value="Web Application">Web Application</SelectItem>
+                          <SelectItem value="Mobile App">Mobile App</SelectItem>
+                          <SelectItem value="Data Pipeline">Data Pipeline</SelectItem>
+                          <SelectItem value="API Service">API Service</SelectItem>
+                          <SelectItem value="Machine Learning">Machine Learning</SelectItem>
+                          <SelectItem value="Cloud Infrastructure">Cloud Infrastructure</SelectItem>
+                          <SelectItem value="DevOps Tool">DevOps Tool</SelectItem>
+                          <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The category this project belongs to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background text-foreground border-input">
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover text-popover-foreground border-border">
+                          <SelectItem value="planning">Planning</SelectItem>
+                          <SelectItem value="in-progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="on-hold">On Hold</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Current status of the project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Your role in the project" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Your role or position in this project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        When did you start working on this project?
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        When did you finish this project? (Leave blank if ongoing)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          max="100" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Display priority (1-100, higher means more prominent)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="teamSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Team Size</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          {...field} 
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Number of people working on this project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Brief description of the project..."
+                        className="min-h-[100px] bg-background text-foreground border-input"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      A short summary of what the project is about
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="longDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Long Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Detailed description of the project..."
+                        className="min-h-[150px] bg-background text-foreground border-input"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      A comprehensive description of the project, including goals, scope, and outcomes
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="technologies"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Technologies</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="React, Node.js, Firebase..." 
+                          {...field} 
+                          value={field.value?.join(", ") || ""}
+                          onChange={(e) => field.onChange(e.target.value.split(",").map(t => t.trim()).filter(t => t))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Technologies used in this project (comma separated)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="web, backend, frontend..." 
+                          {...field} 
+                          value={field.value?.join(", ") || ""}
+                          onChange={(e) => field.onChange(e.target.value.split(",").map(t => t.trim()).filter(t => t))}
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Tags to categorize this project (comma separated)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="liveUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Live URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://project-demo.com" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        URL to the live project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="githubUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GitHub URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://github.com/user/project" 
+                          {...field} 
+                          className="bg-background text-foreground border-input"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        URL to the GitHub repository
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div>
+                  <FormLabel>Project Image</FormLabel>
+                  <ImageUpload
+                    onUploadComplete={(url, path) => {
+                      setImageUrl(url);
+                      setImagePath(path);
+                      form.setValue("image", url);
+                    }}
+                    currentImageUrl={imageUrl}
+                    folder="project-images"
+                  />
+                </div>
+                
+                <div>
+                  <FormLabel>Project Logo</FormLabel>
+                  <ImageUpload
+                    onUploadComplete={(url, path) => {
+                      setLogoUrl(url);
+                      setLogoPath(path);
+                      form.setValue("logo", url);
+                    }}
+                    currentImageUrl={logoUrl}
+                    folder="project-logos"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-6 pt-4">
+                <FormField
+                  control={form.control}
+                  name="featured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Featured Project
+                      </FormLabel>
+                      <FormDescription>
+                        Display this project prominently
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="disabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Disable Project
+                      </FormLabel>
+                      <FormDescription>
+                        Hide this project from display
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <DialogFooter className="gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    resetForm();
+                    setImageUrl("");
+                    setImagePath("");
+                    setLogoUrl("");
+                    setLogoPath("");
+                  }}
+                  className="bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="shadow-glow"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : projectToEdit ? (
+                    <>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Project
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Project
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Project Details Dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>

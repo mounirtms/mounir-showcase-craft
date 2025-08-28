@@ -277,5 +277,270 @@ export const initialProjects: ProjectInput[] = [
     createdAt: 1695945600000,
     updatedAt: 1704931200000,
     version: 1
+  },
+  {
+    title: "AI-Powered Analytics Dashboard",
+    description: "Advanced analytics dashboard with AI-driven insights, real-time data visualization, and predictive analytics for business intelligence.",
+    longDescription: "Developed a sophisticated analytics dashboard that leverages artificial intelligence to provide actionable business insights. Features include real-time data visualization, predictive analytics, automated report generation, and machine learning-powered recommendations. The platform processes millions of data points daily and provides insights that have helped clients increase revenue by up to 40%.",
+    category: "Machine Learning",
+    status: "completed",
+    achievements: [
+      "Increased client revenue by 40%",
+      "Processed 10M+ data points daily",
+      "Achieved 92% prediction accuracy",
+      "Reduced manual reporting by 85%",
+      "Implemented real-time streaming analytics",
+      "Built automated alert systems",
+      "Created custom ML models for forecasting"
+    ],
+    technologies: ["Python", "TensorFlow", "React", "D3.js", "Apache Kafka", "ClickHouse", "Redis", "FastAPI", "Docker", "AWS SageMaker"],
+    tags: ["ai", "machine-learning", "analytics", "real-time", "dashboard", "predictive"],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    logo: "/ai-dashboard-logo.svg",
+    icon: "🤖",
+    liveUrl: "https://analytics.demo-ai.com",
+    githubUrl: "",
+    demoUrl: "https://analytics.demo-ai.com/demo",
+    caseStudyUrl: "",
+    featured: true,
+    disabled: false,
+    priority: 92,
+    startDate: "2024-01-01",
+    endDate: "2024-06-30",
+    duration: "6 months",
+    clientInfo: {
+      name: "Enterprise Analytics Corp",
+      industry: "Business Intelligence",
+      size: "large",
+      location: "United States",
+      website: "https://analytics.demo-ai.com",
+      isPublic: true
+    },
+    metrics: {
+      usersReached: 15000,
+      performanceImprovement: "40% revenue increase",
+      revenueImpact: "$5M+ generated insights",
+      customMetrics: {
+        data_points_daily: "10M",
+        prediction_accuracy: "92%",
+        manual_reporting_reduction: "85%",
+        ml_models: 15
+      }
+    },
+    challenges: [
+      "Real-time data processing at scale",
+      "Complex ML model deployment",
+      "Multi-tenant architecture design",
+      "High-performance data visualization"
+    ],
+    solutions: [
+      "Apache Kafka for real-time streaming",
+      "TensorFlow Serving for model deployment",
+      "Microservices with Docker containers",
+      "WebGL-powered visualization engine"
+    ],
+    teamSize: 8,
+    role: "Lead AI Engineer",
+    createdAt: 1704067200000,
+    updatedAt: 1719705600000,
+    version: 1
+  },
+  {
+    title: "Mobile Banking Application",
+    description: "Secure mobile banking app with biometric authentication, real-time transactions, and advanced security features.",
+    longDescription: "Built a comprehensive mobile banking application from scratch with enterprise-grade security, biometric authentication, real-time transaction processing, and comprehensive financial management tools. The app handles over 100,000 daily transactions with 99.99% uptime and bank-level security standards including end-to-end encryption and fraud detection.",
+    category: "Mobile Application",
+    status: "completed",
+    achievements: [
+      "Handles 100K+ daily transactions",
+      "Achieved 99.99% uptime",
+      "Implemented bank-level security",
+      "Built biometric authentication",
+      "Integrated fraud detection AI",
+      "Supported 5+ languages",
+      "Achieved 4.8/5 user rating"
+    ],
+    technologies: ["React Native", "Node.js", "PostgreSQL", "Redis", "AWS", "Firebase", "Stripe", "Face ID", "Touch ID", "OpenSSL"],
+    tags: ["mobile", "banking", "security", "fintech", "payments", "biometric"],
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
+    logo: "/mobile-banking-logo.svg",
+    icon: "📱",
+    liveUrl: "",
+    githubUrl: "",
+    demoUrl: "",
+    caseStudyUrl: "",
+    featured: true,
+    disabled: false,
+    priority: 88,
+    startDate: "2023-02-01",
+    endDate: "2023-11-30",
+    duration: "10 months",
+    clientInfo: {
+      name: "SecureBank International",
+      industry: "Financial Services",
+      size: "enterprise",
+      location: "International",
+      isPublic: false
+    },
+    metrics: {
+      usersReached: 50000,
+      performanceImprovement: "99.99% uptime",
+      customMetrics: {
+        daily_transactions: "100000",
+        security_incidents: 0,
+        user_rating: "4.8/5",
+        languages_supported: 5,
+        fraud_detection_accuracy: "99.7%"
+      }
+    },
+    challenges: [
+      "Bank-level security implementation",
+      "Real-time transaction processing",
+      "Biometric authentication integration",
+      "Cross-platform compatibility"
+    ],
+    solutions: [
+      "End-to-end encryption with OpenSSL",
+      "Event-driven microservices architecture",
+      "Native biometric API integration",
+      "React Native for unified codebase"
+    ],
+    teamSize: 7,
+    role: "Lead Mobile Developer",
+    createdAt: 1675209600000,
+    updatedAt: 1701388800000,
+    version: 1
+  },
+  {
+    title: "Microservices Migration Platform",
+    description: "Enterprise platform for migrating monolithic applications to microservices architecture with automated deployment.",
+    longDescription: "Designed and implemented a comprehensive platform for migrating legacy monolithic applications to modern microservices architecture. The platform includes automated code analysis, service decomposition recommendations, containerization tools, and deployment automation. Successfully migrated 20+ enterprise applications with 70% reduction in deployment time.",
+    category: "DevOps & Infrastructure",
+    status: "completed",
+    achievements: [
+      "Migrated 20+ enterprise applications",
+      "Reduced deployment time by 70%",
+      "Automated 90% of migration process",
+      "Improved system scalability by 300%",
+      "Reduced infrastructure costs by 40%",
+      "Built automated testing pipelines",
+      "Implemented zero-downtime deployments"
+    ],
+    technologies: ["Docker", "Kubernetes", "Jenkins", "Terraform", "AWS", "Consul", "Istio", "Prometheus", "Grafana", "Helm"],
+    tags: ["microservices", "migration", "devops", "kubernetes", "automation", "enterprise"],
+    image: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop",
+    logo: "/microservices-logo.svg",
+    icon: "🔄",
+    liveUrl: "",
+    githubUrl: "",
+    demoUrl: "",
+    caseStudyUrl: "",
+    featured: false,
+    disabled: false,
+    priority: 82,
+    startDate: "2022-08-01",
+    endDate: "2023-04-30",
+    duration: "9 months",
+    clientInfo: {
+      name: "Multiple Enterprise Clients",
+      industry: "Technology Consulting",
+      size: "enterprise",
+      location: "International",
+      isPublic: false
+    },
+    metrics: {
+      performanceImprovement: "70% faster deployments",
+      customMetrics: {
+        applications_migrated: 20,
+        deployment_time_reduction: "70%",
+        scalability_improvement: "300%",
+        cost_reduction: "40%",
+        automation_level: "90%"
+      }
+    },
+    challenges: [
+      "Complex legacy system dependencies",
+      "Zero-downtime migration requirements",
+      "Multi-tenant architecture design",
+      "Service mesh implementation"
+    ],
+    solutions: [
+      "Automated dependency analysis tools",
+      "Blue-green deployment strategies",
+      "Kubernetes namespace isolation",
+      "Istio service mesh integration"
+    ],
+    teamSize: 6,
+    role: "DevOps Architect",
+    createdAt: 1659312000000,
+    updatedAt: 1682899200000,
+    version: 1
+  },
+  {
+    title: "Real-time Collaboration Platform",
+    description: "WebRTC-powered collaboration platform with video conferencing, shared whiteboards, and document editing.",
+    longDescription: "Developed a comprehensive real-time collaboration platform that enables teams to work together seamlessly with video conferencing, shared whiteboards, collaborative document editing, and project management tools. The platform supports up to 100 concurrent users per session with sub-200ms latency and integrates with popular productivity tools.",
+    category: "Web Application",
+    status: "completed",
+    achievements: [
+      "Supports 100+ concurrent users",
+      "Achieved sub-200ms latency",
+      "Built real-time document editing",
+      "Implemented HD video conferencing",
+      "Created collaborative whiteboard",
+      "Integrated 15+ productivity tools",
+      "Achieved 99.5% user satisfaction"
+    ],
+    technologies: ["React", "Node.js", "WebRTC", "Socket.io", "MongoDB", "Redis", "Nginx", "Docker", "AWS", "WebAssembly"],
+    tags: ["collaboration", "webrtc", "real-time", "video", "productivity", "saas"],
+    image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=600&fit=crop",
+    logo: "/collaboration-logo.svg",
+    icon: "🤝",
+    liveUrl: "https://collaborate.example.com",
+    githubUrl: "",
+    demoUrl: "https://collaborate.example.com/demo",
+    caseStudyUrl: "",
+    featured: false,
+    disabled: false,
+    priority: 78,
+    startDate: "2023-07-01",
+    endDate: "2024-01-31",
+    duration: "7 months",
+    clientInfo: {
+      name: "ProductivityCorp",
+      industry: "Software Development",
+      size: "medium",
+      location: "Europe",
+      website: "https://collaborate.example.com",
+      isPublic: true
+    },
+    metrics: {
+      usersReached: 25000,
+      performanceImprovement: "Sub-200ms latency",
+      customMetrics: {
+        concurrent_users_max: 100,
+        latency_ms: 180,
+        user_satisfaction: "99.5%",
+        tool_integrations: 15,
+        session_duration_avg: "45min"
+      }
+    },
+    challenges: [
+      "Real-time synchronization at scale",
+      "WebRTC connection optimization",
+      "Cross-browser compatibility",
+      "Low-latency global distribution"
+    ],
+    solutions: [
+      "Operational transformation algorithms",
+      "TURN/STUN server optimization",
+      "WebAssembly for performance-critical code",
+      "CDN with edge computing"
+    ],
+    teamSize: 5,
+    role: "Full-Stack Developer",
+    createdAt: 1688169600000,
+    updatedAt: 1706745600000,
+    version: 1
   }
 ];

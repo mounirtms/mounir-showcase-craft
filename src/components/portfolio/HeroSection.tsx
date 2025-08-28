@@ -332,11 +332,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <span>Hello, I'm</span>
               </div>
               
-              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight font-heading tracking-tight">
                 {name}
               </h1>
               
-              <div className="text-2xl lg:text-3xl font-semibold text-primary min-h-[2em]">
+              <div className="text-2xl lg:text-3xl font-semibold text-primary min-h-[2em] font-heading tracking-normal">
                 {enableTypingEffect && !prefersReducedMotion ? (
                   <span>
                     {animatedTitle}
@@ -349,7 +349,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Description */}
-            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
+            <p className="text-xl text-gray-600 leading-relaxed max-w-2xl font-sans">
               {description}
             </p>
 

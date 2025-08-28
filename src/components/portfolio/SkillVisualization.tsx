@@ -91,6 +91,33 @@ const CATEGORY_CONFIG = {
   }
 };
 
+// Skill-specific colors for more variety
+const SKILL_COLORS: Record<string, string> = {
+  // Frontend
+  react: "#61DAFB",
+  typescript: "#3178C6",
+  nextjs: "#000000",
+  tailwind: "#06B6D4",
+  vue: "#4FC08D",
+  angular: "#DD0031",
+  
+  // Backend & ETL
+  nodejs: "#339933",
+  python: "#3776AB",
+  postgresql: "#336791",
+  mongodb: "#47A248",
+  kafka: "#231F20",
+  airflow: "#00C7D4",
+  
+  // DevOps & Cloud
+  docker: "#2496ED",
+  aws: "#FF9900",
+  firebase: "#FFCA28",
+  kubernetes: "#326CE5",
+  terraform: "#623CE4",
+  jenkins: "#D24939"
+};
+
 // Progress ring component
 interface ProgressRingProps {
   progress: number;
@@ -243,7 +270,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         <div className="flex flex-col items-center space-y-2">
           <ProgressRing
             progress={skill.level}
-            color={skill.color || category.color.replace('bg-', '#')}
+            color={skill.color || SKILL_COLORS[skill.id] || category.color.replace('bg-', '#')}
             animated={true}
             duration={animationDuration}
             size={100}
@@ -251,8 +278,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
           />
           
           <div className="text-center">
-            <h3 className="font-semibold text-sm">{skill.name}</h3>
-            <p className="text-xs text-muted-foreground">{skill.experience}</p>
+            <h3 className="font-semibold text-sm font-heading">{skill.name}</h3>
+            <p className="text-xs text-muted-foreground font-sans">{skill.experience}</p>
           </div>
           
           {skill.trending && (
@@ -296,7 +323,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           {/* Progress Ring */}
           <ProgressRing
             progress={skill.level}
-            color={skill.color || category.color.replace('bg-', '#')}
+            color={skill.color || SKILL_COLORS[skill.id] || category.color.replace('bg-', '#')}
             animated={true}
             duration={animationDuration}
             size={layout === "list" ? 60 : 80}

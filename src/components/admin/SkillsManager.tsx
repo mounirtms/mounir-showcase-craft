@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useSkills, type Skill } from "@/hooks/useSkills";
+import { useSkills, type Skill, type SkillCategory } from "@/hooks/useSkills";
 import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DataTable, ActionColumn } from "@/components/ui/data-table";
@@ -147,9 +147,15 @@ export function SkillsManager() {
     },
   });
 
-  // Handle form submission
+  // Handle form submission with enhanced validation and error handling
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Show loading state
+      const loadingToast = toast({
+        title: skillToEdit ? "Updating skill..." : "Creating skill...",
+        description: "Please wait while we save your skill.",
+      });
+
       if (skillToEdit) {
         // Check if this is a local skill (can't be updated in Firebase)
         if (skillToEdit.id.startsWith('local-') || skillToEdit.id.startsWith('fallback-')) {
@@ -168,36 +174,56 @@ export function SkillsManager() {
           disabled: values.disabled ?? false,
           updatedAt: Date.now(),
         } as Partial<Skill>);
+        
         toast({
-          title: "Skill updated",
-          description: `${values.name} has been updated successfully.`,
+          title: "Skill updated successfully",
+          description: `"${values.name}" has been updated and synced to Firebase.`,
         });
       } else {
         // Add new skill
         await addSkill({
-          ...values,
-          icon: iconUrl || values.icon,
+          name: values.name,
+          category: values.category as SkillCategory,
+          level: values.level,
+          yearsOfExperience: values.yearsOfExperience,
+          description: values.description || "",
+          icon: iconUrl || values.icon || "",
+          color: values.color || "",
           certifications: [],
           projects: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
           disabled: values.disabled ?? false,
-        } as SkillInput);
+          featured: values.featured ?? false,
+          priority: values.priority ?? 50,
+        });
+        
         toast({
-          title: "Skill added",
-          description: `${values.name} has been added successfully.`,
+          title: "Skill created successfully",
+          description: `"${values.name}" has been added to your skills and synced to Firebase.`,
         });
       }
+      
       setIsFormOpen(false);
       resetForm();
       setIconUrl("");
       setIconPath("");
     } catch (error) {
       console.error("Error saving skill:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      let errorMessage = "Unknown error occurred";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        if (errorMessage.includes('permission')) {
+          errorMessage = "You don't have permission to modify skills. Please check your access rights.";
+        } else if (errorMessage.includes('network')) {
+          errorMessage = "Network error. Please check your internet connection and try again.";
+        }
+      }
+      
       toast({
         title: "Failed to save skill",
-        description: errorMessage,
+        description: `Error: ${errorMessage}. Please try again or contact support if the issue persists.`,
         variant: "destructive",
       });
     }
@@ -390,53 +416,22 @@ export function SkillsManager() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <ActionColumn
-          row={row}
-          onView={() => console.log("View skill", row.original)}
-          onEdit={() => handleEditSkill(row.original)}
-          onDelete={() => handleDeleteSkill(row.original)}
-          onDuplicate={() => console.log("Duplicate skill", row.original)}
-          onToggleStatus={async () => {
-            try {
-              await updateSkill(row.original.id, {
-                ...row.original,
-                disabled: !row.original.disabled,
-                updatedAt: Date.now(),
-              } as Partial<Skill>);
-              toast({
-                title: "Skill updated",
-                description: `${row.original.name} status has been updated.`,
-              });
-            } catch (error) {
-              console.error("Error updating skill:", error);
-              toast({
-                title: "Failed to update skill",
-                description: "Please try again.",
-                variant: "destructive",
-              });
-            }
-          }}
-          onToggleFeatured={async () => {
-            try {
-              await updateSkill(row.original.id, {
-                ...row.original,
-                featured: !row.original.featured,
-                updatedAt: Date.now(),
-              } as Partial<Skill>);
-              toast({
-                title: "Skill updated",
-                description: `${row.original.name} featured status has been updated.`,
-              });
-            } catch (error) {
-              console.error("Error updating skill:", error);
-              toast({
-                title: "Failed to update skill",
-                description: "Please try again.",
-                variant: "destructive",
-              });
-            }
-          }}
-        />
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditSkill(row.original)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteSkill(row.original)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -460,8 +455,8 @@ export function SkillsManager() {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold">Skills Management</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-bold font-heading">Skills Management</CardTitle>
+              <CardDescription className="font-sans leading-relaxed">
                 Manage your technical skills and expertise
               </CardDescription>
             </div>
@@ -495,8 +490,6 @@ export function SkillsManager() {
               setBulkDeleteOpen(true);
             }}
             onAdd={() => setIsFormOpen(true)}
-            emptyStateMessage="No skills found"
-            emptyStateDescription="Get started by adding a new skill"
           />
         </CardContent>
       </Card>
@@ -731,8 +724,7 @@ export function SkillsManager() {
                   }}
                   currentImageUrl={iconUrl}
                   folder="skill-icons"
-                  title="Skill Icon"
-                  description="Upload an icon for this skill (optional)"
+                  label="Skill Icon"
                 />
               </div>
               

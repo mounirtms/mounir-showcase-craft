@@ -319,14 +319,14 @@ export function AdminDataTable<TData, TValue>({
 
   return (
     <Card className="border-0 shadow-medium bg-card text-card-foreground" role="region" aria-labelledby="admin-table-title">
-      <CardHeader className="bg-muted/50 dark:bg-muted/30">
+      <CardHeader className="bg-muted/50">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle id="admin-table-title" className="text-xl font-semibold">
+            <CardTitle id="admin-table-title" className="text-xl font-semibold font-heading">
               {title}
             </CardTitle>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1 font-sans leading-relaxed">
                 {description}
               </p>
             )}
@@ -488,11 +488,11 @@ export function AdminDataTable<TData, TValue>({
           {virtualScrolling && data.length > 50 ? (
             <div>
               {/* Sticky Header */}
-              <div className={cn("bg-muted/50 dark:bg-muted/30", stickyHeader && "sticky top-0 z-10")}>
+              <div className={cn("bg-muted/50", stickyHeader && "sticky top-0 z-10")}>
                 <Table>
                   <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id} className="bg-muted/50 dark:bg-muted/30 hover:bg-muted/70 dark:hover:bg-muted/50">
+                      <TableRow key={headerGroup.id} className="bg-muted/50 hover:bg-muted/70">
                         {headerGroup.headers.map((header) => (
                           <TableHead 
                             key={header.id} 
@@ -504,7 +504,7 @@ export function AdminDataTable<TData, TValue>({
                                 <div
                                   className={cn(
                                     "flex items-center space-x-2",
-                                    header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 dark:hover:bg-muted/30 rounded p-1 -m-1"
+                                    header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/50 rounded p-1 -m-1"
                                   )}
                                   onClick={header.column.getToggleSortingHandler()}
                                 >

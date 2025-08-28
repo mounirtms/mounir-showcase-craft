@@ -366,10 +366,10 @@ const FormField: React.FC<FormFieldProps> = ({
   const isValid = touched && !error && value.trim() !== '';
 
   const inputClasses = cn(
-    "transition-all duration-200 bg-white/50 dark:bg-slate-800/50 border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-offset-2",
-    hasError && "border-red-400 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50 dark:bg-red-900/20",
-    hasWarning && "border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500/20 bg-yellow-50/50 dark:bg-yellow-900/20",
-    isValid && "border-green-400 focus:border-green-500 focus:ring-green-500/20 bg-green-50/50 dark:bg-green-900/20",
+    "transition-all duration-200 bg-white/50 border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-offset-2",
+    hasError && "border-red-400 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50",
+    hasWarning && "border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500/20 bg-yellow-50/50",
+    isValid && "border-green-400 focus:border-green-500 focus:ring-green-500/20 bg-green-50/50",
     !hasError && !hasWarning && !isValid && "border-border hover:border-primary/50 focus:border-primary focus:ring-primary/20"
   );
 
@@ -379,7 +379,7 @@ const FormField: React.FC<FormFieldProps> = ({
 
   return (
     <div className="space-y-3">
-      <label htmlFor={name} className="text-sm font-semibold text-foreground flex items-center gap-2">
+      <label htmlFor={name} className="text-sm font-semibold text-foreground flex items-center gap-2 font-heading">
         <div className="p-1 rounded-md bg-primary/10 text-primary">
           {field.icon}
         </div>

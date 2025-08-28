@@ -155,8 +155,9 @@ const IconToggle: React.FC<{ size?: "sm" | "md" | "lg"; showLabel?: boolean }> =
 }) => {
   const { theme, setTheme, actualTheme } = useTheme();
   
+  // Always stay in light theme
   const toggleTheme = () => {
-    setTheme(actualTheme === "dark" ? "light" : "dark");
+    setTheme("light");
   };
 
   const sizeClasses = {
@@ -174,29 +175,25 @@ const IconToggle: React.FC<{ size?: "sm" | "md" | "lg"; showLabel?: boolean }> =
         "relative transition-all duration-300 hover:scale-110",
         sizeClasses[size]
       )}
-      aria-label={`Switch to ${actualTheme === "dark" ? "light" : "dark"} mode`}
+      aria-label="Switch to light mode"
     >
       <div className="relative w-full h-full">
         <Sun
           className={cn(
             "absolute inset-0 m-auto transition-all duration-300",
-            actualTheme === "dark" 
-              ? "rotate-90 scale-0 opacity-0" 
-              : "rotate-0 scale-100 opacity-100"
+            "rotate-0 scale-100 opacity-100"
           )}
         />
         <Moon
           className={cn(
             "absolute inset-0 m-auto transition-all duration-300",
-            actualTheme === "dark" 
-              ? "rotate-0 scale-100 opacity-100" 
-              : "-rotate-90 scale-0 opacity-0"
+            "-rotate-90 scale-0 opacity-0"
           )}
         />
       </div>
       {showLabel && (
         <span className="sr-only">
-          {actualTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          {"Switch to light mode"}
         </span>
       )}
     </Button>
@@ -491,7 +488,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       <Button
         variant="outline"
         size={size}
-        onClick={() => setTheme(actualTheme === "dark" ? "light" : "dark")}
+        onClick={() => setTheme("light")}
         className={cn("gap-2 transition-all duration-300", className)}
       >
         <div className="relative">

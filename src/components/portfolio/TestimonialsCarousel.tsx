@@ -184,14 +184,14 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         return (
           <div className="text-center space-y-4">
             <Quote className="w-8 h-8 text-primary mx-auto opacity-50" />
-            <blockquote className="text-lg italic text-muted-foreground">
+            <blockquote className="text-lg italic text-muted-foreground leading-relaxed font-sans">
               "{testimonial.content}"
             </blockquote>
             <div className="flex items-center justify-center gap-3">
               {renderAvatar()}
               <div>
-                <p className="font-semibold">{testimonial.name}</p>
-                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                <p className="font-semibold text-lg font-heading">{testimonial.name}</p>
+                <p className="text-sm text-muted-foreground font-sans">{testimonial.role}</p>
               </div>
             </div>
           </div>
@@ -204,8 +204,8 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <p className="font-semibold text-sm">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-semibold text-sm font-heading">{testimonial.name}</p>
+                  <p className="text-xs text-muted-foreground font-sans">
                     {testimonial.role} at {testimonial.company}
                   </p>
                 </div>
@@ -213,7 +213,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
                   <Rating rating={testimonial.rating} size="sm" />
                 )}
               </div>
-              <p className="text-sm text-muted-foreground line-clamp-3">
+              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed font-sans">
                 "{testimonial.content}"
               </p>
             </div>
@@ -227,11 +227,11 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
               <div className="flex gap-4">
                 {renderAvatar()}
                 <div>
-                  <h4 className="font-semibold">{testimonial.name}</h4>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <h4 className="font-semibold text-lg font-heading">{testimonial.name}</h4>
+                  <p className="text-sm text-muted-foreground font-sans">{testimonial.role}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Building className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">{testimonial.company}</span>
+                    <span className="text-xs text-muted-foreground font-sans">{testimonial.company}</span>
                   </div>
                 </div>
               </div>
@@ -251,15 +251,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 
             <blockquote className="text-muted-foreground italic relative">
               <Quote className="w-6 h-6 text-primary/30 absolute -top-2 -left-2" />
-              <p className="relative z-10">{testimonial.content}</p>
+              <p className="relative z-10 text-lg leading-relaxed font-sans">{testimonial.content}</p>
             </blockquote>
 
             {(testimonial.projectType || testimonial.skills) && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {testimonial.projectType && (
                   <div>
-                    <span className="text-xs font-medium text-muted-foreground">Project:</span>
-                    <Badge variant="secondary" className="ml-2 text-xs">
+                    <span className="text-xs font-medium text-muted-foreground font-sans">Project:</span>
+                    <Badge variant="secondary" className="ml-2 text-xs font-sans">
                       {testimonial.projectType}
                     </Badge>
                   </div>
@@ -267,15 +267,15 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
                 
                 {testimonial.skills && testimonial.skills.length > 0 && (
                   <div>
-                    <span className="text-xs font-medium text-muted-foreground">Skills:</span>
+                    <span className="text-xs font-medium text-muted-foreground font-sans">Skills:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {testimonial.skills.slice(0, 4).map(skill => (
-                        <Badge key={skill} variant="outline" className="text-xs">
+                        <Badge key={skill} variant="outline" className="text-xs font-sans">
                           {skill}
                         </Badge>
                       ))}
                       {testimonial.skills.length > 4 && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs font-sans">
                           +{testimonial.skills.length - 4}
                         </Badge>
                       )}
@@ -286,9 +286,9 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             )}
 
             {(testimonial.linkedInUrl || testimonial.companyUrl) && (
-              <div className="flex gap-2 pt-2 border-t">
+              <div className="flex gap-2 pt-4 border-t border-border">
                 {testimonial.linkedInUrl && (
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="font-sans">
                     <a href={testimonial.linkedInUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3 h-3 mr-1" />
                       LinkedIn
@@ -296,7 +296,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
                   </Button>
                 )}
                 {testimonial.companyUrl && (
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="font-sans">
                     <a href={testimonial.companyUrl} target="_blank" rel="noopener noreferrer">
                       <Building className="w-3 h-3 mr-1" />
                       Company
@@ -304,7 +304,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
                   </Button>
                 )}
                 {onShare && (
-                  <Button variant="ghost" size="sm" onClick={onShare}>
+                  <Button variant="ghost" size="sm" onClick={onShare} className="font-sans">
                     <Share2 className="w-3 h-3 mr-1" />
                     Share
                   </Button>
@@ -320,8 +320,8 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             <div className="flex items-center gap-3">
               {renderAvatar()}
               <div className="flex-1">
-                <h4 className="font-semibold">{testimonial.name}</h4>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-semibold text-lg font-heading">{testimonial.name}</h4>
+                <p className="text-sm text-muted-foreground font-sans">
                   {testimonial.role} at {testimonial.company}
                 </p>
               </div>
@@ -330,14 +330,14 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
               )}
             </div>
 
-            <blockquote className="text-muted-foreground italic">
+            <blockquote className="text-muted-foreground italic text-lg leading-relaxed font-sans">
               "{testimonial.content}"
             </blockquote>
 
             {testimonial.tags && testimonial.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {testimonial.tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
+                  <Badge key={tag} variant="secondary" className="text-xs font-sans">
                     {tag}
                   </Badge>
                 ))}
@@ -376,7 +376,7 @@ export const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   testimonials,
   config = {},
   className,
-  cardVariant = "default",
+  cardVariant = "detailed",
   showFilters = false,
   onTestimonialClick,
   onShare,

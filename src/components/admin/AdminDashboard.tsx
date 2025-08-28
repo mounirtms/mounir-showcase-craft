@@ -95,7 +95,7 @@ export function AdminDashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className={`border-0 shadow-sm ${actualTheme === 'dark' ? 'bg-slate-800/50' : 'bg-white/50'} dark:bg-slate-800/50`}>
+        <Card className={`border-0 shadow-sm bg-white/50`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Skills</CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
@@ -108,7 +108,7 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card className={`border-0 shadow-sm ${actualTheme === 'dark' ? 'bg-slate-800/50' : 'bg-white/50'} dark:bg-slate-800/50`}>
+        <Card className={`border-0 shadow-sm bg-white/50`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -121,7 +121,7 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card className={`border-0 shadow-sm ${actualTheme === 'dark' ? 'bg-slate-800/50' : 'bg-white/50'} dark:bg-slate-800/50`}>
+        <Card className={`border-0 shadow-sm bg-white/50`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Data Status</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
@@ -136,7 +136,7 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
         
-        <Card className={`border-0 shadow-sm ${actualTheme === 'dark' ? 'bg-slate-800/50' : 'bg-white/50'} dark:bg-slate-800/50`}>
+        <Card className={`border-0 shadow-sm bg-white/50`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Export Data</CardTitle>
             <Download className="h-4 w-4 text-muted-foreground" />
@@ -152,28 +152,28 @@ export function AdminDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-muted dark:bg-muted/50">
+        <TabsList className="grid w-full grid-cols-4 bg-muted">
           <TabsTrigger 
             value="overview" 
-            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800/50"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger 
             value="skills" 
-            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800/50"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Skills
           </TabsTrigger>
           <TabsTrigger 
             value="projects" 
-            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800/50"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Projects
           </TabsTrigger>
           <TabsTrigger 
             value="analytics" 
-            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800/50"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Analytics
           </TabsTrigger>

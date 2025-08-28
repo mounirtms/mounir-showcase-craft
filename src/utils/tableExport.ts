@@ -9,7 +9,7 @@ export interface ExportColumn {
 }
 
 export interface ExportOptions {
-  format: "csv" | "json" | "xlsx";
+  format?: "csv" | "json" | "xlsx";
   filename?: string;
   includeHeaders?: boolean;
   selectedOnly?: boolean;

@@ -246,7 +246,7 @@ const ProjectCard3D: React.FC<ProjectCard3DProps> = ({
           {/* Header */}
           <div className="space-y-2">
             <div className="flex items-start justify-between">
-              <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+              <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors font-heading">
                 {project.title}
               </h3>
               <Badge variant="outline" className={cn(category.lightColor, "text-xs")}>

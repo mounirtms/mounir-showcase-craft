@@ -250,7 +250,7 @@ const TimelineItemComponent: React.FC<TimelineItemComponentProps> = ({
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-lg leading-tight">
+                  <CardTitle className="text-lg leading-tight font-heading">
                     {item.title}
                   </CardTitle>
                   

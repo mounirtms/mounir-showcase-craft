@@ -38,10 +38,10 @@ const Index = () => {
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Contact CTA */}
           <div className="text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight">
               Ready to Build Something Amazing?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-sans leading-relaxed">
               Let's transform your ideas into scalable, high-performance solutions that drive real business results.
             </p>
             
@@ -79,19 +79,19 @@ const Index = () => {
           {/* Featured Work */}
           <div className="grid gap-6">
             <div className="text-center">
-              <h3 className="text-xl font-bold mb-2">Recent Collaborations</h3>
-              <p className="text-muted-foreground mb-6">Explore some of my latest professional projects</p>
+              <h3 className="text-xl font-bold mb-2 font-heading">Recent Collaborations</h3>
+              <p className="text-muted-foreground mb-6 font-sans">Explore some of my latest professional projects</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <h4 className="font-semibold text-primary">Enterprise Solutions</h4>
+                <h4 className="font-semibold text-primary font-heading">Enterprise Solutions</h4>
                 <div className="flex flex-wrap gap-2 text-sm">
                   <a
                     href="https://hotech.systems"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     Hotech Systems
@@ -100,7 +100,7 @@ const Index = () => {
                     href="https://technostationery.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     Techno Stationery
@@ -109,7 +109,7 @@ const Index = () => {
                     href="https://etl.techno-dz.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     ETL Platform
@@ -118,13 +118,13 @@ const Index = () => {
               </div>
               
               <div className="space-y-3">
-                <h4 className="font-semibold text-primary">Web Applications</h4>
+                <h4 className="font-semibold text-primary font-heading">Web Applications</h4>
                 <div className="flex flex-wrap gap-2 text-sm">
                   <a
                     href="https://jskit-app.web.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     JSKit Developer Tools
@@ -133,7 +133,7 @@ const Index = () => {
                     href="https://www.nooralmaarifa.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     Noor Al Maarifa
@@ -142,7 +142,7 @@ const Index = () => {
                     href="https://it-collaborator-techno.web.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+                    className="inline-flex items-center gap-1 px-3 py-1 border rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-xs font-sans"
                   >
                     <ExternalLink className="w-3 h-3" />
                     IT Collaborator
@@ -159,10 +159,10 @@ const Index = () => {
             </div>
             
             <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-sans">
                 &copy; 2025 Mounir Abderrahmani. Crafted with passion using modern web technologies.
               </p>
-              <p className="text-xs text-muted-foreground/70">
+              <p className="text-xs text-muted-foreground/70 font-sans">
                 Built with React, TypeScript, Tailwind CSS, and Firebase • Optimized for Performance & Accessibility
               </p>
             </div>

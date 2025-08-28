@@ -16,7 +16,7 @@ import Admin from "./pages/Admin";
 const App = () => (
   <ErrorBoundary>
     <AccessibilityProvider>
-      <ThemeProvider defaultTheme="system" storageKey="mounir-portfolio-theme">
+      <ThemeProvider defaultTheme="light" storageKey="mounir-portfolio-theme">
         <TooltipProvider>
             <Toaster />
             <Sonner />

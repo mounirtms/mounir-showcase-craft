@@ -202,8 +202,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex-1 p-6 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                  <p className="text-muted-foreground">{project.description}</p>
+                  <h3 className="text-xl font-bold mb-2 font-heading">{project.title}</h3>
+                  <p className="text-muted-foreground font-sans">{project.description}</p>
                 </div>
                 <Badge variant="outline" className={cn(category.color, "text-white")}>
                   {category.icon}

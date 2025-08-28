@@ -215,7 +215,7 @@ export function AnalyticsDashboard() {
                     <p className="text-xs text-muted-foreground mt-1">{metric.description}</p>
                   )}
                 </div>
-                <div className={`p-3 rounded-xl bg-${metric.color.split('-')[1]}-100 dark:bg-${metric.color.split('-')[1]}-900/20`}>
+                <div className={`p-3 rounded-xl bg-${metric.color.split('-')[1]}-100`}>
                   <div className={metric.color}>
                     {metric.icon}
                   </div>

@@ -29,17 +29,7 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(() => {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return defaultTheme;
-    }
-    try {
-      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
-    } catch (error) {
-      console.warn('Failed to read from localStorage:', error);
-      return defaultTheme;
-    }
-  });
+  const [theme, setTheme] = React.useState<Theme>('light');
 
   const [actualTheme, setActualTheme] = React.useState<"dark" | "light">("light");
 
@@ -50,19 +40,8 @@ export function ThemeProvider({
 
     root.classList.remove("light", "dark")
 
-    let resolvedTheme: "dark" | "light" = "light"
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-      resolvedTheme = systemTheme
-      root.classList.add(systemTheme)
-    } else {
-      resolvedTheme = theme
-      root.classList.add(theme)
-    }
+    const resolvedTheme: "dark" | "light" = "light"
+    root.classList.add("light")
 
     setActualTheme(resolvedTheme)
 
@@ -100,23 +79,7 @@ export function ThemeProvider({
     }
   }, [theme])
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-
-    const handleChange = () => {
-      if (theme === "system") {
-        const systemTheme = mediaQuery.matches ? "dark" : "light"
-        document.documentElement.classList.remove("light", "dark")
-        document.documentElement.classList.add(systemTheme)
-        setActualTheme(systemTheme)
-      }
-    }
-
-    mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [theme])
+  // Removed dark theme listener to force light theme only
 
   const value = {
     theme,
