@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchField } from "@/components/ui/search-field";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Trophy, 
   Zap, 
@@ -15,12 +17,14 @@ import {
   Filter,
   Search,
   SortAsc,
-  X
+  X,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useAccessibility";
 import { motion, AnimatePresence } from "framer-motion";
-import { trackButtonClick } from "@/utils/analytics";
+import { trackButtonClick, trackSkillInteraction } from "@/utils/analytics";
 
 // Skill data interface
 export interface Skill {
@@ -266,19 +270,12 @@ const SkillCard: React.FC<{
   };
 
   return (
-    <motion.div
-      whileHover={{ 
-        y: reducedMotion ? 0 : -5,
-        scale: reducedMotion ? 1 : 1.03
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-    >
+    <div>
       <Card
         className={cn(
-          "transition-all duration-300 hover:shadow-lg border-border/50",
+          "transition-all duration-200 hover:shadow-md border-border/50",
           enableClick && "cursor-pointer",
-          isHovered && enableHover && "shadow-xl border-primary/30 transform scale-[1.01]",
+          isHovered && enableHover && "shadow-lg border-primary/20",
           layout === "list" && "flex items-center"
         )}
         onMouseEnter={handleMouseEnter}
@@ -345,7 +342,7 @@ const SkillCard: React.FC<{
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 
@@ -361,7 +358,7 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
   layout = "grid",
   sortBy: initialSortBy = "level",
   sortOrder: initialSortOrder = "desc",
-  animationDuration = 1000,
+  animationDuration = 500,
   enableClick = false,
   enableHover = true,
   onSkillClick,
@@ -380,42 +377,43 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
   useEffect(() => {
     let filtered = [...allSkills];
 
-    // Filter by category
+    // Apply category filter
     if (selectedCategory) {
       filtered = filtered.filter(skill => skill.category === selectedCategory);
     }
 
-    // Filter by search term
-    if (searchTerm) {
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(skill => 
-        skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (skill.description && skill.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        skill.category.toLowerCase().includes(searchTerm.toLowerCase())
+        skill.name.toLowerCase().includes(searchLower) ||
+        skill.description.toLowerCase().includes(searchLower) ||
+        skill.category.toLowerCase().includes(searchLower)
       );
     }
 
-    // Sort skills
+    // Apply sorting
     filtered.sort((a, b) => {
-      let aValue, bValue;
+      let aValue: any, bValue: any;
       
       switch (currentSort.by) {
-        case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
         case "level":
           aValue = a.level;
           bValue = b.level;
           break;
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
         case "experience":
-          aValue = a.experience.toLowerCase();
-          bValue = b.experience.toLowerCase();
+          aValue = a.experience;
+          bValue = b.experience;
           break;
         default:
           aValue = a.level;
           bValue = b.level;
       }
-      
+
       if (currentSort.order === "asc") {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -426,191 +424,215 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
     setFilteredSkills(filtered);
   }, [allSkills, selectedCategory, searchTerm, currentSort]);
 
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory(null);
-  };
-
-  // Get unique categories
-  const skillCategories = Array.from(new Set(allSkills.map(skill => skill.category)));
-
-  // Set default category to frontend if available and no default is set
-  useEffect(() => {
-    if (defaultCategory === null && skillCategories.length > 0) {
-      // Default to frontend category if it exists, otherwise first category
-      const frontendCategory = skillCategories.find(cat => cat === "frontend");
-      setSelectedCategory(frontendCategory || skillCategories[0]);
-    } else if (defaultCategory && skillCategories.includes(defaultCategory as any)) {
-      setSelectedCategory(defaultCategory);
-    }
-  }, [defaultCategory, skillCategories]);
+  // Get available categories
+  const availableCategories = useMemo(() => {
+    const categories = [...new Set(allSkills.map(skill => skill.category))];
+    return categories.map(cat => ({
+      value: cat,
+      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+      count: allSkills.filter(skill => skill.category === cat).length
+    }));
+  }, [allSkills]);
 
   // Layout classes
   const layoutClasses = {
-    grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4",
+    grid: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4",
     list: "space-y-3",
-    circles: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6"
+    circles: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+  };
+
+  // Handle category change
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
+    trackSkillInteraction('category_filter', 'filter', { 
+      category: category || 'all',
+      skills_count: filteredSkills.length 
+    });
+  };
+
+  // Handle search change
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (value.trim()) {
+      trackSkillInteraction('search', 'search', { 
+        search_term: value,
+        results_count: filteredSkills.length 
+      });
+    }
+  };
+
+  // Handle sort change
+  const handleSortChange = (sortBy: string, sortOrder: string) => {
+    setCurrentSort({ by: sortBy as any, order: sortOrder as any });
+    trackSkillInteraction('sort', 'sort', { 
+      sort_by: sortBy,
+      sort_order: sortOrder 
+    });
   };
 
   return (
-    <div ref={containerRef} className={cn("space-y-6", className)}>
-      {/* Controls */}
+    <div className={cn("space-y-6", className)} ref={containerRef}>
+      {/* Filters and Controls */}
       {(showFilters || showSearch) && (
         <div className="space-y-4">
-          {/* Search */}
-          {showSearch && (
-            <SearchField
-              placeholder="Search skills..."
-              value={searchTerm}
-              onValueChange={setSearchTerm}
-              variant="glass"
-              size="md"
-              className="max-w-md"
-              showClearButton={true}
-            />
-          )}
+          {/* Mobile Filter Toggle */}
+          <div className="md:hidden">
+            <Button
+              variant="outline"
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="w-full"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {showMobileFilters ? 'Hide' : 'Show'} Filters
+            </Button>
+          </div>
 
-          {/* Filters and Sort */}
-          {showFilters && (
-            <div className="flex flex-wrap items-center gap-4">
+          {/* Desktop Filters */}
+          <div className={cn(
+            "space-y-4",
+            showMobileFilters ? "block" : "hidden md:block"
+          )}>
+            {/* Search */}
+            {showSearch && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search skills..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            )}
+
+            {/* Category and Sort Controls */}
+            <div className="flex flex-col sm:flex-row gap-4">
               {/* Category Filter */}
-              {showCategories && (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant={selectedCategory === null ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(null)}
-                  >
-                    All Categories
-                  </Button>
-                  {skillCategories.map(category => {
-                    const categoryKey = category as keyof typeof CATEGORY_CONFIG;
-                    const config = CATEGORY_CONFIG[categoryKey] || {
-                      label: category,
-                      icon: <Filter className="w-4 h-4" />,
-                      color: "bg-gray-500",
-                      lightColor: "bg-gray-100"
-                    };
-                    
-                    return (
-                      <Button
-                        key={category}
-                        variant={selectedCategory === category ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedCategory(category)}
-                        className="gap-2"
-                      >
-                        {config.icon}
-                        <span className="capitalize">{config.label}</span>
-                      </Button>
-                    );
-                  })}
+              {showCategories && availableCategories.length > 0 && (
+                <div className="flex-1">
+                  <Select value={selectedCategory || ""} onValueChange={handleCategoryChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Categories ({allSkills.length})</SelectItem>
+                      {availableCategories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label} ({category.count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
-              {/* Sort */}
-              <div className="flex items-center gap-2">
-                <SortAsc className="w-4 h-4 text-muted-foreground" />
-                <select
-                  value={`${currentSort.by}-${currentSort.order}`}
-                  onChange={(e) => {
-                    const [by, order] = e.target.value.split('-') as ["level" | "name" | "experience", "asc" | "desc"];
-                    setCurrentSort({ by, order });
-                  }}
-                  className="px-3 py-1 border rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+              {/* Sort Control */}
+              <div className="flex gap-2">
+                <Select 
+                  value={currentSort.by} 
+                  onValueChange={(value) => handleSortChange(value, currentSort.order)}
                 >
-                  <option value="level-desc">Level (High to Low)</option>
-                  <option value="level-asc">Level (Low to High)</option>
-                  <option value="name-asc">Name (A-Z)</option>
-                  <option value="name-desc">Name (Z-A)</option>
-                  <option value="experience-desc">Experience (High to Low)</option>
-                  <option value="experience-asc">Experience (Low to High)</option>
-                </select>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="level">Level</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="experience">Experience</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleSortChange(currentSort.by, currentSort.order === "asc" ? "desc" : "asc")}
+                >
+                  {currentSort.order === "asc" ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                </Button>
               </div>
             </div>
-          )}
+
+            {/* Results Summary */}
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Showing {filteredSkills.length} of {allSkills.length} skills
+                {selectedCategory && ` in ${selectedCategory}`}
+                {searchTerm && ` matching "${searchTerm}"`}
+              </span>
+              {filteredSkills.length > 0 && (
+                <span>
+                  Sorted by {currentSort.by} ({currentSort.order})
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       {/* Skills Grid */}
       <div className={cn(
         layoutClasses[layout],
-        "transition-all duration-500 ease-out",
-        showMobileFilters ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden",
-        "md:max-h-screen md:opacity-100 md:overflow-visible"
+        "transition-all duration-300 ease-out"
       )}>
-        <AnimatePresence>
-          {filteredSkills.length > 0 ? (
-            filteredSkills.map((skill, index) => {
-              // Get category configuration
-              const categoryKey = skill.category as keyof typeof CATEGORY_CONFIG;
-              const category = CATEGORY_CONFIG[categoryKey] || {
-                label: skill.category,
-                icon: <Code2 className="w-4 h-4" />,
-                color: "bg-gray-500",
-                lightColor: "bg-gray-100"
-              };
-              
-              return (
-                <motion.div
-                  key={`${skill.id}-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: index * 0.05,
-                    ease: "easeOut"
+        {filteredSkills.length > 0 ? (
+          filteredSkills.map((skill, index) => {
+            // Get category configuration
+            const categoryKey = skill.category as keyof typeof CATEGORY_CONFIG;
+            const category = CATEGORY_CONFIG[categoryKey] || {
+              label: skill.category,
+              icon: <Code2 className="w-4 h-4" />,
+              color: "bg-gray-500",
+              lightColor: "bg-gray-100"
+            };
+            
+            return (
+              <div
+                key={`${skill.id}-${index}`}
+                className="transition-all duration-200 ease-out"
+                style={{
+                  animationDelay: `${index * 50}ms`
+                }}
+              >
+                <SkillCard 
+                  skill={skill} 
+                  category={category}
+                  layout={layout}
+                  enableHover={enableHover}
+                  enableClick={enableClick}
+                  onSkillClick={onSkillClick}
+                  onSkillHover={onSkillHover}
+                  animationDuration={animationDuration}
+                />
+              </div>
+            )
+          })
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <div className="space-y-4">
+              <Search className="w-12 h-12 text-muted-foreground mx-auto" />
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">No skills found</h3>
+                <p className="text-muted-foreground">
+                  {searchTerm 
+                    ? `No skills match "${searchTerm}". Try adjusting your search.`
+                    : "No skills available in this category."
+                  }
+                </p>
+              </div>
+              {(searchTerm || selectedCategory) && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory(null);
                   }}
                 >
-                  <SkillCard 
-                    skill={skill} 
-                    category={category}
-                    layout={layout}
-                    enableHover={enableHover}
-                    enableClick={enableClick}
-                    onSkillClick={onSkillClick}
-                    onSkillHover={onSkillHover}
-                    animationDuration={animationDuration}
-                  />
-                </motion.div>
-              )
-            })
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-full text-center py-12"
-            >
-              <div className="text-muted-foreground">
-                No skills found matching your criteria
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Stats Summary */}
-      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground border-t pt-4 mt-6">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="rounded-full">
-            {filteredSkills.length}
-          </Badge>
-          <span>Skills shown</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="rounded-full">
-            {Math.round(filteredSkills.reduce((sum, skill) => sum + skill.level, 0) / filteredSkills.length)}%
-          </Badge>
-          <span>Average proficiency</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="rounded-full">
-            {skillCategories.length}
-          </Badge>
-          <span>Categories</span>
-        </div>
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

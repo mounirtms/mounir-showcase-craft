@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useAccessibility";
+import { trackProjectInteraction } from "@/utils/analytics";
 
 // Project interface extending the existing one
 export interface GalleryProject {
@@ -506,6 +507,57 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
     setSelectedDifficulty(null);
   };
 
+  // Handle filter changes
+  const handleFilterChange = (filterType: string, value: string) => {
+    trackProjectInteraction('filter_change', 'filter', { 
+      filter_type: filterType,
+      filter_value: value,
+      location: 'project_gallery'
+    });
+  };
+
+  // Handle layout change
+  const handleLayoutChange = (newLayout: LayoutType) => {
+    setLayout(newLayout);
+    trackProjectInteraction('layout_change', 'layout', { 
+      layout_type: newLayout,
+      location: 'project_gallery'
+    });
+  };
+
+  // Handle sort change
+  const handleSortChange = (newSortBy: string, newSortOrder: string) => {
+    setSortBy(newSortBy as any);
+    setSortOrder(newSortOrder as any);
+    trackProjectInteraction('sort_change', 'sort', { 
+      sort_by: newSortBy,
+      sort_order: newSortOrder,
+      location: 'project_gallery'
+    });
+  };
+
+  // Handle search change
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (value.trim()) {
+      trackProjectInteraction('search', 'search', { 
+        search_term: value,
+        results_count: filteredProjects.length,
+        location: 'project_gallery'
+      });
+    }
+  };
+
+  // Handle project click
+  const handleProjectClick = (project: GalleryProject) => {
+    trackProjectInteraction('project_click', 'click', { 
+      project_name: project.title,
+      project_category: project.category,
+      project_status: project.status,
+      location: 'project_gallery'
+    });
+  };
+
   return (
     <div className={cn("space-y-8", className)}>
       {/* Search and Controls */}
@@ -518,7 +570,15 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
               type="text"
               placeholder="Search projects, technologies, or tags..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (e.target.value.trim()) {
+                  trackProjectInteraction('search', 'search', { 
+                    search_term: e.target.value,
+                    location: 'project_gallery'
+                  });
+                }
+              }}
               className="pl-10"
             />
           </div>
@@ -534,7 +594,13 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
                 <Button
                   variant={selectedCategory === null ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedCategory(null)}
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    trackProjectInteraction('filter_clear', 'filter', { 
+                      filter_type: 'category',
+                      location: 'project_gallery'
+                    });
+                  }}
                 >
                   All Categories
                 </Button>
@@ -543,7 +609,14 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
                     key={key}
                     variant={selectedCategory === key ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory(key)}
+                    onClick={() => {
+                      setSelectedCategory(key);
+                      trackProjectInteraction('filter_change', 'filter', { 
+                        filter_type: 'category',
+                        filter_value: key,
+                        location: 'project_gallery'
+                      });
+                    }}
                     className="gap-2"
                   >
                     {config.icon}
@@ -581,7 +654,13 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
               <Button
                 variant={layout === "isotope" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setLayout("isotope")}
+                onClick={() => {
+                  setLayout("isotope");
+                  trackProjectInteraction('layout_change', 'layout', { 
+                    layout_type: 'isotope',
+                    location: 'project_gallery'
+                  });
+                }}
                 className="rounded-r-none"
               >
                 <Grid className="w-4 h-4" />
@@ -589,7 +668,13 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
               <Button
                 variant={layout === "grid" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setLayout("grid")}
+                onClick={() => {
+                  setLayout("grid");
+                  trackProjectInteraction('layout_change', 'layout', { 
+                    layout_type: 'grid',
+                    location: 'project_gallery'
+                  });
+                }}
                 className="rounded-none border-x"
               >
                 <Grid3X3 className="w-4 h-4" />
@@ -597,7 +682,13 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
               <Button
                 variant={layout === "masonry" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setLayout("masonry")}
+                onClick={() => {
+                  setLayout("masonry");
+                  trackProjectInteraction('layout_change', 'layout', { 
+                    layout_type: 'masonry',
+                    location: 'project_gallery'
+                  });
+                }}
                 className="rounded-none border-x"
               >
                 <Filter className="w-4 h-4" />
@@ -605,7 +696,13 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
               <Button
                 variant={layout === "list" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setLayout("list")}
+                onClick={() => {
+                  setLayout("list");
+                  trackProjectInteraction('layout_change', 'layout', { 
+                    layout_type: 'list',
+                    location: 'project_gallery'
+                  });
+                }}
                 className="rounded-l-none"
               >
                 <List className="w-4 h-4" />
@@ -620,6 +717,11 @@ export const FilterableProjectGallery: React.FC<FilterableProjectGalleryProps> =
                   const [by, order] = e.target.value.split('-') as [typeof sortBy, typeof sortOrder];
                   setSortBy(by);
                   setSortOrder(order);
+                  trackProjectInteraction('sort_change', 'sort', { 
+                    sort_by: by,
+                    sort_order: order,
+                    location: 'project_gallery'
+                  });
                 }}
                 className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
               >

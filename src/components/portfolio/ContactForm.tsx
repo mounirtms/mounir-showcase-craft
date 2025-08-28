@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,15 +19,13 @@ import {
   Github,
   Linkedin,
   Twitter,
-  Calendar,
   Clock,
-  MapPin,
-  Star
+  MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackButtonClick, trackFormSubmit } from "@/utils/analytics";
 
-// Validation schemas
+// Types
 interface ValidationRule {
   required?: boolean;
   minLength?: number;
@@ -41,8 +39,33 @@ interface FieldError {
   type: "error" | "warning" | "info";
 }
 
-// Form field configuration
-const FORM_FIELDS = {
+interface FormField {
+  label: string;
+  placeholder: string;
+  icon: React.ReactNode;
+  validation: ValidationRule;
+}
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  website: string;
+  subject: string;
+  message: string;
+  newsletter: boolean;
+}
+
+interface ContactFormProps {
+  className?: string;
+  onSubmit?: (data: ContactFormData) => Promise<void>;
+  enableSocialLinks?: boolean;
+  showSuccessMessage?: boolean;
+}
+
+// Form configuration
+const FORM_FIELDS: Record<keyof ContactFormData, FormField> = {
   name: {
     label: "Full Name",
     placeholder: "Enter your full name",
@@ -82,7 +105,7 @@ const FORM_FIELDS = {
     placeholder: "+1 (555) 123-4567",
     icon: <Phone className="w-4 h-4" />,
     validation: {
-      pattern: /^[\+]?[1-9][\d]{0,15}$/,
+      pattern: /^[+]?[1-9][\d]{0,15}$/,
       customValidator: (value: string) => {
         if (value && value.length < 10) {
           return "Phone number should be at least 10 digits";
@@ -129,40 +152,17 @@ const FORM_FIELDS = {
     icon: <MessageSquare className="w-4 h-4" />,
     validation: {
       required: true,
-      minLength: 20,
+      minLength: 10,
       maxLength: 1000
     }
+  },
+  newsletter: {
+    label: "Newsletter",
+    placeholder: "",
+    icon: <Mail className="w-4 h-4" />,
+    validation: {}
   }
 };
-
-// Contact methods
-const CONTACT_METHODS = [
-  {
-    icon: <Mail className="w-5 h-5" />,
-    label: "Email",
-    value: "mounir@example.com",
-    description: "Best for detailed inquiries",
-    primary: true
-  },
-  {
-    icon: <Phone className="w-5 h-5" />,
-    label: "Phone",
-    value: "+1 (555) 123-4567",
-    description: "Available Mon-Fri, 9 AM - 6 PM"
-  },
-  {
-    icon: <MapPin className="w-5 h-5" />,
-    label: "Location",
-    value: "San Francisco, CA",
-    description: "Open to remote work"
-  },
-  {
-    icon: <Clock className="w-5 h-5" />,
-    label: "Response Time",
-    value: "Within 24 hours",
-    description: "Usually much faster"
-  }
-];
 
 // Social links
 const SOCIAL_LINKS = [
@@ -186,41 +186,15 @@ const SOCIAL_LINKS = [
   }
 ];
 
-// Form data interface
-export interface ContactFormData {
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  website: string;
-  subject: string;
-  message: string;
-  newsletter?: boolean;
-  projectType?: string;
-  budget?: string;
-  timeline?: string;
-}
-
-// Component props
-export interface ContactFormProps {
-  className?: string;
-  onSubmit?: (data: ContactFormData) => Promise<void>;
-  enableSocialLinks?: boolean;
-  enableContactMethods?: boolean;
-  enableProjectDetails?: boolean;
-  showSuccessMessage?: boolean;
-  customFields?: Record<string, any>;
-}
-
-// Real-time validation hook
+// Validation hook
 const useFormValidation = (initialData: ContactFormData) => {
   const [formData, setFormData] = useState<ContactFormData>(initialData);
-  const [errors, setErrors] = useState<Record<string, FieldError>>({});
-  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [errors, setErrors] = useState<Record<keyof ContactFormData, FieldError | null>>({} as any);
+  const [touchedFields, setTouchedFields] = useState<Set<keyof ContactFormData>>(new Set());
   const [isValid, setIsValid] = useState(false);
 
-  const validateField = (name: string, value: string): FieldError | null => {
-    const field = FORM_FIELDS[name as keyof typeof FORM_FIELDS];
+  const validateField = (name: keyof ContactFormData, value: string): FieldError | null => {
+    const field = FORM_FIELDS[name];
     if (!field) return null;
 
     const { validation } = field;
@@ -236,14 +210,14 @@ const useFormValidation = (initialData: ContactFormData) => {
     }
 
     // Length validation
-    if (validation.minLength && value.length < validation.minLength) {
+    if ('minLength' in validation && validation.minLength && value.length < validation.minLength) {
       return { 
         message: `${field.label} must be at least ${validation.minLength} characters`, 
         type: 'error' 
       };
     }
 
-    if (validation.maxLength && value.length > validation.maxLength) {
+    if ('maxLength' in validation && validation.maxLength && value.length > validation.maxLength) {
       return { 
         message: `${field.label} cannot exceed ${validation.maxLength} characters`, 
         type: 'warning' 
@@ -251,7 +225,7 @@ const useFormValidation = (initialData: ContactFormData) => {
     }
 
     // Pattern validation
-    if (validation.pattern && !validation.pattern.test(value)) {
+    if ('pattern' in validation && validation.pattern && !validation.pattern.test(value)) {
       switch (name) {
         case 'email':
           return { message: 'Please enter a valid email address', type: 'error' };
@@ -267,7 +241,7 @@ const useFormValidation = (initialData: ContactFormData) => {
     }
 
     // Custom validation
-    if (validation.customValidator) {
+    if ('customValidator' in validation && validation.customValidator) {
       const customError = validation.customValidator(value);
       if (customError) {
         return { message: customError, type: 'error' };
@@ -277,33 +251,31 @@ const useFormValidation = (initialData: ContactFormData) => {
     return null;
   };
 
-  const updateField = (name: string, value: string) => {
+  const updateField = (name: keyof ContactFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     setTouchedFields(prev => new Set(prev).add(name));
 
-    // Real-time validation
-    const error = validateField(name, value);
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      if (error) {
-        newErrors[name] = error;
-      } else {
-        delete newErrors[name];
-      }
-      return newErrors;
-    });
+    // Real-time validation (only for string values)
+    if (typeof value === 'string') {
+      const error = validateField(name, value);
+      setErrors(prev => ({
+        ...prev,
+        [name]: error
+      }));
+    }
   };
 
   const validateAllFields = () => {
-    const newErrors: Record<string, FieldError> = {};
+    const newErrors: Record<keyof ContactFormData, FieldError | null> = {} as any;
     let hasErrors = false;
 
     Object.keys(FORM_FIELDS).forEach(fieldName => {
-      const value = formData[fieldName as keyof ContactFormData] as string || '';
-      const error = validateField(fieldName, value);
-      if (error) {
-        newErrors[fieldName] = error;
-        if (error.type === 'error') {
+      const key = fieldName as keyof ContactFormData;
+      const value = formData[key];
+      if (typeof value === 'string') {
+        const error = validateField(key, value);
+        newErrors[key] = error;
+        if (error && error.type === 'error') {
           hasErrors = true;
         }
       }
@@ -315,15 +287,15 @@ const useFormValidation = (initialData: ContactFormData) => {
   };
 
   useEffect(() => {
-    const hasErrors = Object.values(errors).some(error => error.type === 'error');
+    const hasErrors = Object.values(errors).some(error => error && error.type === 'error');
     const requiredFields = Object.entries(FORM_FIELDS)
-      .filter(([, config]) => config.validation?.required)
-      .map(([name]) => name);
+      .filter(([, config]) => 'required' in config.validation && config.validation.required)
+      .map(([name]) => name as keyof ContactFormData);
     
-    const requiredFieldsFilled = requiredFields.every(field => 
-      formData[field as keyof ContactFormData] && 
-      (formData[field as keyof ContactFormData] as string).trim() !== ''
-    );
+    const requiredFieldsFilled = requiredFields.every(field => {
+      const value = formData[field];
+      return typeof value === 'string' && value.trim() !== '';
+    });
 
     setIsValid(!hasErrors && requiredFieldsFilled);
   }, [formData, errors]);
@@ -339,14 +311,14 @@ const useFormValidation = (initialData: ContactFormData) => {
   };
 };
 
-// Input field component with validation
+// Form field component
 interface FormFieldProps {
-  name: string;
+  name: keyof ContactFormData;
   type?: "text" | "email" | "tel" | "url" | "textarea";
   value: string;
-  error?: FieldError;
+  error: FieldError | null;
   touched: boolean;
-  onChange: (name: string, value: string) => void;
+  onChange: (name: keyof ContactFormData, value: string) => void;
   disabled?: boolean;
 }
 
@@ -359,7 +331,7 @@ const FormField: React.FC<FormFieldProps> = ({
   onChange,
   disabled
 }) => {
-  const field = FORM_FIELDS[name as keyof typeof FORM_FIELDS];
+  const field = FORM_FIELDS[name];
   if (!field) return null;
 
   const hasError = error && error.type === 'error';
@@ -385,7 +357,7 @@ const FormField: React.FC<FormFieldProps> = ({
           {field.icon}
         </div>
         {field.label}
-        {field.validation?.required && <span className="text-red-500 text-lg">*</span>}
+        {'required' in field.validation && field.validation.required && <span className="text-red-500 text-lg">*</span>}
       </label>
       
       <div className="relative group">
@@ -433,15 +405,15 @@ const FormField: React.FC<FormFieldProps> = ({
       )}
 
       {/* Character count for text fields */}
-      {(type === "textarea" || name === "subject") && field.validation?.maxLength && (
+      {(type === "textarea" || name === "subject") && 'maxLength' in field.validation && field.validation.maxLength && (
         <div className="flex justify-between items-center text-xs text-muted-foreground">
           <span></span>
           <span className={cn(
             "px-2 py-1 rounded-md",
-            field.validation?.maxLength && value.length > (field.validation.maxLength * 0.9) && "text-amber-600 bg-amber-50 dark:bg-amber-900/20",
-            field.validation?.maxLength && value.length >= field.validation.maxLength && "text-red-600 bg-red-50 dark:bg-red-900/20"
+            field.validation.maxLength && value.length > (field.validation.maxLength * 0.9) && "text-amber-600 bg-amber-50 dark:bg-amber-900/20",
+            field.validation.maxLength && value.length >= field.validation.maxLength && "text-red-600 bg-red-50 dark:bg-red-900/20"
           )}>
-            {value.length} / {field.validation?.maxLength}
+            {value.length} / {field.validation.maxLength}
           </span>
         </div>
       )}
@@ -449,15 +421,12 @@ const FormField: React.FC<FormFieldProps> = ({
   );
 };
 
-// Main contact form component
+// Main component
 export const ContactForm: React.FC<ContactFormProps> = ({
   className,
   onSubmit,
   enableSocialLinks = true,
-  enableContactMethods = true,
-  enableProjectDetails = false,
-  showSuccessMessage = true,
-  customFields = {}
+  showSuccessMessage = true
 }) => {
   const initialData: ContactFormData = {
     name: "",
@@ -467,8 +436,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     website: "",
     subject: "",
     message: "",
-    newsletter: false,
-    ...customFields
+    newsletter: false
   };
 
   const {
@@ -519,10 +487,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           setSubmitMessage("");
         }, 3000);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       setSubmitStatus("error");
       setSubmitMessage("Sorry, there was an error sending your message. Please try again.");
-      trackFormSubmit('contact_form', { status: 'error', error: error.message });
+      trackFormSubmit('contact_form', { status: 'error', error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -530,14 +498,14 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
   const progressPercentage = Math.round(
     (Object.keys(FORM_FIELDS).filter(field => {
-      const value = formData[field as keyof ContactFormData] as string;
-      return value && value.trim() !== '';
+      const key = field as keyof ContactFormData;
+      const value = formData[key];
+      return typeof value === 'string' && value.trim() !== '';
     }).length / Object.keys(FORM_FIELDS).length) * 100
   );
 
   return (
     <div className={cn("w-full max-w-7xl mx-auto", className)}>
-      {/* Contact Form - Full Width Modern Layout */}
       <div className="space-y-8">
         {/* Form Header */}
         <div className="text-center space-y-4">
@@ -561,7 +529,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
               </div>
               <div className="w-full bg-muted rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-primary to-blue-500 h-2 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-primary to-blue-600 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
@@ -662,6 +630,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   />
                 </div>
               </div>
+
               {/* Submit Section */}
               <div className="space-y-6 pt-6 border-t border-border/50">
                 {/* Newsletter opt-in */}
@@ -670,7 +639,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                     type="checkbox"
                     id="newsletter"
                     checked={formData.newsletter}
-                    onChange={(e) => updateField('newsletter', e.target.checked.toString())}
+                    onChange={(e) => updateField('newsletter', e.target.checked)}
                     disabled={isSubmitting}
                     className="w-4 h-4 rounded border-border focus:ring-primary focus:ring-2 focus:ring-offset-2"
                   />
@@ -748,6 +717,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-300 border backdrop-blur-sm hover:shadow-lg"
+                  onClick={() => trackButtonClick('social_link_click', { platform: social.label })}
                 >
                   <div className="p-3 bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-xl group-hover:from-primary/20 group-hover:to-blue-500/20 transition-colors">
                     {social.icon}
@@ -765,16 +735,5 @@ export const ContactForm: React.FC<ContactFormProps> = ({
     </div>
   );
 };
-
-// Export types and component
-export interface ContactFormInterface {
-  className?: string;
-  onSubmit?: (data: ContactFormData) => Promise<void>;
-  enableSocialLinks?: boolean;
-  enableContactMethods?: boolean;
-  enableProjectDetails?: boolean;
-  showSuccessMessage?: boolean;
-  customFields?: Record<string, any>;
-}
 
 export default ContactForm;

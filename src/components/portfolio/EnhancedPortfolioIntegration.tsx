@@ -20,10 +20,27 @@ import {
 } from "./index";
 import { 
   Monitor, Code, Settings, User, Heart, Zap, Clock, Mail, MapPin, Phone,
-  ArrowRight, Download, Play, Pause, Award, Trophy, Github, Briefcase
+  ArrowRight, Download, Play, Pause, Award, Trophy, Github, Briefcase, MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackButtonClick } from "@/utils/analytics";
+
+// Testimonial interface
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  company: string;
+  content: string;
+  rating: number;
+  date: string;
+  projectType: string;
+  skills: string[];
+  avatar: string;
+  verified: boolean;
+  featured: boolean;
+  tags: string[];
+}
 
 // Optimized Portfolio Configuration
 interface PortfolioConfig {
@@ -210,13 +227,13 @@ export interface EnhancedPortfolioIntegrationProps {
 export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegrationProps> = ({ 
   className,
   config: userConfig, 
-  adminSettings = { showTestimonials: true, showContactForm: true, enableAnimations: true } 
+  adminSettings = { showTestimonials: false, showContactForm: true, enableAnimations: true } 
 }) => {
   const [activeSection, setActiveSection] = useState("hero");
   const [animationsEnabled, setAnimationsEnabled] = useState(adminSettings.enableAnimations);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(adminSettings.showContactForm);
+  const [showContactForm, setShowContactForm] = useState(false);
 
   const sectionsRef = useRef<{ [key: string]: HTMLElement | null }>({});
 
@@ -458,7 +475,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {/* Contact Section */}
       {adminSettings.showContactForm && (
         <section id="contact" className="py-12 sm:py-16 relative">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <ScrollAnimation animation="slideInUp">
               <div className="text-center mb-12 sm:mb-16">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
@@ -470,76 +487,85 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
               </div>
             </ScrollAnimation>
 
-            <div className="grid lg:grid-cols-2 gap-8 sm:gap-12">
-              <div>
+            {/* Contact Form - Hidden by default, shown when Discuss button is clicked */}
+            {showContactForm ? (
+              <div className="max-w-6xl mx-auto">
                 <ContactForm />
               </div>
-              
-              <div className="space-y-6">
-                <h3 className="text-xl sm:text-2xl font-bold font-heading">Get In Touch</h3>
-                
-                {showContactDetails ? (
-                  <>
-                    <p className="text-muted-foreground font-sans">
-                      I'm always interested in discussing new opportunities, innovative projects, 
-                      and ways to solve complex data challenges. Reach out and let's start a conversation.
-                    </p>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                          <Mail className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="font-medium">Email</div>
-                          <a href="mailto:mounir.webdev@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
-                            mounir.webdev@gmail.com
-                          </a>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                          <MapPin className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="font-medium">Location</div>
-                          <div className="text-muted-foreground">Algeria • Remote Worldwide</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button 
-                        size="lg" 
-                        variant="outline" 
-                        className="shadow-medium hover:shadow-large transition-all duration-300"
-                        asChild
-                        onClick={() => trackButtonClick('download_cv')}
-                      >
-                        <a href="/Mounir_CV_2025.pdf" download>
-                          <Download className="w-5 h-5 mr-2" />
-                          Download CV
-                        </a>
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="pt-4">
+            ) : (
+              <div className="max-w-4xl mx-auto text-center space-y-8">
+                <div className="space-y-6">
+                  <h3 className="text-xl sm:text-2xl font-bold font-heading">Ready to Start a Project?</h3>
+                  
+                  <p className="text-muted-foreground font-sans text-lg">
+                    I'm always interested in discussing new opportunities, innovative projects, 
+                    and ways to solve complex data challenges. Let's start a conversation.
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <Button 
                       size="lg" 
                       onClick={() => {
-                        setShowContactDetails(true);
-                        trackButtonClick('show_contact_details');
+                        setShowContactForm(true);
+                        trackButtonClick('show_contact_form');
                       }}
-                      className="shadow-medium hover:shadow-large transition-all duration-300"
+                      className="shadow-medium hover:shadow-large transition-all duration-300 text-lg px-8 py-4"
                     >
-                      Show Contact Details
+                      <MessageSquare className="w-5 h-5 mr-2" />
+                      Let's Discuss Your Project
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="shadow-medium hover:shadow-large transition-all duration-300 text-lg px-8 py-4"
+                      asChild
+                      onClick={() => trackButtonClick('download_cv')}
+                    >
+                      <a href="/Mounir_CV_2025.pdf" download>
+                        <Download className="w-5 h-5 mr-2" />
+                        Download CV
+                      </a>
                     </Button>
                   </div>
-                )}
+                </div>
+
+                {/* Contact Information Cards */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                  <div className="glass-card p-6 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-semibold">Email</h4>
+                    </div>
+                    <a href="mailto:mounir.webdev@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                      mounir.webdev@gmail.com
+                    </a>
+                  </div>
+                  
+                  <div className="glass-card p-6 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-semibold">Location</h4>
+                    </div>
+                    <div className="text-muted-foreground">Algeria • Remote Worldwide</div>
+                  </div>
+                  
+                  <div className="glass-card p-6 rounded-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-semibold">Response Time</h4>
+                    </div>
+                    <div className="text-muted-foreground">Within 24 hours</div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
       )}

@@ -66,9 +66,13 @@ import {
   XCircle,
   AlertCircle,
   Target,
-  LineChart
+  LineChart,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import type { ClientInfo, ProjectMetrics, ProjectCategory, ProjectStatus } from "@/hooks/useProjects";
+import { trackAdminAction, trackError, trackButtonClick } from "@/utils/analytics";
+import { toast } from "@/hooks/use-toast";
 
 export default function Admin() {
   const [email, setEmail] = useState("");
@@ -79,7 +83,9 @@ export default function Admin() {
   const [editingProjectData, setEditingProjectData] = useState<ProjectInput | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const { projects, loading } = useProjects();
+  const [operationLoading, setOperationLoading] = useState(false);
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const { projects, loading, refetch } = useProjects();
   const { skipLinks } = useAccessibility();
 
   // Define skip links for admin navigation
@@ -91,7 +97,13 @@ export default function Admin() {
 
   useEffect(() => {
     if (!auth) return;
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (u) {
+        trackAdminAction('login_success', { user_email: u.email });
+        setAuthError(null);
+      }
+    });
     return () => unsub();
   }, []);
 
@@ -112,18 +124,39 @@ export default function Admin() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (!auth) return;
+    if (!auth) {
+      const error = "Firebase Auth is not available";
+      setAuthError(error);
+      trackError('auth_error', error, { location: 'admin_login' });
+      return;
+    }
     
     setAuthLoading(true);
     setAuthError(null);
     
     try {
+      trackAdminAction('login_attempt', { email });
       await signInWithEmailAndPassword(auth, email, password);
       setEmail("");
       setPassword("");
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the admin dashboard!",
+        variant: "default"
+      });
     } catch (error: unknown) {
       console.error("Login failed:", error);
-      setAuthError(error instanceof Error ? error.message : "Login failed. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Login failed. Please try again.";
+      setAuthError(errorMessage);
+      trackError('login_failed', errorMessage, { 
+        location: 'admin_login',
+        email: email 
+      });
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setAuthLoading(false);
     }
@@ -131,12 +164,36 @@ export default function Admin() {
 
   async function handleLogout() {
     if (!auth) return;
-    await signOut(auth);
+    try {
+      trackAdminAction('logout_attempt', { user_email: user?.email });
+      await signOut(auth);
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+        variant: "default"
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Logout failed";
+      trackError('logout_failed', errorMessage, { location: 'admin_logout' });
+      toast({
+        title: "Logout Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    }
   }
 
   async function addProject(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!db) return;
+    if (!db) {
+      const error = "Firestore database is not available";
+      setOperationError(error);
+      trackError('database_error', error, { location: 'add_project' });
+      return;
+    }
+    
+    setOperationLoading(true);
+    setOperationError(null);
     
     const form = new FormData(e.currentTarget);
     
@@ -203,31 +260,121 @@ export default function Admin() {
     };
 
     try {
+      trackAdminAction('add_project', { 
+        project_title: data.title,
+        project_category: data.category,
+        section: 'projects'
+      });
+      
       await addDoc(collection(db, PROJECTS_COLLECTION), data);
       e.currentTarget.reset();
+      
+      toast({
+        title: "Project Added",
+        description: `"${data.title}" has been successfully added.`,
+        variant: "default"
+      });
+      
+      // Refresh projects list
+      await refetch();
     } catch (error) {
       console.error("Failed to add project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to add project";
+      setOperationError(errorMessage);
+      trackError('add_project_failed', errorMessage, { 
+        location: 'add_project',
+        project_title: data.title 
+      });
+      toast({
+        title: "Add Project Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setOperationLoading(false);
     }
   }
 
   async function updateProject(id: string, updates: Partial<ProjectInput>) {
-    if (!db) return;
+    if (!db) {
+      const error = "Firestore database is not available";
+      trackError('database_error', error, { location: 'update_project' });
+      return;
+    }
+    
     try {
+      trackAdminAction('update_project', { 
+        project_id: id,
+        section: 'projects'
+      });
+      
       await updateDoc(doc(db, PROJECTS_COLLECTION, id), {
         ...updates,
         updatedAt: Date.now(),
       });
+      
+      toast({
+        title: "Project Updated",
+        description: "Project has been successfully updated.",
+        variant: "default"
+      });
+      
+      // Refresh projects list
+      await refetch();
     } catch (error) {
       console.error("Failed to update project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update project";
+      trackError('update_project_failed', errorMessage, { 
+        location: 'update_project',
+        project_id: id 
+      });
+      toast({
+        title: "Update Project Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   }
 
   async function deleteProject(id: string) {
-    if (!db || !confirm("Are you sure you want to delete this project?")) return;
+    if (!db) {
+      const error = "Firestore database is not available";
+      trackError('database_error', error, { location: 'delete_project' });
+      return;
+    }
+    
+    if (!confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      return;
+    }
+    
     try {
+      trackAdminAction('delete_project', { 
+        project_id: id,
+        section: 'projects'
+      });
+      
       await deleteDoc(doc(db, PROJECTS_COLLECTION, id));
+      
+      toast({
+        title: "Project Deleted",
+        description: "Project has been successfully deleted.",
+        variant: "default"
+      });
+      
+      // Refresh projects list
+      await refetch();
     } catch (error) {
       console.error("Failed to delete project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete project";
+      trackError('delete_project_failed', errorMessage, { 
+        location: 'delete_project',
+        project_id: id 
+      });
+      toast({
+        title: "Delete Project Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   }
 
@@ -235,13 +382,32 @@ export default function Admin() {
     setEditingProject(project.id);
     setEditingProjectData({ ...project });
     setActiveTab("add-project");
+    trackAdminAction('start_edit_project', { 
+      project_id: project.id,
+      project_title: project.title,
+      section: 'projects'
+    });
   }
 
   async function saveEditedProject(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!db || !editingProject || !editingProjectData) return;
+    if (!db || !editingProject || !editingProjectData) {
+      const error = "Missing required data for editing";
+      setOperationError(error);
+      trackError('edit_project_error', error, { location: 'save_edited_project' });
+      return;
+    }
+    
+    setOperationLoading(true);
+    setOperationError(null);
     
     try {
+      trackAdminAction('save_edited_project', { 
+        project_id: editingProject,
+        project_title: editingProjectData.title,
+        section: 'projects'
+      });
+      
       await updateDoc(doc(db, PROJECTS_COLLECTION, editingProject), {
         ...editingProjectData,
         updatedAt: Date.now(),
@@ -250,8 +416,30 @@ export default function Admin() {
       setEditingProject(null);
       setEditingProjectData(null);
       setActiveTab("projects");
+      
+      toast({
+        title: "Project Updated",
+        description: `"${editingProjectData.title}" has been successfully updated.`,
+        variant: "default"
+      });
+      
+      // Refresh projects list
+      await refetch();
     } catch (error) {
       console.error("Failed to update project:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update project";
+      setOperationError(errorMessage);
+      trackError('save_edited_project_failed', errorMessage, { 
+        location: 'save_edited_project',
+        project_id: editingProject 
+      });
+      toast({
+        title: "Update Project Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setOperationLoading(false);
     }
   }
 
@@ -287,6 +475,16 @@ export default function Admin() {
       });
     }
   }
+
+  // Clear operation errors when switching tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setOperationError(null);
+    trackAdminAction('tab_change', { 
+      tab: value,
+      section: 'admin_navigation'
+    });
+  };
 
   if (!canUseAdmin) {
     return (
