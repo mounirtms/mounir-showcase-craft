@@ -43,6 +43,33 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Analyze bundle size
+        run: npm run bundle:analyze
+        continue-on-error: true
+
+      - name: Run Lighthouse CI
+        run: npm run lighthouse:ci
+        continue-on-error: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Check performance budgets
+        run: node scripts/performance-enforcer.js
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-reports
+          path: |
+            performance-reports/
+            bundle-report.json
+            lighthouse-reports/
+          retention-days: 30
+
       - name: Copy 404.html for SPA routing
         run: cp ./dist/index.html ./dist/404.html
 

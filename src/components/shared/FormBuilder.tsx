@@ -682,8 +682,181 @@ interface FieldRendererProps {
 }
 
 const FieldRenderer: React.FC<FieldRendererProps> = ({ field, formField, error }) => {
-  // This would contain the actual field rendering logic
-  // For brevity, showing a basic implementation
+  // Handle different field types
+  const renderField = () => {
+    switch (field.type) {
+      case "text":
+      case "email":
+      case "password":
+      case "url":
+      case "tel":
+        return (
+          <input
+            {...formField}
+            type={field.type}
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+      
+      case "textarea":
+        return (
+          <textarea
+            {...formField}
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            rows={(field as TextareaFieldConfig).rows || 3}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+      
+      case "number":
+        return (
+          <input
+            {...formField}
+            type="number"
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            min={(field as NumberFieldConfig).min}
+            max={(field as NumberFieldConfig).max}
+            step={(field as NumberFieldConfig).step}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+      
+      case "select":
+        const selectField = field as SelectFieldConfig;
+        return (
+          <select
+            {...formField}
+            disabled={field.disabled}
+            multiple={selectField.multiple}
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            {selectField.options.map((option) => (
+              <option 
+                key={option.value} 
+                value={option.value} 
+                disabled={option.disabled}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        );
+      
+      case "checkbox":
+        const checkboxField = field as CheckboxFieldConfig;
+        if (checkboxField.options && checkboxField.options.length > 0) {
+          return (
+            <div className="flex flex-col space-y-2">
+              {checkboxField.options.map((option) => (
+                <label key={option.value} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    value={option.value}
+                    checked={formField.value?.includes(option.value)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        formField.onChange([...(formField.value || []), option.value]);
+                      } else {
+                        formField.onChange(formField.value.filter((v: any) => v !== option.value));
+                      }
+                    }}
+                    disabled={option.disabled || field.disabled}
+                    className="rounded"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          );
+        } else {
+          return (
+            <div className="flex items-center space-x-2">
+              <input
+                {...formField}
+                type="checkbox"
+                checked={formField.value || false}
+                onChange={(e) => formField.onChange(e.target.checked)}
+                disabled={field.disabled}
+                className="rounded"
+              />
+              <span>{field.label}</span>
+            </div>
+          );
+        }
+      
+      case "radio":
+        const radioField = field as RadioFieldConfig;
+        return (
+          <div className={radioField.inline ? "flex space-x-4" : "flex flex-col space-y-2"}>
+            {radioField.options.map((option) => (
+              <label key={option.value} className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value={option.value}
+                  checked={formField.value === option.value}
+                  onChange={() => formField.onChange(option.value)}
+                  disabled={option.disabled || field.disabled}
+                  className="rounded"
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+        );
+      
+      case "date":
+      case "datetime":
+      case "time":
+        return (
+          <input
+            {...formField}
+            type={field.type === "datetime" ? "datetime-local" : field.type}
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            min={(field as DateFieldConfig).min}
+            max={(field as DateFieldConfig).max}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+      
+      case "file":
+        return (
+          <input
+            {...formField}
+            type="file"
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            accept={(field as FileFieldConfig).accept}
+            multiple={(field as FileFieldConfig).multiple}
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              formField.onChange(files);
+            }}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+      
+      case "custom":
+        const customField = field as CustomFieldConfig;
+        return <customField.component {...formField} {...customField.props} />;
+      
+      default:
+        return (
+          <input
+            {...formField}
+            type="text"
+            placeholder={field.placeholder}
+            disabled={field.disabled}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        );
+    }
+  };
+
   return (
     <div className="space-y-1">
       <label className="text-sm font-medium">
@@ -691,14 +864,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({ field, formField, error }
         {field.required && <span className="text-red-500 ml-1">*</span>}
       </label>
       
-      {/* Basic input for demonstration */}
-      <input
-        {...formField}
-        type={field.type === "textarea" ? "text" : field.type}
-        placeholder={field.placeholder}
-        disabled={field.disabled}
-        className="w-full px-3 py-2 border rounded-md"
-      />
+      {renderField()}
       
       {field.description && (
         <p className="text-xs text-muted-foreground">{field.description}</p>

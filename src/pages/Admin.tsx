@@ -22,12 +22,13 @@ import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebas
 import { ProfessionalSignature } from "@/components/ui/signature";
 import { ProjectsManager } from "@/components/admin/ProjectsManager";
 import { SkillsTab } from "@/components/admin/skills";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ThemeToggle } from "@/components/theme";
 import { DashboardOverview } from "@/components/admin/dashboard";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { AdminLoading, DataLoading } from "@/components/ui/loading";
+import { FirebaseConfigChecker } from "@/components/FirebaseConfigChecker";
 import { 
   BarChart3, 
   Plus, 
@@ -508,21 +509,8 @@ export default function Admin() {
               Admin Panel Unavailable
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-center space-y-6">
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 backdrop-blur-sm">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Shield className="w-5 h-5" />
-                <span className="font-medium">Configuration Required</span>
-              </div>
-              <p className="text-sm text-red-200">
-                Firebase is not configured properly. Please check your environment variables and restart the development server.
-              </p>
-            </div>
-            
-            <div className="text-xs text-white/50 space-y-1">
-              <div>Required: Firebase Auth, Firestore Database</div>
-              <div>Check: .env.local file and VITE_FIREBASE_ENABLE_DEV=true</div>
-            </div>
+          <CardContent className="space-y-6">
+            <FirebaseConfigChecker showDetails={true} />
             
             <Button 
               onClick={() => window.location.reload()} 

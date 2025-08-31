@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { SkillInput } from "@/hooks/useSkills";
-import { SkillCategorySchema } from "@/lib/validation-schemas";
+import { SkillSchema } from "@/lib/schema/skillSchema";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -40,32 +40,24 @@ export const SkillForm: React.FC<SkillFormProps> = ({ defaultValues, submitLabel
       name: "",
       category: "Frontend Development",
       level: 50,
-      yearsOfExperience: 0,
-      description: "",
+      yearsOfExperience: 1,
       featured: false,
       disabled: false,
       priority: 50,
-      icon: "",
-      color: "",
-      ...defaultValues,
     },
+    ...defaultValues,
   });
 
-  const categories = Object.values(SkillCategorySchema.enum);
+  const skillSchema = SkillSchema;
+  const categories = Object.keys(skillSchema.shape.category._def.innerType.enum);
 
-  const handleSubmit = async (values: SkillFormValues) => {
-    await onSubmit({
-      ...values,
-      certifications: [],
-      projects: [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    } as SkillInput);
-  };
+  function onSubmitHandler(values: SkillFormValues) {
+    onSubmit(values);
+  }
 
   return (
     <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmitHandler)}>
         <div className="grid md:grid-cols-2 gap-6">
           <FormField
             control={form.control}

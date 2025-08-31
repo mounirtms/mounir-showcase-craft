@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { LoadingStates } from "@/components/shared/LoadingStates";
+import { LoadingState } from "@/components/shared/BaseComponents";
 
 // Create lazy-loaded components for heavy admin sections
 export const LazyDashboardOverview = lazy(() => 

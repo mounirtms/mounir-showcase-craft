@@ -27,7 +27,6 @@ const LazyInteractiveTimeline = lazy(() => import("./InteractiveTimeline").then(
 const LazyProfessionalAvatar = lazy(() => import("./ProfessionalAvatar").then(module => ({ default: module.ProfessionalAvatar })));
 const LazyDynamicTypingEffect = lazy(() => import("./DynamicTypingEffect").then(module => ({ default: module.DynamicTypingEffect })));
 const LazyAnimationLibrary = lazy(() => import("./AnimationLibrary").then(module => ({ default: module })));
-const LazyAnimationLibraryDemo = lazy(() => import("./AnimationLibraryDemo"));
 
 // Demo components (lazy loaded separately)
 const LazySkillVisualizationDemo = lazy(() => import("./SkillVisualizationDemo"));

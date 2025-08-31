@@ -1,46 +1,60 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
+import { Toaster, Sonner, TooltipProvider } from "@/components/ui";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Admin from "./pages/Admin";
+import { ErrorBoundary } from "@/components/shared";
+import { ThemeProvider, ThemeDemo } from "@/components/theme";
+import { AccessibilityProvider } from "@/contexts";
+import { RUMProvider } from "@/components";
+import { HomePage, AdminPage, NotFoundPage } from "@/pages";
 
 
 
-const App = () => (
-  <ErrorBoundary>
-    <AccessibilityProvider>
-      <ThemeProvider defaultTheme="light" storageKey="mounir-portfolio-theme">
-        <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route 
-                  path="/admin/*" 
-                  element={
-                    <ErrorBoundary>
-                      <Admin />
-                    </ErrorBoundary>
-                  } 
-                />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-            
+const App = () => {
+  const rumConfig = {
+    sampleRate: import.meta.env.PROD ? 0.1 : 1.0, // Sample 10% in prod, 100% in dev
+    enableConsoleLogging: import.meta.env.DEV,
+    enableLocalStorage: true,
+    apiEndpoint: import.meta.env.VITE_RUM_API_ENDPOINT,
+    apiKey: import.meta.env.VITE_RUM_API_KEY,
+  };
 
-          </TooltipProvider>
-      </ThemeProvider>
-    </AccessibilityProvider>
-  </ErrorBoundary>
-);
+  return (
+    <ErrorBoundary>
+      <RUMProvider config={rumConfig} enabled={true}>
+        <AccessibilityProvider>
+          <ThemeProvider 
+            defaultTheme="system" 
+            storageKey="mounir-portfolio-theme"
+            enableSystem={true}
+            disableTransitionOnChange={false}
+            enableColorSchemeChange={true}
+          >
+            <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/theme-demo" element={<ThemeDemo />} />
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <ErrorBoundary>
+                          <AdminPage />
+                        </ErrorBoundary>
+                      } 
+                    /> 
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </BrowserRouter>
+                
+
+              </TooltipProvider>
+          </ThemeProvider>
+        </AccessibilityProvider>
+      </RUMProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

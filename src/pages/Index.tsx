@@ -9,30 +9,30 @@ import { ExternalLink, Mail, Phone, Linkedin, Github } from "lucide-react";
 
 const Index = () => {
   const { skipLinks } = useAccessibility();
-  
+
   // Define skip links for navigation
   const defaultSkipLinks = [
     { id: 'main-navigation', label: 'Skip to Navigation', target: 'main-navigation' },
     { id: 'main-content', label: 'Skip to Main Content', target: 'main-content' },
     { id: 'contact-section', label: 'Skip to Contact', target: 'contact-section' }
   ];
-  
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Skip Links for Accessibility */}
       <SkipLinks links={skipLinks.length > 0 ? skipLinks : defaultSkipLinks} />
-      
+
       <div id="main-navigation">
         <Navigation />
       </div>
-      
+
       {/* Enhanced Portfolio Integration */}
       <main id="main-content">
-        <EnhancedPortfolioIntegration 
+        <EnhancedPortfolioIntegration
           className="relative"
         />
       </main>
-      
+
       {/* Professional Footer */}
       <footer id="contact-section" className="py-16 px-6 bg-gradient-to-br from-card/30 via-card/50 to-card/30 backdrop-blur-sm border-t border-border/50">
         <div className="max-w-6xl mx-auto space-y-12">
@@ -44,7 +44,7 @@ const Index = () => {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-sans leading-relaxed">
               Let's transform your ideas into scalable, high-performance solutions that drive real business results.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Button size="lg" className="shadow-glow hover:shadow-large transition-all duration-300" asChild>
                 <a href="mailto:mounir.webdev@gmail.com" className="flex items-center gap-2">
@@ -52,7 +52,7 @@ const Index = () => {
                   Start a Conversation
                 </a>
               </Button>
-              
+
               <div className="flex gap-4">
                 <Button variant="outline" size="sm" asChild>
                   <a href="https://linkedin.com/in/mounir1badi" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -82,7 +82,7 @@ const Index = () => {
               <h3 className="text-xl font-bold mb-2 font-heading">Recent Collaborations</h3>
               <p className="text-muted-foreground mb-6 font-sans">Explore some of my latest professional projects</p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <h4 className="font-semibold text-primary font-heading">Enterprise Solutions</h4>
@@ -116,7 +116,7 @@ const Index = () => {
                   </a>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <h4 className="font-semibold text-primary font-heading">Web Applications</h4>
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -151,13 +151,13 @@ const Index = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Signature and Copyright */}
           <div className="pt-8 border-t border-border/50 space-y-6">
             <div className="flex justify-center">
               <Signature size="lg" className="text-primary hover:scale-105 transition-transform duration-300" />
             </div>
-            
+
             <div className="text-center space-y-2">
               <p className="text-sm text-muted-foreground font-sans">
                 &copy; 2025 Mounir Abderrahmani. Crafted with passion using modern web technologies.

@@ -1,79 +1,50 @@
-// State Management Index
-// This file provides centralized exports for all state management components
+/**
+ * State Index
+ * Centralized exports for all state management modules
+ */
 
-// Contexts
-export {
-  AdminStatsProvider,
-  useAdminStats,
-  useProjectStats,
-  useSkillStats,
-  useSystemStats,
-  type AdminStats,
-  type ProjectStats,
-  type SkillStats,
-  type SystemStats
-} from "@/contexts/AdminStatsContext";
+// Re-export contexts as state providers
+export * from '@/contexts';
 
-export {
-  GlobalStateProvider,
-  useGlobalState,
-  useErrors,
-  useLoading,
-  useAsyncAction,
-  useConnectionStatus,
-  useUserActivity,
-  type AppError,
-  type LoadingState,
-  type GlobalState,
-  type AsyncActionOptions
-} from "@/contexts/GlobalStateContext";
+// State types
+export type { AppState, AuthState, UIState, DataState } from '@/types';
 
-// Hooks
-export {
-  useAdminNavigation,
-  useDefaultAdminNavigation,
-  defaultAdminNavItems,
-  type NavItem,
-  type BreadcrumbItem,
-  type NavigationState,
-  type UseAdminNavigationConfig
-} from "@/hooks/useAdminNavigation";
+// State utilities
+export const createInitialState = () => ({
+  auth: {
+    user: null,
+    loading: false,
+    error: null,
+  },
+  ui: {
+    theme: 'light' as const,
+    sidebarCollapsed: false,
+    activeTab: 'dashboard',
+    loading: false,
+    notifications: [],
+  },
+  data: {
+    projects: { data: null, loading: false, error: null },
+    skills: { data: null, loading: false, error: null },
+    experiences: { data: null, loading: false, error: null },
+  },
+});
 
-export {
-  useAdminActions,
-  type Project,
-  type Skill,
-  type BulkActionResult,
-  type ActionOptions,
-  type UseAdminActionsReturn
-} from "@/hooks/useAdminActions";
+// State actions
+export const stateActions = {
+  SET_USER: 'SET_USER',
+  SET_LOADING: 'SET_LOADING',
+  SET_ERROR: 'SET_ERROR',
+  SET_THEME: 'SET_THEME',
+  TOGGLE_SIDEBAR: 'TOGGLE_SIDEBAR',
+  SET_ACTIVE_TAB: 'SET_ACTIVE_TAB',
+  ADD_NOTIFICATION: 'ADD_NOTIFICATION',
+  REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION',
+} as const;
 
-// Re-export shared utilities that work with state management
-export {
-  LoadingStates,
-  type LoadingStateProps
-} from "@/components/shared/LoadingStates";
-
-export {
-  EmptyStates,
-  NoDataState,
-  NoSearchResultsState,
-  ErrorState,
-  NoFilterResultsState,
-  type EmptyStateProps,
-  type EmptyStateVariant
-} from "@/components/shared/EmptyStates";
-
-export {
-  ErrorBoundary,
-  type ErrorBoundaryProps
-} from "@/components/shared/ErrorBoundary";
-
-export {
-  ConfirmDialog,
-  DeleteConfirmDialog,
-  SaveConfirmDialog,
-  LogoutConfirmDialog,
-  type ConfirmDialogProps,
-  type ConfirmDialogVariant
-} from "@/components/shared/ConfirmDialog";
+// Default exports for lazy loading
+export default {
+  GlobalStateProvider: () => import('@/contexts/GlobalStateContext').then(m => ({ default: m.GlobalStateProvider })),
+  AdminStatsProvider: () => import('@/contexts/AdminStatsContext').then(m => ({ default: m.AdminStatsProvider })),
+  AccessibilityProvider: () => import('@/contexts/AccessibilityContext').then(m => ({ default: m.AccessibilityProvider })),
+};

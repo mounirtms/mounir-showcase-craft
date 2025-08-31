@@ -59,6 +59,7 @@ export const usePerformanceMonitoring = (options: {
 
   const [metrics, setMetrics] = useState<PerformanceMetrics>({});
   const [budgetViolations, setBudgetViolations] = useState<string[]>([]);
+  const [isMonitoring, setIsMonitoring] = useState(enabled);
   const observerRef = useRef<PerformanceObserver | null>(null);
   const metricsRef = useRef<PerformanceMetrics>({});
 
@@ -84,7 +85,7 @@ export const usePerformanceMonitoring = (options: {
 
   // Observe Core Web Vitals
   useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+    if (!isMonitoring || typeof window === "undefined") return;
 
     // LCP Observer
     const lcpObserver = new PerformanceObserver((list) => {
@@ -155,11 +156,11 @@ export const usePerformanceMonitoring = (options: {
       fcpObserver.disconnect();
       window.removeEventListener("load", updateNavigationTiming);
     };
-  }, [enabled, updateMetric]);
+  }, [isMonitoring, updateMetric]);
 
   // Memory usage monitoring
   useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+    if (!isMonitoring || typeof window === "undefined") return;
 
     const updateMemoryUsage = () => {
       if ("memory" in performance) {
@@ -176,12 +177,24 @@ export const usePerformanceMonitoring = (options: {
     const interval = setInterval(updateMemoryUsage, reportingInterval);
 
     return () => clearInterval(interval);
-  }, [enabled, reportingInterval, updateMetric]);
+  }, [isMonitoring, reportingInterval, updateMetric]);
+
+  // Control functions
+  const startMonitoring = useCallback(() => {
+    setIsMonitoring(true);
+  }, []);
+
+  const stopMonitoring = useCallback(() => {
+    setIsMonitoring(false);
+  }, []);
 
   return {
     metrics: metricsRef.current,
     budgetViolations,
-    updateMetric
+    updateMetric,
+    isMonitoring,
+    startMonitoring,
+    stopMonitoring
   };
 };
 

@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useSkills, type Skill, type SkillCategory } from "@/hooks/useSkills";
 import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { createActionColumnDef } from "@/components/admin/ActionColumn";
-import { validateSkillUpdate } from "@/lib/validation-schemas";
 import { getSkillIcon, getSkillColor } from "@/lib/skill-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -63,15 +62,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -88,7 +86,6 @@ import { Slider } from "@/components/ui/slider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { SkillSchema, SkillCategorySchema, type SkillInput } from "@/lib/validation-schemas";
 import { DataExportManager } from "@/components/admin/DataExportManager";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
@@ -148,6 +145,15 @@ export function SkillsManager() {
     },
   });
 
+  // Handle add skill
+  const handleAddSkill = useCallback(() => {
+    setSkillToEdit(null);
+    resetForm();
+    setIconUrl("");
+    setIconPath("");
+    setIsFormOpen(true);
+  }, []);
+
   // Handle form submission with enhanced validation and error handling
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -155,6 +161,7 @@ export function SkillsManager() {
       const loadingToast = toast({
         title: skillToEdit ? "Updating skill..." : "Creating skill...",
         description: "Please wait while we save your skill.",
+        duration: 3000,
       });
 
       if (skillToEdit) {
@@ -164,6 +171,7 @@ export function SkillsManager() {
             title: "Cannot Edit Local Skill",
             description: "This is a local/demo skill. Please create a new skill instead.",
             variant: "destructive",
+            duration: 5000,
           });
           return;
         }
@@ -179,6 +187,8 @@ export function SkillsManager() {
         toast({
           title: "Skill updated successfully",
           description: `"${values.name}" has been updated and synced to Firebase.`,
+          duration: 3000,
+          className: "bg-green-500 text-white",
         });
       } else {
         // Add new skill
@@ -202,6 +212,8 @@ export function SkillsManager() {
         toast({
           title: "Skill created successfully",
           description: `"${values.name}" has been added to your skills and synced to Firebase.`,
+          duration: 3000,
+          className: "bg-green-500 text-white",
         });
       }
       
@@ -227,6 +239,17 @@ export function SkillsManager() {
         title: "Failed to save skill",
         description: `Error: ${errorMessage}. Please try again or contact support if the issue persists.`,
         variant: "destructive",
+        duration: 7000,
+        className: "bg-red-500 text-white",
+        action: (
+          <Button 
+            variant="outline" 
+            onClick={() => console.log("Error details:", error)}
+            className="text-white border-white hover:bg-white hover:text-red-500"
+          >
+            View Details
+          </Button>
+        )
       });
     }
   };
@@ -326,11 +349,19 @@ export function SkillsManager() {
           title: "Cannot Delete Local Skills",
           description: "Local/demo skills cannot be deleted.",
           variant: "destructive",
+          duration: 5000,
         });
         setBulkDeleteOpen(false);
         setSkillsToDelete([]);
         return;
       }
+
+      // Show loading state
+      const loadingToast = toast({
+        title: "Deleting skills...",
+        description: `Preparing to delete ${deletableSkills.length} skills.`,
+        duration: 3000,
+      });
 
       deletableSkills.forEach((skill) => {
         const skillRef = doc(db, "skills", skill.id);
@@ -340,8 +371,10 @@ export function SkillsManager() {
       await batch.commit();
       
       toast({
-        title: "Skills deleted",
-        description: `${deletableSkills.length} skills have been deleted successfully.`,
+        title: "Skills deleted successfully",
+        description: `${deletableSkills.length} skills have been permanently deleted from Firebase.`,
+        duration: 5000,
+        className: "bg-green-500 text-white",
       });
       
       setBulkDeleteOpen(false);
@@ -350,10 +383,22 @@ export function SkillsManager() {
     } catch (error) {
       console.error("Error deleting skills:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
       toast({
         title: "Failed to delete skills",
-        description: errorMessage,
+        description: `Error: ${errorMessage}. Please try again later.`,
         variant: "destructive",
+        duration: 7000,
+        className: "bg-red-500 text-white",
+        action: (
+          <Button 
+            variant="outline" 
+            onClick={() => console.log("Error details:", error)}
+            className="text-white border-white hover:bg-white hover:text-red-500"
+          >
+            View Details
+          </Button>
+        )
       });
     }
   }, [skillsToDelete, refetch]);
@@ -446,34 +491,42 @@ export function SkillsManager() {
                 Manage your technical skills and expertise
               </CardDescription>
             </div>
-            <Button onClick={() => setIsFormOpen(true)} className="shadow-glow">
+            <Button onClick={handleAddSkill} className="shadow-glow">
               <Plus className="h-4 w-4 mr-2" />
               Add Skill
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <AdminDataTable
-            columns={columns}
-            data={skills}
-            loading={loading}
-            searchPlaceholder="Search skills..."
-            filterFields={[
-              {
-                key: "category",
-                title: "Category",
-                options: categoryOptions,
-              },
-              {
-                key: "disabled",
-                title: "Status",
-                options: statusOptions,
-              },
-            ]}
-            onRefresh={refetch}
-            onDelete={handleBulkDelete}
-            onAdd={() => setIsFormOpen(true)}
-          />
+          {loading ? (
+            <div className="space-y-4">
+              <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-80 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          ) : (
+            <AdminDataTable
+              title="Skills"
+              columns={columns}
+              data={skills}
+              loading={loading}
+              searchPlaceholder="Search skills..."
+              filterFields={[
+                {
+                  key: "category",
+                  title: "Category",
+                  options: categoryOptions,
+                },
+                {
+                  key: "disabled",
+                  title: "Status",
+                  options: statusOptions,
+                },
+              ]}
+              onRefresh={refetch}
+              onDelete={handleBulkDelete}
+              onAdd={handleAddSkill}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -491,7 +544,9 @@ export function SkillsManager() {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Use div instead of ScrollArea to maintain scroll position when form is long */}
+              <div className="max-h-[60vh] pr-4 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="name"
@@ -755,6 +810,8 @@ export function SkillsManager() {
                     </FormItem>
                   )}
                 />
+              </div>
+              
               </div>
               
               <DialogFooter className="gap-2 pt-4">

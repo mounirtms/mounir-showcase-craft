@@ -18,6 +18,7 @@ import {
   type Project,
   type TimelineItem
 } from "./index";
+import { CompactSkillsSection } from "./CompactSkillsSection";
 import { 
   Monitor, Code, Settings, User, Heart, Zap, Clock, Mail, MapPin, Phone,
   ArrowRight, Download, Play, Pause, Award, Trophy, Github, Briefcase, MessageSquare
@@ -365,14 +366,10 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
             </div>
           </ScrollAnimation>
 
-          <SkillVisualization 
-            categories={config.skills.categories}
-            layout="grid"
-            defaultCategory={null}
-            showCategories={true}
-            showFilters={true}
-            showSearch={true}
+          <CompactSkillsSection 
             className="mb-16"
+            showHeader={false}
+            defaultTab="frontend"
           />
 
           {/* Stats Section */}

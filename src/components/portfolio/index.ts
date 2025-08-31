@@ -1,88 +1,36 @@
-// Portfolio components exports
+/**
+ * Portfolio Components Index
+ * Centralized exports for all portfolio components
+ */
 
-// Task 15: Portfolio Frontend Enhancements
+// Hero and main sections
 export { HeroSection } from "./HeroSection";
 export type { HeroSectionProps } from "./HeroSection";
 
+// Skills components
 export { SkillVisualization } from "./SkillVisualization";
-export { default as SkillVisualizationDemo } from "./SkillVisualizationDemo";
-export type { 
-  Skill, 
-  SkillVisualizationProps 
-} from "./SkillVisualization";
+export { CompactSkillsSection } from "./CompactSkillsSection";
 
+// Projects components
 export { ProjectShowcase } from "./ProjectShowcase";
-export { default as ProjectShowcaseDemo } from "./ProjectShowcaseDemo";
-export type { 
-  Project, 
-  ProjectShowcaseProps 
-} from "./ProjectShowcase";
-
-export {
-  ScrollAnimation,
-  useScrollAnimation
-} from "./ScrollAnimations";
-
-export {
-  Parallax,
-  StaggeredAnimation,
- 
-} from "./AnimationLibrary";
-
-export { default as ScrollAnimationsDemo } from "./ScrollAnimationsDemo";
-export type {
-  ScrollAnimationConfig as OriginalScrollAnimationConfig,
-  ScrollAnimationProps as OriginalScrollAnimationProps,
-
-} from "./ScrollAnimations";
-
-// Task 16: Portfolio Identity Components
-export { ProfessionalAvatar } from "./ProfessionalAvatar";
-export type { ProfessionalAvatarProps } from "./ProfessionalAvatar";
-
-export { DynamicTypingEffect } from "./DynamicTypingEffect";
-export type { DynamicTypingEffectProps } from "./DynamicTypingEffect";
-
-export { TestimonialsCarousel } from "./TestimonialsCarousel";
-export type { 
-  TestimonialsCarouselProps,
-  Testimonial 
-} from "./TestimonialsCarousel";
-
-export { InteractiveTimeline } from "./InteractiveTimeline";
-export type { 
-  InteractiveTimelineProps,
-  TimelineItem 
-} from "./InteractiveTimeline";
-
-// Task 17: Portfolio Interactive Features
 export { FilterableProjectGallery } from "./FilterableProjectGallery";
-export type { 
-  FilterableProjectGalleryProps,
-  GalleryProject,
-  LayoutType
-} from "./FilterableProjectGallery";
 
+// Experience components
+export { ExperienceTimeline } from "./ExperienceTimeline";
+export { InteractiveTimeline } from "./InteractiveTimeline";
+
+// Contact components
+export { ContactSection } from "./ContactSection";
 export { ContactForm } from "./ContactForm";
-export type { 
-  ContactFormProps,
-  ContactFormData
-} from "./ContactForm";
 
-export { ThemeToggle, ThemeCustomization } from "./ThemeToggle";
-export type { 
-  ThemeToggleProps,
-  ThemeCustomizationProps
-} from "./ThemeToggle";
-
+// Interactive components
 export { InteractiveCodeSnippets } from "./InteractiveCodeSnippets";
-export type { 
-  InteractiveCodeSnippetsProps,
-  CodeSnippetProps
-} from "./InteractiveCodeSnippets";
+export { TestimonialsCarousel } from "./TestimonialsCarousel";
+export { ProfessionalAvatar } from "./ProfessionalAvatar";
+export { DynamicTypingEffect } from "./DynamicTypingEffect";
 
-// Task 19: Portfolio Animation Library
-export {
+// Animation components
+export { 
   Animation,
   ScrollAnimation as LibraryScrollAnimation,
   Parallax as LibraryParallax,
@@ -90,28 +38,91 @@ export {
   SequenceAnimation,
   MorphAnimation,
   useAnimation,
-  useScrollAnimation as useLibraryScrollAnimation,
-  useParallax as useLibraryParallax
+  useScrollAnimation as useLibraryScrollAnimation
 } from "./AnimationLibrary";
+export { ScrollAnimation, useScrollAnimation } from "./ScrollAnimations";
 
-// Task 18: Portfolio Performance Optimizations
-export { LazyPortfolioLoader } from "./LazyPortfolioLoader";
+// Utility components
 export { OptimizedImage } from "./OptimizedImage";
+export { LazyPortfolioLoader } from "./LazyPortfolioLoader";
 export { PerformanceMonitor } from "./PerformanceMonitor";
+export { ThemeToggle, ThemeCustomization } from "./ThemeToggle";
 
-// Task 15: Enhanced Portfolio Integration
+// Enhanced integration
 export { EnhancedPortfolioIntegration } from "./EnhancedPortfolioIntegration";
+
+// Types
+export type { 
+  Skill, 
+  SkillVisualizationProps 
+} from "./SkillVisualization";
+
+export type { 
+  Project, 
+  ProjectShowcaseProps 
+} from "./ProjectShowcase";
+
+export type { 
+  TestimonialsCarouselProps,
+  Testimonial 
+} from "./TestimonialsCarousel";
+
+export type { 
+  InteractiveTimelineProps,
+  TimelineItem 
+} from "./InteractiveTimeline";
+
+export type { 
+  FilterableProjectGalleryProps,
+  GalleryProject,
+  LayoutType
+} from "./FilterableProjectGallery";
+
+export type { 
+  ContactFormData,
+  ContactFormProps
+} from "./ContactForm";
+
+export type { 
+  ThemeToggleProps,
+  ThemeCustomizationProps
+} from "./ThemeToggle";
+
+export type { 
+  InteractiveCodeSnippetsProps,
+  CodeSnippetProps
+} from "./InteractiveCodeSnippets";
+
+export type { ProfessionalAvatarProps } from "./ProfessionalAvatar";
+export type { DynamicTypingEffectProps } from "./DynamicTypingEffect";
 export type { EnhancedPortfolioIntegrationProps } from "./EnhancedPortfolioIntegration";
-export { default as AnimationLibraryDemo } from "./AnimationLibraryDemo";
+
 export type {
   AnimationType,
   AnimationConfig,
-  ScrollAnimationConfig,
+  ScrollAnimationConfig as OriginalScrollAnimationConfig,
   ParallaxConfig,
   AnimationProps,
-  ScrollAnimationProps,
+  ScrollAnimationProps as OriginalScrollAnimationProps,
   ParallaxProps,
   StaggeredAnimationProps,
   SequenceAnimationProps,
   MorphAnimationProps
 } from "./AnimationLibrary";
+
+export type {
+  ScrollAnimationConfig,
+  ScrollAnimationProps
+} from "./ScrollAnimations";
+
+// Default exports for lazy loading
+export default {
+  HeroSection: () => import("./HeroSection"),
+  SkillVisualization: () => import("./SkillVisualization"),
+  ProjectShowcase: () => import("./ProjectShowcase"),
+  ExperienceTimeline: () => import("./ExperienceTimeline"),
+  ContactSection: () => import("./ContactSection"),
+  FilterableProjectGallery: () => import("./FilterableProjectGallery"),
+  TestimonialsCarousel: () => import("./TestimonialsCarousel"),
+  EnhancedPortfolioIntegration: () => import("./EnhancedPortfolioIntegration"),
+};

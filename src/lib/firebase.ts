@@ -4,8 +4,8 @@ import { getAuth, type Auth, connectAuthEmulator } from "firebase/auth";
 import { getAnalytics, type Analytics } from "firebase/analytics";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-// Read config from Vite env vars. Create a .env or .env.local with these keys.
-const firebaseConfig = {
+// Production Firebase configuration
+const productionConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -13,21 +13,64 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-} as const;
+};
+
+// Development fallback configuration (for demo purposes)
+const developmentConfig = {
+  apiKey: "demo-api-key",
+  authDomain: "demo-project.firebaseapp.com",
+  projectId: "demo-project",
+  storageBucket: "demo-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456",
+  measurementId: "G-XXXXXXXXXX",
+};
+
+// Use production config if available, otherwise fallback to development
+const firebaseConfig = (() => {
+  const hasProductionConfig = Boolean(
+    productionConfig.apiKey &&
+    productionConfig.authDomain &&
+    productionConfig.projectId &&
+    productionConfig.apiKey !== 'mock-api-key-for-development' &&
+    !productionConfig.apiKey.includes('demo')
+  );
+
+  if (hasProductionConfig) {
+    return productionConfig;
+  }
+
+  // In development, use demo config to prevent errors
+  if (import.meta.env.DEV) {
+    console.warn('🔥 Using Firebase demo configuration for development');
+    return developmentConfig;
+  }
+
+  // In production without config, use production config anyway (will show error)
+  return productionConfig;
+})();
 
 // Validate configuration
 const hasRequiredConfig = Boolean(
   firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
-  firebaseConfig.projectId &&
-  firebaseConfig.apiKey !== 'mock-api-key-for-development'
+  firebaseConfig.projectId
 );
 
-// Enable Firebase in production or development with valid config
-export const isFirebaseEnabled: boolean = hasRequiredConfig && (
-  import.meta.env.PROD || 
-  (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_ENABLE_DEV === 'true')
-);
+// Enable Firebase based on environment and configuration
+export const isFirebaseEnabled: boolean = (() => {
+  // Always enable in production (even if config is missing, to show proper error)
+  if (import.meta.env.PROD) {
+    return true;
+  }
+
+  // In development, enable if we have config or if explicitly enabled
+  if (import.meta.env.DEV) {
+    return hasRequiredConfig || import.meta.env.VITE_FIREBASE_ENABLE_DEV === 'true';
+  }
+
+  return hasRequiredConfig;
+})();
 
 // Debug logging
 console.log('🔥 Firebase Debug Info:', {

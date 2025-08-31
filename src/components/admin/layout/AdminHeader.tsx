@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { ThemeToggle } from '@/components/theme';
 import { ProfessionalSignature } from '@/components/ui/signature';
 import { Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';

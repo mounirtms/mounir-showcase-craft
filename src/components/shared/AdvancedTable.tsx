@@ -39,7 +39,7 @@ import {
   X
 } from "lucide-react";
 import { VirtualScroll } from "@/components/shared/VirtualScroll";
-import { LoadingStates } from "@/components/shared/LoadingStates";
+import { LoadingState } from "@/components/shared/BaseComponents";
 import { EmptyStates } from "@/components/shared/EmptyStates";
 
 // Column definition types

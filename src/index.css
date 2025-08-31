@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Light theme colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -36,6 +37,19 @@ All colors MUST be HSL.
     --input: 220 13% 91%;
     --ring: 263 70% 50.4%;
 
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Theme transition */
+    --theme-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
     /* Modern design tokens */
     --gradient-primary: linear-gradient(135deg, hsl(263 70% 50.4%), hsl(270 70% 60%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 14.3% 98%));
@@ -50,37 +64,102 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
     
-    /* Glass Morphism */
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
+    /* Glass Morphism - Light */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(15, 23, 42, 0.1);
     --glass-backdrop: blur(16px);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     
-    /* Modern Gradients */
+    /* Modern Gradients - Light */
     --gradient-mesh: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
     
-    /* Glow Effects */
-    --glow-primary: 0 0 30px rgba(139, 92, 246, 0.3);
-    --glow-success: 0 0 30px rgba(34, 197, 94, 0.3);
-    --glow-warning: 0 0 30px rgba(251, 191, 36, 0.3);
-    --glow-danger: 0 0 30px rgba(239, 68, 68, 0.3);
+    /* Glow Effects - Light */
+    --glow-primary: 0 0 30px rgba(139, 92, 246, 0.2);
+    --glow-success: 0 0 30px rgba(34, 197, 94, 0.2);
+    --glow-warning: 0 0 30px rgba(251, 191, 36, 0.2);
+    --glow-danger: 0 0 30px rgba(239, 68, 68, 0.2);
 
-    --sidebar-background: 0 0% 98%;
+    /* Admin Dashboard - Light */
+    --admin-bg: #f8fafc;
+    --admin-card-bg: rgba(255, 255, 255, 0.9);
+    --admin-border: rgba(15, 23, 42, 0.1);
+    --admin-text: #0f172a;
+    --admin-text-muted: #64748b;
+    --admin-hover: rgba(139, 92, 246, 0.05);
+    --admin-active: rgba(139, 92, 246, 0.1);
+  }
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+  .dark {
+    /* Dark theme colors */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --primary: 263 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --sidebar-border: 220 13% 91%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 263 70% 50.4%;
+
+    /* Sidebar colors - Dark */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 94.1%;
+    --sidebar-primary-foreground: 220.9 39.3% 11%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Modern design tokens - Dark */
+    --gradient-primary: linear-gradient(135deg, hsl(263 70% 50.4%), hsl(270 70% 60%));
+    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 17.5%));
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-glow: 0 0 0 1px rgb(263 70% 50.4% / 0.2), 0 4px 16px rgb(263 70% 50.4% / 0.25);
+
+    /* Glass Morphism - Dark */
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(148, 163, 184, 0.1);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    /* Modern Gradients - Dark */
+    --gradient-card: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.6) 100%);
+    
+    /* Glow Effects - Dark */
+    --glow-primary: 0 0 30px rgba(139, 92, 246, 0.4);
+    --glow-success: 0 0 30px rgba(34, 197, 94, 0.4);
+    --glow-warning: 0 0 30px rgba(251, 191, 36, 0.4);
+    --glow-danger: 0 0 30px rgba(239, 68, 68, 0.4);
+
+    /* Admin Dashboard - Dark */
+    --admin-bg: #0f172a;
+    --admin-card-bg: rgba(30, 41, 59, 0.8);
+    --admin-border: rgba(148, 163, 184, 0.1);
+    --admin-text: #f1f5f9;
+    --admin-text-muted: #94a3b8;
+    --admin-hover: rgba(139, 92, 246, 0.1);
+    --admin-active: rgba(139, 92, 246, 0.2);
   }
 }
 
@@ -100,6 +179,35 @@ All colors MUST be HSL.
   
   p {
     @apply font-sans;
+  }
+
+  /* Theme transition support */
+  .theme-transitioning,
+  .theme-transitioning *,
+  .theme-transitioning *:before,
+  .theme-transitioning *:after {
+    transition: background-color var(--theme-transition-duration, 300ms) var(--transition-smooth),
+                border-color var(--theme-transition-duration, 300ms) var(--transition-smooth),
+                color var(--theme-transition-duration, 300ms) var(--transition-smooth),
+                fill var(--theme-transition-duration, 300ms) var(--transition-smooth),
+                stroke var(--theme-transition-duration, 300ms) var(--transition-smooth),
+                box-shadow var(--theme-transition-duration, 300ms) var(--transition-smooth) !important;
+  }
+
+  /* Prevent flash of unstyled content */
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  /* System theme media query support */
+  @media (prefers-color-scheme: dark) {
+    html:not(.light):not(.dark) {
+      color-scheme: dark;
+    }
   }
 }
 

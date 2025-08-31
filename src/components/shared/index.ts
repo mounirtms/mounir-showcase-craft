@@ -1,187 +1,48 @@
-// Loading States
-export {
-  LoadingStates,
-  TableLoadingState,
-  FormLoadingState,
-  PageLoadingState,
-  SearchLoadingState,
-  ExportLoadingState,
-  ImportLoadingState
-} from "./LoadingStates";
-export type { LoadingStateProps, LoadingStateVariant, LoadingStateSize } from "./LoadingStates";
+/**
+ * Shared components index
+ * Centralized exports for all shared components
+ */
 
-// Empty States
-export {
-  EmptyStates,
-  NoDataState,
-  NoSearchResultsState,
-  ErrorState,
-  NoFilterResultsState,
-  EmptyFolderState
-} from "./EmptyStates";
-export type { EmptyStateProps, EmptyStateAction, EmptyStateVariant } from "./EmptyStates";
+// Base components
+export * from './BaseComponents';
 
-// Error Boundary
-export { ErrorBoundary, withErrorBoundary } from "./ErrorBoundary";
-export type { ErrorBoundaryProps, ErrorBoundaryState } from "./ErrorBoundary";
+// Enhanced components (consolidated)
+export { LoadingState, TableLoadingState, FormLoadingState, PageLoadingState } from './BaseComponents';
+export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+export { EmptyStates } from './EmptyStates';
 
-// Confirm Dialog
-export {
-  ConfirmDialog,
-  DeleteConfirmDialog,
-  SaveConfirmDialog,
-  LogoutConfirmDialog,
-  ArchiveConfirmDialog,
-  RefreshConfirmDialog
-} from "./ConfirmDialog";
-export type { ConfirmDialogProps, ConfirmDialogVariant, ConfirmDialogIcon } from "./ConfirmDialog";
+// Specialized components
+export * from './ConfirmDialog';
+export * from './FormBuilder';
+export * from './FormFields';
+export * from './AdvancedTable';
+export * from './VirtualScroll';
+export * from './LazyLoading';
+export * from './ResponsiveDesign';
+export * from './MobileOptimized';
+export * from './AccessibleComponents';
+export * from './AnalyticsCharts';
 
-// Lazy Loading
-export {
-  LazyDashboardOverview,
-  LazyProjectsManager,
-  LazySkillsTab,
-  LazyWrapper,
-  preloadAdminComponents,
-  usePreloadAdminComponents,
-  LazyDashboard,
-  LazyProjects,
-  LazySkills,
-  useIntersectionObserver,
-  LazyOnScroll
-} from "./LazyLoading";
-export type { LazyWrapperProps, LazyOnScrollProps } from "./LazyLoading";
+// Performance components
+export * from './PerformanceMonitor';
+export * from './PerformanceOptimizations';
 
-// Performance Optimizations
-export {
-  createMemoComponent,
-  createOptimizedListItem,
-  useStableCallback,
-  useStableObject,
-  useExpensiveComputation,
-  usePerformanceMonitor,
-  usePreventUnnecessaryRenders,
-  createStableHandlers,
-  useOptimizedList,
-  withPerformanceOptimization,
-  debugMemo
-} from "./PerformanceOptimizations";
-
-// Virtual Scrolling
-export {
-  VirtualScroll
-} from "./VirtualScroll";
-export type { VirtualScrollProps } from "./VirtualScroll";
-
-// Responsive Design
-export {
-  ResponsiveGrid,
-  useBreakpoint,
-  useMediaQuery,
-  TouchFriendly,
-  AdaptiveLayout,
-  breakpoints
-} from "./ResponsiveDesign";
-export type { 
-  ResponsiveGridProps, 
-  TouchFriendlyProps, 
-  AdaptiveLayoutProps, 
-  Breakpoint 
-} from "./ResponsiveDesign";
-
-// Mobile Optimized
-export {
-  MobileDrawer,
-  SwipeableCarousel,
-  MobileButton,
-  PullToRefresh
-} from "./MobileOptimized";
-export type { 
-  MobileDrawerProps, 
-  SwipeableCarouselProps, 
-  MobileButtonProps, 
-  PullToRefreshProps 
-} from "./MobileOptimized";
-
-// Advanced Table
-export {
-  AdvancedTable
-} from "./AdvancedTable";
-export type {
-  AdvancedTableProps,
-  TableColumn,
-  SortConfig,
-  FilterConfig,
-  PaginationConfig,
-  ExportOptions
-} from "./AdvancedTable";
-
-// Form Builder
-export {
-  FormBuilder
-} from "./FormBuilder";
-export type {
-  FormBuilderProps,
-  FormSection,
-  FieldConfig,
-  AutoSaveConfig
-} from "./FormBuilder";
-
-// Form Fields
-export {
-  EnhancedInput,
-  EnhancedSelect,
-  EnhancedTextarea,
-  DatePicker,
-  FileUpload
-} from "./FormFields";
-export type {
-  BaseFieldProps,
-  EnhancedInputProps,
-  EnhancedSelectProps,
-  EnhancedTextareaProps,
-  DatePickerProps,
-  FileUploadProps
-} from "./FormFields";
-
-// Accessible Components
-export {
-  SkipLinks,
-  AccessibleHeading,
-  AccessibleButton,
-  AccessibleBadge,
-  AccessibleCard,
-  AccessibleNav,
-  AccessibleList,
-  AccessibleListItem,
-  AccessibleProgress,
-  FocusTrap,
-  AccessibilityMenu
-} from "./AccessibleComponents";
-export type {
-  AccessibleHeadingProps,
-  AccessibleButtonProps,
-  AccessibleBadgeProps,
-  AccessibleCardProps,
-  AccessibleNavProps,
-  AccessibleListProps,
-  AccessibleListItemProps,
-  AccessibleProgressProps,
-  FocusTrapProps,
-  AccessibilityMenuProps
-} from "./AccessibleComponents";
-
-// Analytics and Charts
-export {
-  SimpleBarChart,
-  SimpleLineChart,
-  MetricCard,
-  AnalyticsDashboard
-} from "./AnalyticsCharts";
-export type {
-  ChartDataPoint,
-  TimeSeriesData,
-  ChartProps,
-  MetricCardProps,
-  AnalyticsDashboardProps
-} from "./AnalyticsCharts";
+// Default export with commonly used components
+export default {
+  // Base components
+  BaseCard: () => import('./BaseComponents').then(m => m.BaseCard),
+  EnhancedCard: () => import('./BaseComponents').then(m => m.EnhancedCard),
+  BaseButton: () => import('./BaseComponents').then(m => m.BaseButton),
+  StatusBadge: () => import('./BaseComponents').then(m => m.StatusBadge),
+  EmptyState: () => import('./BaseComponents').then(m => m.EmptyState),
+  LoadingState: () => import('./BaseComponents').then(m => m.LoadingState),
+  ErrorState: () => import('./BaseComponents').then(m => m.ErrorState),
+  AsyncContent: () => import('./BaseComponents').then(m => m.AsyncContent),
+  Section: () => import('./BaseComponents').then(m => m.Section),
+  
+  // Other components
+  ErrorBoundary: () => import('./ErrorBoundary').then(m => m.ErrorBoundary),
+  ConfirmDialog: () => import('./ConfirmDialog'),
+  FormBuilder: () => import('./FormBuilder'),
+  AdvancedTable: () => import('./AdvancedTable'),
+};

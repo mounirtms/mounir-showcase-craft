@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { ErrorBoundary } from './components/ui/error-boundary'
+import { ErrorBoundary } from './components/shared/ErrorBoundary'
 
 // Enhanced error handling for unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {

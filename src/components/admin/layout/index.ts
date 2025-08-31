@@ -1,4 +1,22 @@
-export { AdminLayout, default as AdminLayoutDefault } from './AdminLayout';
-export { AdminHeader, default as AdminHeaderDefault } from './AdminHeader';
-export { AdminSidebar, default as AdminSidebarDefault } from './AdminSidebar';
-export { AdminBreadcrumb, default as AdminBreadcrumbDefault } from './AdminBreadcrumb';
+/**
+ * Admin Layout Components
+ */
+
+export { AdminLayout } from './AdminLayout';
+export { AdminHeader } from './AdminHeader';
+export { AdminSidebar } from './AdminSidebar';
+export { AdminBreadcrumb } from './AdminBreadcrumb';
+
+export type {
+  AdminLayoutProps,
+  AdminHeaderProps,
+  AdminSidebarProps,
+  AdminBreadcrumbProps,
+} from './types';
+
+export default {
+  AdminLayout: () => import('./AdminLayout'),
+  AdminHeader: () => import('./AdminHeader'),
+  AdminSidebar: () => import('./AdminSidebar'),
+  AdminBreadcrumb: () => import('./AdminBreadcrumb'),
+};

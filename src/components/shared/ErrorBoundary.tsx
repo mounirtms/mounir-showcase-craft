@@ -1,3 +1,8 @@
+/**
+ * Enhanced Error Boundary Component
+ * Consolidated error boundary with comprehensive error handling and recovery options
+ */
+
 import React, { Component, ReactNode, ErrorInfo } from "react";
 import { AlertTriangle, RefreshCw, Home, Bug, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/hooks/use-toast";
+
+// Simple error boundary alias for backward compatibility - defined at the end of this file
 
 export interface ErrorBoundaryState {
   hasError: boolean;
@@ -366,5 +373,8 @@ export const withErrorBoundary = <P extends object>(
   
   return WrappedComponent;
 };
+
+// Backward compatibility exports
+export { ErrorBoundary as SimpleErrorBoundary, withErrorBoundary as withSimpleErrorBoundary };
 
 export default ErrorBoundary;
