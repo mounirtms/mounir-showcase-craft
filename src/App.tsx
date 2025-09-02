@@ -1,20 +1,35 @@
+import React from 'react';
 import { Toaster, Sonner, TooltipProvider } from "@/components/ui";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/shared";
-import { ThemeProvider, ThemeDemo } from "@/components/theme";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ThemeTransition } from "@/components/theme/theme-transition";
 import { AccessibilityProvider } from "@/contexts";
 import { RUMProvider } from "@/components";
-import { HomePage, AdminPage, NotFoundPage } from "@/pages";
+
+// Import the HomePage component
+import HomePage from "./pages/HomePage";
+// Import other pages
+import AdminPage from "./pages/Admin";
+import NotFoundPage from "./pages/NotFound";
+
+// Loading component for Suspense
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  </div>
+);
 
 
 
-const App = () => {
+// Define the App component
+export default function App() {
   const rumConfig = {
     sampleRate: import.meta.env.PROD ? 0.1 : 1.0, // Sample 10% in prod, 100% in dev
     enableConsoleLogging: import.meta.env.DEV,
     enableLocalStorage: true,
-    apiEndpoint: import.meta.env.VITE_RUM_API_ENDPOINT,
-    apiKey: import.meta.env.VITE_RUM_API_KEY,
+    ...(import.meta.env.VITE_RUM_API_ENDPOINT && { apiEndpoint: import.meta.env.VITE_RUM_API_ENDPOINT }),
+    ...(import.meta.env.VITE_RUM_API_KEY && { apiKey: import.meta.env.VITE_RUM_API_KEY }),
   };
 
   return (
@@ -29,32 +44,44 @@ const App = () => {
             enableColorSchemeChange={true}
           >
             <TooltipProvider>
+              <ThemeTransition>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/theme-demo" element={<ThemeDemo />} />
-                    <Route 
-                      path="/admin/*" 
-                      element={
-                        <ErrorBoundary>
-                          <AdminPage />
-                        </ErrorBoundary>
-                      } 
-                    /> 
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
+                  <React.Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route 
+                        path="/" 
+                        element={
+                          <ErrorBoundary>
+                            <HomePage />
+                          </ErrorBoundary>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/*" 
+                        element={
+                          <ErrorBoundary>
+                            <AdminPage />
+                          </ErrorBoundary>
+                        } 
+                      />
+                      <Route 
+                        path="*" 
+                        element={
+                          <ErrorBoundary>
+                            <NotFoundPage />
+                          </ErrorBoundary>
+                        } 
+                      />
+                    </Routes>
+                  </React.Suspense>
                 </BrowserRouter>
-                
-
-              </TooltipProvider>
+              </ThemeTransition>
+            </TooltipProvider>
           </ThemeProvider>
         </AccessibilityProvider>
       </RUMProvider>
     </ErrorBoundary>
   );
-};
-
-export default App;
+}

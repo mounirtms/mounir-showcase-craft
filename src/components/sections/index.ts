@@ -3,21 +3,21 @@
  * Centralized exports for all section components
  */
 
-export { default as HeroSection } from './hero';
-export { default as SkillsSection } from './skills';
-export { default as ProjectsSection } from './projects';
-export { default as ExperienceSection } from './experience';
+export { Hero as HeroSection } from './hero';
+export { Skills as SkillsSection } from './skills';
+export { Projects as ProjectsSection } from './projects';
+export { Experience as ExperienceSection } from './experience';
 
 // Types
-export type { HeroSectionProps } from './hero';
-export type { SkillsSectionProps } from './skills';
-export type { ProjectsSectionProps } from './projects';
-export type { ExperienceSectionProps } from './experience';
+export type { HeroProps as HeroSectionProps } from './hero';
+// Note: The Skills component does not have props, so no type is exported.
+export type { ProjectsProps as ProjectsSectionProps } from './projects';
+export type { ExperienceProps as ExperienceSectionProps } from './experience';
 
-// Default exports for lazy loading
+// Default exports for lazy loading, now compatible with React.lazy
 export default {
-  Hero: () => import('./hero'),
-  Skills: () => import('./skills'),
-  Projects: () => import('./projects'),
-  Experience: () => import('./experience'),
+  Hero: () => import('./hero').then(m => ({ default: m.Hero })),
+  Skills: () => import('./skills').then(m => ({ default: m.Skills })),
+  Projects: () => import('./projects').then(m => ({ default: m.Projects })),
+  Experience: () => import('./experience').then(m => ({ default: m.Experience })),
 };

@@ -5,18 +5,15 @@
 
 // Constants
 export * from './constants';
-export { default as CONSTANTS } from './constants';
 
 // Types
-export * from './types';
+export type { ValidationResult, ValidationRule } from './types';
 
 // Formatters
 export * from './formatters';
-export { default as formatters } from './formatters';
 
 // Validators
 export * from './validators';
-export { default as validators } from './validators';
 
 // Re-export commonly used utilities from other locations
 export { cn } from '../utils';

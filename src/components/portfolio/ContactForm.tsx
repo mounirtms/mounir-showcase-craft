@@ -46,7 +46,7 @@ interface FormField {
   validation: ValidationRule;
 }
 
-interface ContactFormData {
+export interface ContactFormData {
   name: string;
   email: string;
   phone: string;
@@ -57,7 +57,7 @@ interface ContactFormData {
   newsletter: boolean;
 }
 
-interface ContactFormProps {
+export interface ContactFormProps {
   className?: string;
   onSubmit?: (data: ContactFormData) => Promise<void>;
   enableSocialLinks?: boolean;
@@ -189,7 +189,7 @@ const SOCIAL_LINKS = [
 // Validation hook
 const useFormValidation = (initialData: ContactFormData) => {
   const [formData, setFormData] = useState<ContactFormData>(initialData);
-  const [errors, setErrors] = useState<Record<keyof ContactFormData, FieldError | null>>({} as any);
+  const [errors, setErrors] = useState<Record<keyof ContactFormData, FieldError | null>>({} as Record<keyof ContactFormData, FieldError | null>);
   const [touchedFields, setTouchedFields] = useState<Set<keyof ContactFormData>>(new Set());
   const [isValid, setIsValid] = useState(false);
 
@@ -266,7 +266,7 @@ const useFormValidation = (initialData: ContactFormData) => {
   };
 
   const validateAllFields = () => {
-    const newErrors: Record<keyof ContactFormData, FieldError | null> = {} as any;
+    const newErrors: Record<keyof ContactFormData, FieldError | null> = {} as Record<keyof ContactFormData, FieldError | null>;
     let hasErrors = false;
 
     Object.keys(FORM_FIELDS).forEach(fieldName => {

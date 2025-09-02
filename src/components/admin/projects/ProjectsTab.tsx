@@ -5,7 +5,7 @@ import { ProjectForm } from "./ProjectForm";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectBulkActions } from "./ProjectBulkActions";
 import { AdminDataTable } from "../AdminDataTable";
-import { ActionColumn } from "../ActionColumn";
+import { createActionColumnDef } from "../ActionColumn";
 import { StatusBadge } from "@/components/ui/data-table";
 import { format } from "date-fns";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -266,17 +266,9 @@ export function ProjectsTab({ className }: ProjectsTabProps) {
         );
       },
     },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        return (
-          <ActionColumn
-            row={row}
-            onEdit={() => handleEditProject(row.original)}
-          />
-        );
-      },
-    },
+    createActionColumnDef({
+      onEdit: handleEditProject,
+    }),
   ], [selectedProjects, handleSelectAll, handleProjectSelect, handleEditProject]);
 
   return (
@@ -348,6 +340,7 @@ export function ProjectsTab({ className }: ProjectsTabProps) {
           <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
             <TabsContent value="table">
               <AdminDataTable
+                title="Projects"
                 columns={columns}
                 data={filteredProjects}
                 loading={loading}

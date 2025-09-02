@@ -115,14 +115,3 @@ export type {
   ScrollAnimationProps
 } from "./ScrollAnimations";
 
-// Default exports for lazy loading
-export default {
-  HeroSection: () => import("./HeroSection"),
-  SkillVisualization: () => import("./SkillVisualization"),
-  ProjectShowcase: () => import("./ProjectShowcase"),
-  ExperienceTimeline: () => import("./ExperienceTimeline"),
-  ContactSection: () => import("./ContactSection"),
-  FilterableProjectGallery: () => import("./FilterableProjectGallery"),
-  TestimonialsCarousel: () => import("./TestimonialsCarousel"),
-  EnhancedPortfolioIntegration: () => import("./EnhancedPortfolioIntegration"),
-};

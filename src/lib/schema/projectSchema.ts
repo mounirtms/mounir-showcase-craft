@@ -32,7 +32,7 @@ const emailSchema = z.string()
 // Phone validation
 const phoneSchema = z.string()
   .refine(
-    (val) => !val || val === '' || /^[\+]?[1-9][\d]{0,15}$/.test(val.replace(/[\s\-\(\)]/g, '')),
+    (val) => !val || val === '' || /^[+]?[1-9][\d]{0,15}$/.test(val.replace(/[\s\-()]/g, '')),
     { message: 'Must be a valid phone number' }
   )
   .or(z.literal(''))
@@ -333,8 +333,88 @@ export const ProjectSchema = z.object({
 export type ProjectInput = z.input<typeof ProjectSchema>;
 export type Project = z.output<typeof ProjectSchema>;
 
+// Create a base schema without refinements for partial operations
+const ProjectSchemaBase = z.object({
+  // Basic Information
+  title: z.string()
+    .min(1, 'Title is required')
+    .max(100, 'Title must be less than 100 characters')
+    .trim(),
+  
+  description: z.string()
+    .min(10, 'Description must be at least 10 characters')
+    .max(500, 'Description must be less than 500 characters')
+    .trim(),
+  
+  longDescription: z.string()
+    .max(5000, 'Long description must be less than 5000 characters')
+    .trim()
+    .optional(),
+
+  // Classification
+  category: z.nativeEnum(ProjectCategory, {
+    errorMap: () => ({ message: 'Please select a valid project category' })
+  }),
+  
+  status: z.nativeEnum(ProjectStatus, {
+    errorMap: () => ({ message: 'Please select a valid project status' })
+  }).default(ProjectStatus.COMPLETED),
+  
+  priority: z.nativeEnum(ProjectPriority).default(ProjectPriority.MEDIUM),
+
+  // Technical Details
+  technologies: nonEmptyStringArray,
+  achievements: optionalStringArray,
+  challenges: optionalStringArray,
+  solutions: optionalStringArray,
+  tags: optionalStringArray,
+
+  // Media and Links
+  images: z.array(ProjectImageSchema).default([]),
+  links: z.array(ProjectLinkSchema).default([]),
+  icon: z.string().optional(),
+
+  // Project Details
+  featured: z.boolean().default(false),
+  disabled: z.boolean().default(false),
+  visibility: z.enum(['public', 'private', 'draft']).default('public'),
+
+  // Timeline
+  startDate: dateSchema,
+  endDate: dateSchema,
+  duration: z.string()
+    .max(50, 'Duration must be less than 50 characters')
+    .trim()
+    .optional(),
+
+  // Team and Role
+  teamSize: z.number()
+    .int('Team size must be a whole number')
+    .min(1, 'Team size must be at least 1')
+    .max(100, 'Team size cannot exceed 100')
+    .default(1),
+  
+  role: z.string()
+    .min(1, 'Role is required')
+    .max(100, 'Role must be less than 100 characters')
+    .trim(),
+
+  // Client and Business
+  clientInfo: ClientInfoSchema.optional(),
+  metrics: ProjectMetricsSchema.optional(),
+
+  // SEO and Metadata
+  seo: ProjectSEOSchema.optional(),
+
+  // System Fields
+  createdAt: z.number().positive('Created date must be valid'),
+  updatedAt: z.number().positive('Updated date must be valid'),
+  version: z.number().int().min(1).default(1),
+  schemaVersion: z.string().default('1.0.0'),
+});
+
 // Partial schemas for updates
-export const ProjectUpdateSchema = ProjectSchema.partial().omit({
+export const ProjectUpdateSchema = ProjectSchemaBase.partial().omit({
   createdAt: true,
   schemaVersion: true
 }).extend({
@@ -345,16 +425,15 @@ export const ProjectUpdateSchema = ProjectSchema.partial().omit({
 export type ProjectUpdate = z.infer<typeof ProjectUpdateSchema>;
 
 // Create schema for new projects
-export const ProjectCreateSchema = ProjectSchema.omit({
+export const ProjectCreateSchema = ProjectSchemaBase.omit({
   createdAt: true,
   updatedAt: true,
   version: true,
   schemaVersion: true
 }).extend({
-  createdAt: z.number().positive('Created date must be valid').default(() => Date.now()),
-  updatedAt: z.number().positive('Updated date must be valid').default(() => Date.now()),
-  version: z.number().int().min(1).default(1),
-  schemaVersion: z.string().default('1.0.0'),
+  // Allow setting initial values for these fields
+  createdAt: z.number().positive('Created date must be valid').optional(),
+  updatedAt: z.number().positive('Updated date must be valid').optional(),
 });
 
 export type ProjectCreate = z.infer<typeof ProjectCreateSchema>;

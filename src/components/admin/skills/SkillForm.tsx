@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { SkillInput } from "@/hooks/useSkills";
 import { SkillSchema } from "@/lib/schema/skillSchema";
+import { SkillCategory } from "@/lib/schema/types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -48,8 +49,8 @@ export const SkillForm: React.FC<SkillFormProps> = ({ defaultValues, submitLabel
     ...defaultValues,
   });
 
-  const skillSchema = SkillSchema;
-  const categories = Object.keys(skillSchema.shape.category._def.innerType.enum);
+  // Get categories from the SkillCategory enum
+  const categories = Object.values(SkillCategory);
 
   function onSubmitHandler(values: SkillFormValues) {
     onSubmit(values);
@@ -57,55 +58,57 @@ export const SkillForm: React.FC<SkillFormProps> = ({ defaultValues, submitLabel
 
   return (
     <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmitHandler)}>
-        <div className="grid md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
+      <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Skill name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Input placeholder="TypeScript" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="level"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Proficiency Level (1-100)</FormLabel>
+                <FormLabel>Level</FormLabel>
                 <FormControl>
-                  <Input type="number" min={1} max={100} {...field} />
+                  <Input type="number" min={1} max={100} {...field} onChange={(e) => field.onChange(+e.target.value)} />
                 </FormControl>
-                <FormDescription>Percentage indicating your proficiency.</FormDescription>
+                <FormDescription>Rate your skill level from 1 to 100</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -118,84 +121,9 @@ export const SkillForm: React.FC<SkillFormProps> = ({ defaultValues, submitLabel
               <FormItem>
                 <FormLabel>Years of Experience</FormLabel>
                 <FormControl>
-                  <Input type="number" min={0} {...field} />
+                  <Input type="number" min={0} {...field} onChange={(e) => field.onChange(+e.target.value)} />
                 </FormControl>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Priority</FormLabel>
-                <FormControl>
-                  <Input type="number" min={1} max={100} {...field} />
-                </FormControl>
-                <FormDescription>Higher priority surfaces the skill first.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="icon"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Icon (emoji)</FormLabel>
-                <FormControl>
-                  <Input placeholder="🚀" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Color (hex)</FormLabel>
-                <FormControl>
-                  <Input placeholder="#6E56CF" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="featured"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-3 border rounded-md">
-                <div>
-                  <FormLabel>Featured</FormLabel>
-                  <FormDescription>Showcase this skill prominently.</FormDescription>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="disabled"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-3 border rounded-md">
-                <div>
-                  <FormLabel>Hidden</FormLabel>
-                  <FormDescription>Hide this skill from public view.</FormDescription>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
               </FormItem>
             )}
           />
@@ -208,22 +136,79 @@ export const SkillForm: React.FC<SkillFormProps> = ({ defaultValues, submitLabel
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea rows={3} placeholder="Short description..." {...field} />
+                <Textarea
+                  placeholder="Describe your experience with this skill"
+                  className="resize-none"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="flex items-center justify-end gap-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FormField
+            control={form.control}
+            name="featured"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Featured</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>Display this skill prominently</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="disabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Disabled</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>Hide this skill from display</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="priority"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Priority</FormLabel>
+                <FormControl>
+                  <Input type="number" min={1} max={100} {...field} onChange={(e) => field.onChange(+e.target.value)} />
+                </FormControl>
+                <FormDescription>Higher values appear first</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex justify-between">
           <Button type="submit">{submitLabel}</Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
         </div>
       </form>
     </Form>
   );
 };
-
-export default SkillForm;

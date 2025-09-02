@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useProjects, PROJECTS_COLLECTION, type Project } from "@/hooks/useProjects";
+import { useProjects, PROJECTS_COLLECTION, type Project, type ProjectInput } from "@/hooks/useProjects";
 import { addDoc, collection, doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { createActionColumnDef } from "@/components/admin/ActionColumn";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { validateProjectUpdate } from "@/lib/validation-schemas";
 import { format } from "date-fns";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataExportManager } from "@/components/admin/DataExportManager";
@@ -109,51 +108,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ProjectSchema, type ProjectInput } from "@/lib/validation-schemas";
-
-// Schema for the project form
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  longDescription: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
-  status: z.string().min(1, "Status is required"),
-  achievements: z.array(z.string()).optional(),
-  technologies: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
-  image: z.string().optional(),
-  logo: z.string().optional(),
-  icon: z.string().optional(),
-  liveUrl: z.string().optional(),
-  githubUrl: z.string().optional(),
-  demoUrl: z.string().optional(),
-  caseStudyUrl: z.string().optional(),
-  featured: z.boolean().default(false),
-  disabled: z.boolean().default(false),
-  priority: z.number().min(1).max(100).default(50),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  duration: z.string().optional(),
-  teamSize: z.number().min(1).default(1),
-  role: z.string().min(1, "Role is required"),
-  clientInfo: z.object({
-    name: z.string().optional(),
-    industry: z.string().optional(),
-    size: z.enum(["startup", "small", "medium", "large", "enterprise"]).optional(),
-    location: z.string().optional(),
-    website: z.string().optional(),
-    isPublic: z.boolean().default(false),
-  }).optional(),
-  metrics: z.object({
-    usersReached: z.number().optional(),
-    performanceImprovement: z.string().optional(),
-    revenueImpact: z.string().optional(),
-    uptime: z.string().optional(),
-    customMetrics: z.record(z.string()).optional(),
-  }).optional(),
-  challenges: z.array(z.string()).optional(),
-  solutions: z.array(z.string()).optional(),
-});
+import { ProjectSchema } from "@/lib/schema/projectSchema";
 
 export function ProjectsManager() {
   const { projects, loading, refetch } = useProjects();
@@ -170,8 +125,8 @@ export function ProjectsManager() {
   const [logoPath, setLogoPath] = useState<string>("");
 
   // Form setup
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ProjectInput>({
+    resolver: zodResolver(ProjectSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -217,13 +172,22 @@ export function ProjectsManager() {
   });
 
   // Handle form submission with better validation and error handling
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: ProjectInput) => {
     try {
       // Show loading state
       const loadingToast = toast({
         title: projectToEdit ? "Updating project..." : "Creating project...",
         description: "Please wait while we save your project.",
       });
+
+      if (!db) {
+        toast({
+          title: "Database Error",
+          description: "Firebase connection is not available.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (projectToEdit) {
         // Check if this is a local project (can't be updated in Firebase)
@@ -506,6 +470,15 @@ export function ProjectsManager() {
         description: `Removing ${projectsToDelete.length} projects from your portfolio.`,
       });
       
+      if (!db) {
+        toast({
+          title: "Database Error",
+          description: "Firebase connection is not available.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const batch = writeBatch(db);
       
       projectsToDelete.forEach((project) => {
@@ -640,6 +613,7 @@ export function ProjectsManager() {
         </CardHeader>
         <CardContent>
           <AdminDataTable
+            title="Projects"
             columns={columns}
             data={projects}
             loading={loading}

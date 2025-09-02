@@ -292,4 +292,7 @@ export const useScreenReaderDetection = () => {
   return hasScreenReader;
 };
 
+// Export the context itself
+export { AccessibilityContext };
+
 export default AccessibilityProvider;

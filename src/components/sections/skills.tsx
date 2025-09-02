@@ -1,10 +1,47 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getSkillIcon, getSkillColor } from "@/lib/skill-icons";
+import { getSkillIcon } from "@/lib/skill-icons";
 import { Code, Server, Cloud, Database, Globe, Users } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useInView, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const SkillProgress = ({ name, level }: { name: string; level: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px 0px -50px 0px" });
+
+  return (
+    <div ref={ref} className="space-y-2">
+      <div className="flex justify-between items-center text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 flex items-center justify-center">
+            {getSkillIcon(name)}
+          </div>
+          <span className="font-medium">{name}</span>
+        </div>
+        <span className="text-muted-foreground font-medium">{level}%</span>
+      </div>
+      <Progress 
+        value={isInView ? level : 0} 
+        className="h-2 bg-secondary/20 transition-all duration-1000 ease-out"
+        style={{
+          '--progress-color': `hsl(var(--primary))`,
+        } as React.CSSProperties}
+      />
+    </div>
+  );
+};
 
 export const Skills = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px 0px -100px 0px" });
+
+  useEffect(() => {
+    if (isInView && sectionRef.current) {
+      sectionRef.current.style.scrollMarginTop = '80px';
+    }
+  }, [isInView]);
   const skillCategories = [
     {
       icon: Code,
@@ -64,8 +101,15 @@ export const Skills = () => {
   ];
 
   return (
-    <section id="skills" className="py-24 px-6">
-      <div className="max-w-6xl mx-auto space-y-20">
+    <section 
+      ref={sectionRef}
+      id="skills" 
+      className={cn(
+        "py-16 md:py-24 px-4 sm:px-6 scroll-mt-20 transition-opacity duration-700",
+        isInView ? "opacity-100" : "opacity-0 translate-y-8"
+      )}
+    >
+      <div className="max-w-6xl mx-auto space-y-12 md:space-y-20">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Technical <span className="text-primary">Expertise</span>
@@ -76,92 +120,115 @@ export const Skills = () => {
         </div>
 
         {/* Core Skills */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {skillCategories.map((category, index) => {
             const Icon = category.icon;
+            const delay = index * 100;
             return (
-              <Card key={index} className="group hover:shadow-glow transition-all duration-500 hover:scale-[1.02] border-0 shadow-medium">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                      <Icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-xl font-bold">{category.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {category.skills.map((skill, skillIndex) => (
-                    <div key={skillIndex} className="space-y-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 flex items-center justify-center">
-                            {getSkillIcon(skill.name)}
-                          </div>
-                          <span className="font-medium">{skill.name}</span>
-                        </div>
-                        <span className="text-muted-foreground font-medium">{skill.level}%</span>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: delay / 1000 }}
+              >
+                <Card className="group h-full hover:shadow-glow transition-all duration-300 hover:shadow-lg border-0 shadow-sm bg-card/50 backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                        <Icon className="h-5 w-5 text-primary" />
                       </div>
-                      <Progress value={skill.level} className="h-2" />
+                      <CardTitle className="text-lg font-bold">{category.title}</CardTitle>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {category.skills.map((skill, skillIndex) => (
+                      <SkillProgress key={skillIndex} name={skill.name} level={skill.level} />
+                    ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Languages */}
-        <Card className="shadow-medium border-0">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <Globe className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle className="text-2xl font-bold">Languages</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {languages.map((lang, index) => (
-                <div key={index} className="text-center p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors group">
-                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">
-                    {lang.flag}
-                  </div>
-                  <div className="font-medium text-sm">{lang.name}</div>
-                  <div className="text-xs text-muted-foreground">{lang.level}</div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="shadow-sm border-0 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <Globe className="h-5 w-5 text-primary" />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <CardTitle className="text-xl font-bold">Languages</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {languages.map((lang, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.3, delay: 0.2 + (index * 0.05) }}
+                    className="text-center p-4 rounded-xl bg-muted/20 hover:bg-muted/40 transition-all duration-300 group"
+                    whileHover={{ y: -5, scale: 1.03 }}
+                  >
+                    <div className="text-2xl mb-2 transition-transform duration-300 group-hover:scale-110">
+                      {lang.flag}
+                    </div>
+                    <div className="font-medium text-sm">{lang.name}</div>
+                    <div className="text-xs text-muted-foreground">{lang.level}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Technologies */}
-        <Card className="shadow-medium border-0">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <Users className="h-6 w-6 text-primary" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="shadow-sm border-0 bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-xl font-bold">Technologies & Tools</CardTitle>
               </div>
-              <CardTitle className="text-2xl font-bold">Technologies & Tools</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {technologies.map((tech, index) => (
-                <Badge 
-                  key={index} 
-                  variant="outline" 
-                  className="text-sm py-2 px-4 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                >
-                  <div className="w-4 h-4 flex items-center justify-center">
-                    {getSkillIcon(tech)}
-                  </div>
-                  {tech}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {technologies.map((tech, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ duration: 0.2, delay: 0.3 + (index * 0.02) }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shadow-sm"
+                    >
+                      <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center">
+                        {getSkillIcon(tech)}
+                      </div>
+                      <span>{tech}</span>
+                    </Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </section>
   );

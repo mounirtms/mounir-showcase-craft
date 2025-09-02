@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
-import RealUserMonitoring, { RUMConfig, PerformanceData } from '../utils/rum-monitor';
+import RealUserMonitoring from '../utils/rum-monitor';
+import type { RUMConfig, PerformanceData } from '../utils/rum-monitor';
 
 interface RUMContextValue {
   rum: RealUserMonitoring | null;
@@ -23,6 +24,14 @@ interface RUMProviderProps {
   enabled?: boolean;
 }
 
+// Default RUM configuration
+const defaultRUMConfig: RUMConfig = {
+  apiEndpoint: process.env.VITE_RUM_API_ENDPOINT || '/api/rum',
+  sampleRate: 1.0,
+  enableConsoleLogging: process.env.NODE_ENV !== 'production',
+  enableLocalStorage: true,
+};
+
 export const RUMProvider: React.FC<RUMProviderProps> = ({ 
   children, 
   config = {}, 
@@ -31,6 +40,11 @@ export const RUMProvider: React.FC<RUMProviderProps> = ({
   const rumRef = useRef<RealUserMonitoring | null>(null);
 
   useEffect(() => {
+    // Merge default config with provided config
+    const mergedConfig = {
+      ...defaultRUMConfig,
+      ...config,
+    };
     if (!enabled) return;
 
     // Initialize RUM monitoring

@@ -3,7 +3,9 @@
  * Centralized utility functions used across the application
  */
 
-import { MOBILE_BREAKPOINT, UI_COMPONENT_CONFIG } from '@/constants';
+import { BREAKPOINT_VALUES, UI_COMPONENT_CONFIG } from '@/constants';
+
+const MOBILE_BREAKPOINT = BREAKPOINT_VALUES.md; // Using md breakpoint as mobile threshold
 
 // Re-export shared utilities for convenience
 export * from '@/lib/shared/utilities';

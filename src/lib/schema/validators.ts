@@ -297,7 +297,7 @@ export function collectValidationMetrics<T>(
   const startMemory = performance.memory?.usedJSHeapSize || 0;
   
   let errorCount = 0;
-  let warningCount = 0;
+  const warningCount = 0;
   let fieldCount = 0;
 
   try {

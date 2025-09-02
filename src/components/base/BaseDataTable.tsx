@@ -3,9 +3,9 @@
  * Reusable data table component to reduce duplication across different table implementations
  */
 
-import React from 'react';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { TableColumn, TableState, BaseComponentProps } from '@/lib/shared/types';
+import { TableColumn, TableState, TableSorting, TableFiltering } from '@/lib/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -33,9 +33,9 @@ import {
   Download,
   Plus
 } from 'lucide-react';
-import { TABLE_CONFIG } from '@/lib/shared/constants';
+import { TABLE_CONFIG } from '@/constants';
 
-export interface BaseDataTableProps<T = any> extends BaseComponentProps {
+export interface BaseDataTableProps<T extends Record<string, unknown> = Record<string, unknown>> extends React.HTMLAttributes<HTMLDivElement> {
   data: T[];
   columns: TableColumn<T>[];
   loading?: boolean;
@@ -82,7 +82,12 @@ export interface BaseDataTableProps<T = any> extends BaseComponentProps {
   compact?: boolean;
 }
 
-export const BaseDataTable = <T extends Record<string, any>>({
+
+
+// Define a type for the table row data
+type TableRowData = Record<string, unknown> & { id: string };
+
+export const BaseDataTable = <T extends TableRowData>({
   data,
   columns,
   loading = false,
@@ -100,22 +105,26 @@ export const BaseDataTable = <T extends Record<string, any>>({
   onStateChange,
   pagination = true,
   pageSize = TABLE_CONFIG.pagination.defaultPageSize,
-  pageSizeOptions = TABLE_CONFIG.pagination.pageSizeOptions,
+  pageSizeOptions = [...TABLE_CONFIG.pagination.pageSizeOptions] as number[],
   stickyHeader = false,
   striped = false,
   bordered = false,
   compact = false,
-  className,
-  ...props
+  className = '',
+  ...restProps
 }: BaseDataTableProps<T>) => {
   // Internal state
-  const [internalState, setInternalState] = React.useState<TableState>({
-    pagination: { page: 0, pageSize, total: data.length },
-    sorting: [],
-    filtering: [],
-    selection: [],
-    ...state
-  });
+  const [internalState, setInternalState] = React.useState<TableState<T>>(() => ({
+    pagination: { 
+      page: 0, 
+      pageSize, 
+      total: data.length,
+      ...(state.pagination || {})
+    },
+    sorting: (state.sorting || []) as TableSorting[],
+    filtering: (state.filtering || []) as TableFiltering[],
+    selection: (state.selection || []) as string[],
+  }));
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showFilters, setShowFilters] = React.useState(false);
@@ -126,7 +135,7 @@ export const BaseDataTable = <T extends Record<string, any>>({
   }, [state]);
 
   // Notify parent of state changes
-  const updateState = React.useCallback((newState: Partial<TableState>) => {
+  const updateState = React.useCallback((newState: Partial<TableState<T>>) => {
     const updatedState = { ...internalState, ...newState };
     setInternalState(updatedState);
     onStateChange?.(updatedState);
@@ -142,7 +151,7 @@ export const BaseDataTable = <T extends Record<string, any>>({
       result = result.filter(item =>
         columns.some(column => {
           if (column.accessorKey) {
-            const value = item[column.accessorKey];
+            const value = item[column.accessorKey as keyof T];
             return String(value).toLowerCase().includes(searchLower);
           }
           return false;
@@ -177,9 +186,11 @@ export const BaseDataTable = <T extends Record<string, any>>({
     if (internalState.sorting.length > 0) {
       result.sort((a, b) => {
         for (const sort of internalState.sorting) {
-          const aValue = a[sort.column];
-          const bValue = b[sort.column];
+          const columnKey = sort.column as keyof T;
+          const aValue = a[columnKey];
+          const bValue = b[columnKey];
           
+          if (aValue === undefined || bValue === undefined) return 0;
           if (aValue < bValue) return sort.direction === 'asc' ? -1 : 1;
           if (aValue > bValue) return sort.direction === 'asc' ? 1 : -1;
         }
@@ -214,20 +225,30 @@ export const BaseDataTable = <T extends Record<string, any>>({
   // Handle sorting
   const handleSort = (columnId: string) => {
     if (!sortable) return;
-    
-    const existingSort = internalState.sorting.find(s => s.column === columnId);
-    let newSorting;
-    
-    if (existingSort) {
-      if (existingSort.direction === 'asc') {
-        newSorting = [{ ...existingSort, direction: 'desc' as const }];
+
+    const currentSorting = internalState.sorting || [];
+    const newSorting: TableSorting[] = [];
+    let sortFound = false;
+
+    // First, remove any existing sort for this column
+    for (const sort of currentSorting) {
+      if (sort.column !== columnId) {
+        newSorting.push(sort);
       } else {
-        newSorting = [];
+        sortFound = true;
+        // Toggle direction if this column was already sorted
+        if (sort.direction === 'asc') {
+          newSorting.push({ column: columnId, direction: 'desc' });
+        }
+        // If it was 'desc', we don't add it back (removes the sort)
       }
-    } else {
-      newSorting = [{ column: columnId, direction: 'asc' as const }];
     }
-    
+
+    // If the column wasn't found, add it with 'asc' direction
+    if (!sortFound) {
+      newSorting.push({ column: columnId, direction: 'asc' });
+    }
+
     updateState({ sorting: newSorting });
   };
 
@@ -277,8 +298,17 @@ export const BaseDataTable = <T extends Record<string, any>>({
     );
   }
 
+  const tableClassName = className;
+
+  // Extract table props to avoid passing them to the DOM element
+  const tableProps = {
+    ...restProps,
+    className: cn('space-y-4', tableClassName),
+    'data-component': 'base-data-table'
+  };
+
   return (
-    <div className={cn('space-y-4', className)} {...props}>
+    <div {...tableProps}>
       {/* Header */}
       {(title || description || createButton || searchable || filterable || exportOptions.length > 0) && (
         <div className="flex flex-col gap-4">

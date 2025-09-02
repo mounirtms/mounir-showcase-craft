@@ -6,9 +6,9 @@ import {
   HeroSection,
   SkillVisualization,
   ProjectShowcase,
-  ScrollAnimation,
-  Parallax,
-  StaggeredAnimation,
+  LibraryScrollAnimation as ScrollAnimation,
+  LibraryParallax as Parallax,
+  LibraryStaggeredAnimation as StaggeredAnimation,
   ProfessionalAvatar,
   DynamicTypingEffect,
   InteractiveTimeline,
@@ -330,7 +330,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       </div>
 
       {/* Hero Section with Parallax */}
-      <ScrollAnimation animation="fadeIn">
+      <ScrollAnimation animation="slideUp">
         <Parallax config={{ speed: 0.5 }}>
           <HeroSection 
             name={config.hero.name}
@@ -355,7 +355,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {/* Skills Section */}
       <section id="skills" className="py-16 sm:py-24 relative" ref={el => sectionsRef.current.skills = el}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <ScrollAnimation animation="slideInUp">
+          <ScrollAnimation animation="slideUp">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
                 Technical Expertise
@@ -392,7 +392,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {/* Experience Timeline */}
       <section id="experience" className="py-16 sm:py-24 bg-gradient-to-br from-card/30 via-card/50 to-card/30 backdrop-blur-sm border-y border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <ScrollAnimation animation="slideInUp">
+          <ScrollAnimation animation="slideUp">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
                 Professional Journey
@@ -439,7 +439,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {/* Projects Showcase */}
       <section id="projects" className="py-16 sm:py-24 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <ScrollAnimation animation="slideInUp">
+          <ScrollAnimation animation="slideUp">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
                 Featured Projects
@@ -473,7 +473,7 @@ export const EnhancedPortfolioIntegration: React.FC<EnhancedPortfolioIntegration
       {adminSettings.showContactForm && (
         <section id="contact" className="py-12 sm:py-16 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <ScrollAnimation animation="slideInUp">
+            <ScrollAnimation animation="slideUp">
               <div className="text-center mb-12 sm:mb-16">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent font-heading tracking-tight mb-3">
                   Get In Touch

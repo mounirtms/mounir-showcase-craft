@@ -9,7 +9,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
-import type { BaseComponentProps, LoadingProps, ErrorProps } from '@/lib/shared/types';
+import type { BaseComponentProps } from '@/lib/shared/types';
+
+// Define missing types that were previously imported from shared/types
+export interface LoadingStateProps extends BaseComponentProps {
+  variant?: 'spinner' | 'skeleton' | 'pulse';
+  size?: 'default' | 'sm' | 'md' | 'lg' | 'icon';
+  inline?: boolean;
+  loadingText?: string;
+  loading?: boolean;
+  children?: React.ReactNode;
+  onRetry?: () => void;
+}
+
+export interface ErrorStateProps extends BaseComponentProps {
+  error?: any;
+  title?: string;
+  size?: 'default' | 'sm' | 'md' | 'lg';
+  showRetry?: boolean;
+  onRetry?: () => void;
+  children?: React.ReactNode;
+  loading?: boolean;
+}
+
+export interface AsyncContentProps extends BaseComponentProps {
+  data?: any;
+  loading?: boolean;
+  error?: any;
+  onRetry?: () => void;
+  emptyState?: React.ReactNode;
+  loadingComponent?: React.ReactNode;
+  errorComponent?: React.ReactNode;
+  children?: React.ReactNode;
+}
 
 /**
  * Base card component with consistent styling
@@ -143,7 +175,7 @@ export const EnhancedCard: React.FC<EnhancedCardProps> = ({
  */
 export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'sm' | 'md' | 'lg' | 'icon';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
   loading?: boolean;
   loadingText?: string;
   icon?: React.ReactNode;
@@ -155,7 +187,7 @@ export const BaseButton = forwardRef<HTMLButtonElement, BaseButtonProps>(({
   children,
   className,
   variant = 'default',
-  size = 'md',
+  size = 'default',
   loading = false,
   loadingText,
   icon,
@@ -206,7 +238,7 @@ BaseButton.displayName = 'BaseButton';
 export interface StatusBadgeProps extends BaseComponentProps {
   status: 'success' | 'warning' | 'error' | 'info' | 'neutral';
   variant?: 'default' | 'outline' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'default' | 'sm' | 'md' | 'lg';
   showIcon?: boolean;
 }
 
@@ -271,7 +303,7 @@ export interface EmptyStateProps extends BaseComponentProps {
   description?: string;
   icon?: React.ReactNode;
   action?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'default' | 'sm' | 'md' | 'lg';
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -284,6 +316,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   ...props
 }) => {
   const sizes = {
+    default: {
+      container: 'py-12',
+      icon: 'w-12 h-12',
+      title: 'text-xl',
+      description: 'text-base'
+    },
     sm: {
       container: 'py-8',
       icon: 'w-8 h-8',
@@ -339,24 +377,29 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 /**
  * Loading state component
  */
-export interface LoadingStateProps extends BaseComponentProps, LoadingProps {
+export interface LoadingStateProps extends BaseComponentProps {
   variant?: 'spinner' | 'skeleton' | 'pulse';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'default' | 'sm' | 'md' | 'lg' | 'icon';
   inline?: boolean;
+  loadingText?: string;
+  loading?: boolean;
+  children?: React.ReactNode;
+  onRetry?: () => void;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({
+export const LoadingState = ({
   variant = 'spinner',
   size = 'md',
   loadingText = 'Loading...',
   inline = false,
   className,
   ...props
-}) => {
-  const sizes = {
-    sm: { icon: 'w-4 h-4', text: 'text-sm', spacing: 'gap-2' },
-    md: { icon: 'w-6 h-6', text: 'text-base', spacing: 'gap-3' },
-    lg: { icon: 'w-8 h-8', text: 'text-lg', spacing: 'gap-4' }
+}: LoadingStateProps) => {
+  const sizes: Record<string, { icon: string; text: string; spacing: string }> = {
+    default: { icon: 'h-4 w-4', text: 'text-sm', spacing: 'gap-2 px-3 py-1.5' },
+    sm: { icon: 'h-3 w-3', text: 'text-xs', spacing: 'gap-1 px-2 py-1' },
+    md: { icon: 'h-4 w-4', text: 'text-sm', spacing: 'gap-2 px-3 py-1.5' },
+    lg: { icon: 'h-5 w-5', text: 'text-base', spacing: 'gap-2 px-4 py-2' },
   };
 
   const sizeConfig = sizes[size];
@@ -403,13 +446,17 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 /**
  * Error state component
  */
-export interface ErrorStateProps extends BaseComponentProps, ErrorProps {
+export interface ErrorStateProps extends BaseComponentProps {
+  error?: any;
   title?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'default' | 'sm' | 'md' | 'lg';
   showRetry?: boolean;
+  onRetry?: () => void;
+  children?: React.ReactNode;
+  loading?: boolean;
 }
 
-export const ErrorState: React.FC<ErrorStateProps> = ({
+export const ErrorState = ({
   error,
   title = 'Something went wrong',
   onRetry,
@@ -417,7 +464,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   size = 'md',
   className,
   ...props
-}) => {
+}: ErrorStateProps) => {
   const errorMessage = typeof error === 'string' ? error : error?.message || 'An unexpected error occurred';
 
   return (
@@ -432,7 +479,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
           <BaseButton
             variant="outline"
             onClick={onRetry}
-            size={size === 'sm' ? 'sm' : 'md'}
+            size={size === 'sm' ? 'sm' : 'default'}
           >
             Try Again
           </BaseButton>
@@ -446,14 +493,17 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 /**
  * Async content wrapper
  */
-export interface AsyncContentProps extends BaseComponentProps, LoadingProps, ErrorProps {
+export interface AsyncContentProps extends BaseComponentProps {
   data?: any;
   emptyState?: React.ReactNode;
   loadingComponent?: React.ReactNode;
   errorComponent?: React.ReactNode;
+  loading?: boolean;
+  error?: any;
+  onRetry?: () => void;
 }
 
-export const AsyncContent: React.FC<AsyncContentProps> = ({
+export const AsyncContent = ({
   children,
   loading = false,
   error = null,
@@ -464,7 +514,7 @@ export const AsyncContent: React.FC<AsyncContentProps> = ({
   onRetry,
   className,
   ...props
-}) => {
+}: AsyncContentProps) => {
   if (loading) {
     return loadingComponent || <LoadingState />;
   }

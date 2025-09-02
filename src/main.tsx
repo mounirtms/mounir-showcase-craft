@@ -29,8 +29,16 @@ window.addEventListener('error', (event) => {
   }
 });
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
+import { CustomThemeProvider } from './contexts/CustomThemeProvider';
+
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
-    <App />
+    <CustomThemeProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </CustomThemeProvider>
   </ErrorBoundary>
 );

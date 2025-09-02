@@ -7,7 +7,7 @@
 export * from './BaseComponents';
 
 // Enhanced components (consolidated)
-export { LoadingState, TableLoadingState, FormLoadingState, PageLoadingState } from './BaseComponents';
+export { LoadingState } from './BaseComponents';
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
 export { EmptyStates } from './EmptyStates';
 

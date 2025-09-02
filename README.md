@@ -33,28 +33,59 @@ Deploy:    GitHub Actions + GitHub Pages
 - **🌐 SEO Optimized**: Perfect for Google search visibility
 - **🎯 Auto-Seeding**: Automatic project data population on first load
 
-## ��� **Quick Start**
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 18+ and npm 9+
+- Git
+- Firebase account (for backend services)
+- GitHub account (for deployment)
 
 ### **Development Setup**
 ```bash
-# Clone and setup
-git clone 
-cd portfolio
+# Clone the repository
+git clone https://github.com/mounir1/mounir1.github.io.git
+cd mounir1.github.io
+
+# Install dependencies
 npm install
 
 # Start development server
 npm run dev
 ```
 
+### **Available Scripts**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production with type checking
+- `npm run build:prod` - Build optimized production bundle
+- `npm run preview` - Preview production build locally
+- `npm run test` - Run tests
+- `npm run lint` - Lint code
+- `npm run format` - Format code
+- `npm run deploy` - Deploy to GitHub Pages
+
+### **Environment Variables**
+Create a `.env` file in the root directory with the following variables:
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
+
 ### **Production Build**
 ```bash
-# Professional production build with verification
-npm run build:production
+# Install dependencies
+npm ci --prefer-offline
 
-# Preview production build
+# Build for production
+npm run build:prod
+
+# Preview production build locally
 npm run preview
-
-# Deploy to GitHub Pages
 npm run deploy
 ```
 

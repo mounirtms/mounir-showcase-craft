@@ -10,7 +10,7 @@ export { AdminNavigation } from './AdminNavigation';
 export { AdminStats } from './AdminStats';
 
 // Action components
-export { ActionColumn, createActionColumnDef, commonActionConfigs } from './ActionColumn';
+export { createActionColumnDef } from './ActionColumn';
 
 // Data management components
 export { ProjectsManager } from './ProjectsManager';
@@ -19,7 +19,7 @@ export { DataExportManager } from './DataExportManager';
 
 // Analytics components
 export { AnalyticsDashboard } from './AnalyticsDashboard';
-export { PerformanceDashboard } from './PerformanceDashboard';
+export { default as PerformanceDashboard } from './performance/PerformanceDashboard';
 export { GoogleAnalyticsInfo } from './GoogleAnalyticsInfo';
 export { default as GoogleAnalyticsVerification } from './GoogleAnalyticsVerification';
 
@@ -33,14 +33,12 @@ export * from './layout';
 export * from './dashboard';
 export * from './projects';
 export * from './skills';
-export * from './performance';
 
 // Types
 export type {
-  ActionItem,
-  ActionGroup,
-  ActionColumnProps,
-} from './ActionColumn';
+  AdminComponentProps,
+  AdminSectionProps
+} from './layout';
 
 // Default exports for lazy loading
 export default {

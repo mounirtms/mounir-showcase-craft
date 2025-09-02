@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { db, isFirebaseEnabled } from "@/lib/firebase";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { collection, onSnapshot, orderBy, query, where, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { initialProjects } from "@/data/initial-projects";
 
@@ -119,21 +120,7 @@ export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  // Update online status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  const isOnline = useOnlineStatus();
 
   const setupFirebaseListener = useCallback(() => {
     let unsubscribe: (() => void) | undefined;

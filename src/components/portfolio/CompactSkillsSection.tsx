@@ -17,7 +17,8 @@ import {
   Briefcase
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { themes } from "@/constants/themes";
+import { useCustomTheme } from "@/contexts/CustomThemeProvider";
 
 // Skill interface
 export interface CompactSkill {
@@ -40,45 +41,27 @@ export interface CompactSkill {
 const CATEGORIES = {
   frontend: { 
     label: "Frontend", 
-    icon: <Globe className="w-4 h-4" />, 
-    color: "from-blue-500 to-cyan-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/20",
-    borderColor: "border-blue-200 dark:border-blue-800"
+    icon: <Globe className="w-4 h-4" />,
   },
   backend: { 
     label: "Backend", 
-    icon: <Database className="w-4 h-4" />, 
-    color: "from-green-500 to-emerald-500",
-    bgColor: "bg-green-50 dark:bg-green-950/20",
-    borderColor: "border-green-200 dark:border-green-800"
+    icon: <Database className="w-4 h-4" />,
   },
   design: { 
     label: "Design", 
-    icon: <Palette className="w-4 h-4" />, 
-    color: "from-purple-500 to-pink-500",
-    bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    borderColor: "border-purple-200 dark:border-purple-800"
+    icon: <Palette className="w-4 h-4" />,
   },
   tools: { 
     label: "Tools", 
-    icon: <Code2 className="w-4 h-4" />, 
-    color: "from-orange-500 to-red-500",
-    bgColor: "bg-orange-50 dark:bg-orange-950/20",
-    borderColor: "border-orange-200 dark:border-orange-800"
+    icon: <Code2 className="w-4 h-4" />,
   },
   languages: { 
     label: "Languages", 
-    icon: <Zap className="w-4 h-4" />, 
-    color: "from-yellow-500 to-orange-500",
-    bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
-    borderColor: "border-yellow-200 dark:border-yellow-800"
+    icon: <Zap className="w-4 h-4" />,
   },
   frameworks: { 
     label: "Frameworks", 
-    icon: <Star className="w-4 h-4" />, 
-    color: "from-indigo-500 to-purple-500",
-    bgColor: "bg-indigo-50 dark:bg-indigo-950/20",
-    borderColor: "border-indigo-200 dark:border-indigo-800"
+    icon: <Star className="w-4 h-4" />,
   }
 };
 
@@ -204,24 +187,21 @@ const DEFAULT_SKILLS: CompactSkill[] = [
 ];
 
 // Compact skill card component
-const CompactSkillCard: React.FC<{ skill: CompactSkill; category: any }> = ({ skill, category }) => {
+const CompactSkillCard: React.FC<{ skill: CompactSkill; category: any; color: string }> = ({ skill, category, color }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className={cn(
-      "transition-all duration-200 hover:shadow-md cursor-pointer",
-      category.bgColor,
-      category.borderColor,
-      "border-l-4"
-    )}
-    onClick={() => setIsExpanded(!isExpanded)}
+    <Card 
+      className="transition-all duration-200 hover:shadow-md cursor-pointer border-l-4"
+      style={{ borderLeftColor: color }}
+      onClick={() => setIsExpanded(!isExpanded)}
     >
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {category.icon}
+              {React.cloneElement(category.icon, { style: { color } })}
               <h3 className="font-semibold text-sm">{skill.name}</h3>
               {skill.trending && (
                 <Badge variant="secondary" className="px-1.5 py-0.5 text-xs">
@@ -298,8 +278,10 @@ export const CompactSkillsSection: React.FC<CompactSkillsSectionProps> = ({
   skills = DEFAULT_SKILLS,
   className,
   showHeader = true,
-  defaultTab = "frontend"
+  defaultTab = "frontend",
 }) => {
+  const { theme } = useCustomTheme();
+  const currentTheme = themes[theme];
   // Group skills by category
   const skillsByCategory = useMemo(() => {
     const grouped = skills.reduce((acc, skill) => {
@@ -348,7 +330,6 @@ export const CompactSkillsSection: React.FC<CompactSkillsSectionProps> = ({
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-4 mb-4">
               <h2 className="text-3xl font-bold">Technical Skills</h2>
-              <ThemeToggle />
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               A comprehensive overview of my technical expertise across different domains
@@ -358,7 +339,7 @@ export const CompactSkillsSection: React.FC<CompactSkillsSectionProps> = ({
 
         {/* Skills Tabs */}
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-8">
+          <TabsList className="relative w-full overflow-x-auto whitespace-nowrap">
             {availableCategories.map((category) => {
               const config = CATEGORIES[category as keyof typeof CATEGORIES];
               const stats = categoryStats[category];
@@ -386,13 +367,14 @@ export const CompactSkillsSection: React.FC<CompactSkillsSectionProps> = ({
             const config = CATEGORIES[category as keyof typeof CATEGORIES];
             const categorySkills = skillsByCategory[category];
             const stats = categoryStats[category];
+            const color = currentTheme.categories[category as keyof typeof currentTheme.categories];
 
             return (
               <TabsContent key={category} value={category} className="space-y-6">
                 {/* Category Header */}
-                <Card className={cn(config.bgColor, config.borderColor, "border-l-4")}>
+                <Card style={{ borderLeftColor: color }} className="border-l-4">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2" style={{ color }}>
                       {config.icon}
                       {config.label} Skills
                     </CardTitle>
@@ -424,6 +406,7 @@ export const CompactSkillsSection: React.FC<CompactSkillsSectionProps> = ({
                       key={skill.id} 
                       skill={skill} 
                       category={config}
+                      color={color}
                     />
                   ))}
                 </div>
