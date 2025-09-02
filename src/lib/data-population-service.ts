@@ -1,7 +1,22 @@
 import { projectService, skillService, experienceService, dataService } from './firebase-data-service';
-import type { ProjectInput } from '@/types/project';
-import type { SkillInput } from '@/types/skill';
-import type { ExperienceInput } from '@/types/experience';
+import type { ProjectInput } from '@/components/admin/projects/types';
+import type { SkillInput } from '@/components/admin/skills/types';
+
+// Create ExperienceInput type based on Experience interface
+interface ExperienceInput {
+  company: string;
+  position: string;
+  description: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  technologies: string[];
+  achievements: string[];
+  location: string;
+  employmentType: string;
+  companySize: string;
+  industry: string;
+}
 
 // Portfolio configuration
 interface PortfolioConfig {
@@ -31,91 +46,91 @@ interface PortfolioConfig {
 // Sample data for portfolio initialization
 const SAMPLE_PROJECTS: ProjectInput[] = [
   {
-    title: \"Advanced React Dashboard\",
-    description: \"A comprehensive dashboard built with React, TypeScript, and modern UI libraries featuring real-time data visualization, advanced filtering, and responsive design.\",
-    longDescription: \"This project showcases my expertise in modern React development, featuring a sophisticated dashboard with real-time data updates, interactive charts, advanced search and filtering capabilities, and a fully responsive design that works seamlessly across all devices.\",
-    category: \"Web Application\",
-    status: \"completed\",
+    title: "Advanced React Dashboard",
+    description: "A comprehensive dashboard built with React, TypeScript, and modern UI libraries featuring real-time data visualization, advanced filtering, and responsive design.",
+    longDescription: "This project showcases my expertise in modern React development, featuring a sophisticated dashboard with real-time data updates, interactive charts, advanced search and filtering capabilities, and a fully responsive design that works seamlessly across all devices.",
+    category: "Web Application",
+    status: "completed",
     achievements: [
-      \"Improved data loading performance by 60%\",
-      \"Implemented real-time updates with WebSocket\",
-      \"Created reusable component library\",
-      \"Achieved 98% test coverage\"
+      "Improved data loading performance by 60%",
+      "Implemented real-time updates with WebSocket",
+      "Created reusable component library",
+      "Achieved 98% test coverage"
     ],
-    technologies: [\"React\", \"TypeScript\", \"Tailwind CSS\", \"Zustand\", \"React Query\", \"Chart.js\"],
-    tags: [\"dashboard\", \"real-time\", \"responsive\", \"typescript\"],
-    image: \"/projects/react-dashboard.jpg\",
-    liveUrl: \"https://dashboard.example.com\",
-    githubUrl: \"https://github.com/mounirab/react-dashboard\",
+    technologies: ["React", "TypeScript", "Tailwind CSS", "Zustand", "React Query", "Chart.js"],
+    tags: ["dashboard", "real-time", "responsive", "typescript"],
+    image: "/projects/react-dashboard.jpg",
+    liveUrl: "https://dashboard.example.com",
+    githubUrl: "https://github.com/mounirab/react-dashboard",
     featured: true,
     priority: 95,
-    startDate: \"2024-01-15\",
-    endDate: \"2024-06-30\",
-    duration: \"5.5 months\",
+    startDate: "2024-01-15",
+    endDate: "2024-06-30",
+    duration: "5.5 months",
     teamSize: 3,
-    role: \"Lead Frontend Developer\",
-    challenges: [\"Real-time data synchronization\", \"Complex state management\", \"Performance optimization\"],
-    solutions: [\"Implemented WebSocket with reconnection logic\", \"Used Zustand for efficient state management\", \"Applied code splitting and lazy loading\"],
+    role: "Lead Frontend Developer",
+    challenges: ["Real-time data synchronization", "Complex state management", "Performance optimization"],
+    solutions: ["Implemented WebSocket with reconnection logic", "Used Zustand for efficient state management", "Applied code splitting and lazy loading"],
     createdAt: Date.now(),
     updatedAt: Date.now(),
     version: 1
   },
   {
-    title: \"E-commerce Platform\",
-    description: \"Full-stack e-commerce solution with Next.js, Stripe integration, and advanced inventory management.\",
-    longDescription: \"A complete e-commerce platform featuring product catalog, shopping cart, secure payment processing, order management, inventory tracking, and admin dashboard. Built with modern technologies and optimized for performance and SEO.\",
-    category: \"E-commerce\",
-    status: \"completed\",
+    title: "E-commerce Platform",
+    description: "Full-stack e-commerce solution with Next.js, Stripe integration, and advanced inventory management.",
+    longDescription: "A complete e-commerce platform featuring product catalog, shopping cart, secure payment processing, order management, inventory tracking, and admin dashboard. Built with modern technologies and optimized for performance and SEO.",
+    category: "E-commerce",
+    status: "completed",
     achievements: [
-      \"Processed $100K+ in transactions\",
-      \"Achieved 99.9% uptime\",
-      \"Reduced page load time by 40%\",
-      \"Integrated 5+ payment methods\"
+      "Processed $100K+ in transactions",
+      "Achieved 99.9% uptime",
+      "Reduced page load time by 40%",
+      "Integrated 5+ payment methods"
     ],
-    technologies: [\"Next.js\", \"Node.js\", \"PostgreSQL\", \"Stripe\", \"Prisma\", \"Tailwind CSS\"],
-    tags: [\"e-commerce\", \"payments\", \"full-stack\", \"nextjs\"],
-    image: \"/projects/ecommerce-platform.jpg\",
-    liveUrl: \"https://shop.example.com\",
-    githubUrl: \"https://github.com/mounirab/ecommerce-platform\",
+    technologies: ["Next.js", "Node.js", "PostgreSQL", "Stripe", "Prisma", "Tailwind CSS"],
+    tags: ["e-commerce", "payments", "full-stack", "nextjs"],
+    image: "/projects/ecommerce-platform.jpg",
+    liveUrl: "https://shop.example.com",
+    githubUrl: "https://github.com/mounirab/ecommerce-platform",
     featured: true,
     priority: 90,
-    startDate: \"2023-08-01\",
-    endDate: \"2024-02-15\",
-    duration: \"6.5 months\",
+    startDate: "2023-08-01",
+    endDate: "2024-02-15",
+    duration: "6.5 months",
     teamSize: 4,
-    role: \"Full-Stack Developer\",
-    challenges: [\"Payment security\", \"Inventory synchronization\", \"SEO optimization\"],
-    solutions: [\"Implemented PCI-compliant payment flow\", \"Created real-time inventory system\", \"Applied Next.js SSG/SSR strategies\"],
+    role: "Full-Stack Developer",
+    challenges: ["Payment security", "Inventory synchronization", "SEO optimization"],
+    solutions: ["Implemented PCI-compliant payment flow", "Created real-time inventory system", "Applied Next.js SSG/SSR strategies"],
     createdAt: Date.now(),
     updatedAt: Date.now(),
     version: 1
   },
   {
-    title: \"Mobile App - TaskFlow\",
-    description: \"Cross-platform productivity app built with React Native, featuring offline support and cloud synchronization.\",
-    longDescription: \"TaskFlow is a comprehensive productivity application that helps users manage tasks, projects, and deadlines efficiently. Features include offline functionality, real-time collaboration, push notifications, and seamless cloud synchronization across all devices.\",
-    category: \"Mobile Application\",
-    status: \"completed\",
+    title: "Mobile App - TaskFlow",
+    description: "Cross-platform productivity app built with React Native, featuring offline support and cloud synchronization.",
+    longDescription: "TaskFlow is a comprehensive productivity application that helps users manage tasks, projects, and deadlines efficiently. Features include offline functionality, real-time collaboration, push notifications, and seamless cloud synchronization across all devices.",
+    category: "Mobile Application",
+    status: "completed",
     achievements: [
-      \"10K+ active users\",
-      \"4.8/5 App Store rating\",
-      \"Featured in App Store\",
-      \"99% crash-free rate\"
+      "10K+ active users",
+      "4.8/5 App Store rating",
+      "Featured in App Store",
+      "99% crash-free rate"
     ],
-    technologies: [\"React Native\", \"Expo\", \"Firebase\", \"Redux Toolkit\", \"AsyncStorage\"],
-    tags: [\"mobile\", \"productivity\", \"react-native\", \"offline\"],
-    image: \"/projects/taskflow-app.jpg\",
-    liveUrl: \"https://taskflow.app\",
-    githubUrl: \"https://github.com/mounirab/taskflow-app\",
+    technologies: ["React Native", "Expo", "Firebase", "Redux Toolkit", "AsyncStorage"],
+    tags: ["mobile", "productivity", "react-native", "offline"],
+    image: "/projects/taskflow-app.jpg",
+    liveUrl: "https://taskflow.app",
+    githubUrl: "https://github.com/mounirab/taskflow-app",
     featured: true,
     priority: 85,
-    startDate: \"2023-03-01\",
-    endDate: \"2023-09-30\",
-    duration: \"7 months\",
+    startDate: "2023-03-01",
+    endDate: "2023-09-30",
+    duration: "7 months",
     teamSize: 2,
-    role: \"Mobile Developer\",
-    challenges: [\"Offline data management\", \"Cross-platform compatibility\", \"Performance optimization\"],
-    solutions: [\"Implemented SQLite with sync mechanism\", \"Used platform-specific components\", \"Applied code optimization techniques\"],
+    role: "Mobile Developer",
+    challenges: ["Offline data management", "Cross-platform compatibility", "Performance optimization"],
+    solutions: ["Implemented SQLite with sync mechanism", "Used platform-specific components", "Applied code optimization techniques"],
     createdAt: Date.now(),
     updatedAt: Date.now(),
     version: 1
@@ -124,67 +139,67 @@ const SAMPLE_PROJECTS: ProjectInput[] = [
 
 const SAMPLE_SKILLS: SkillInput[] = [
   {
-    name: \"React\",
-    category: \"Frontend Development\",
+    name: "React",
+    category: "Frontend Development",
     level: 95,
     yearsOfExperience: 4,
-    description: \"Expert in React ecosystem including hooks, context, and advanced patterns\",
+    description: "Expert in React ecosystem including hooks, context, and advanced patterns",
     featured: true,
     priority: 95,
-    tags: [\"javascript\", \"frontend\", \"spa\"],
-    relatedSkills: [\"JavaScript\", \"TypeScript\", \"Next.js\"],
+    tags: ["javascript", "frontend", "spa"],
+    relatedSkills: ["JavaScript", "TypeScript", "Next.js"],
     createdAt: Date.now(),
     updatedAt: Date.now()
   },
   {
-    name: \"TypeScript\",
-    category: \"Frontend Development\",
+    name: "TypeScript",
+    category: "Frontend Development",
     level: 90,
     yearsOfExperience: 3,
-    description: \"Strong typing and advanced TypeScript patterns for scalable applications\",
+    description: "Strong typing and advanced TypeScript patterns for scalable applications",
     featured: true,
     priority: 90,
-    tags: [\"javascript\", \"typing\", \"scalability\"],
-    relatedSkills: [\"JavaScript\", \"React\", \"Node.js\"],
+    tags: ["javascript", "typing", "scalability"],
+    relatedSkills: ["JavaScript", "React", "Node.js"],
     createdAt: Date.now(),
     updatedAt: Date.now()
   },
   {
-    name: \"Node.js\",
-    category: \"Backend Development\",
+    name: "Node.js",
+    category: "Backend Development",
     level: 88,
     yearsOfExperience: 4,
-    description: \"Backend development with Express, NestJS, and microservices architecture\",
+    description: "Backend development with Express, NestJS, and microservices architecture",
     featured: true,
     priority: 88,
-    tags: [\"backend\", \"javascript\", \"api\"],
-    relatedSkills: [\"Express.js\", \"MongoDB\", \"PostgreSQL\"],
+    tags: ["backend", "javascript", "api"],
+    relatedSkills: ["Express.js", "MongoDB", "PostgreSQL"],
     createdAt: Date.now(),
     updatedAt: Date.now()
   },
   {
-    name: \"Python\",
-    category: \"Backend Development\",
+    name: "Python",
+    category: "Backend Development",
     level: 85,
     yearsOfExperience: 3,
-    description: \"Django, FastAPI, and data science libraries for web and AI applications\",
+    description: "Django, FastAPI, and data science libraries for web and AI applications",
     featured: true,
     priority: 85,
-    tags: [\"backend\", \"ai\", \"data-science\"],
-    relatedSkills: [\"Django\", \"FastAPI\", \"TensorFlow\"],
+    tags: ["backend", "ai", "data-science"],
+    relatedSkills: ["Django", "FastAPI", "TensorFlow"],
     createdAt: Date.now(),
     updatedAt: Date.now()
   },
   {
-    name: \"AWS\",
-    category: \"Cloud & DevOps\",
+    name: "AWS",
+    category: "Cloud & DevOps",
     level: 82,
     yearsOfExperience: 2.5,
-    description: \"Cloud infrastructure, serverless, and containerization with AWS services\",
+    description: "Cloud infrastructure, serverless, and containerization with AWS services",
     featured: false,
     priority: 82,
-    tags: [\"cloud\", \"devops\", \"infrastructure\"],
-    relatedSkills: [\"Docker\", \"Kubernetes\", \"Terraform\"],
+    tags: ["cloud", "devops", "infrastructure"],
+    relatedSkills: ["Docker", "Kubernetes", "Terraform"],
     createdAt: Date.now(),
     updatedAt: Date.now()
   }
@@ -192,78 +207,78 @@ const SAMPLE_SKILLS: SkillInput[] = [
 
 const SAMPLE_EXPERIENCES: ExperienceInput[] = [
   {
-    company: \"TechCorp Solutions\",
-    position: \"Senior Full-Stack Developer\",
-    startDate: \"2022-06-01\",
+    company: "TechCorp Solutions",
+    position: "Senior Full-Stack Developer",
+    startDate: "2022-06-01",
     current: true,
-    description: \"Leading development of enterprise web applications using React, Node.js, and cloud technologies. Mentoring junior developers and architecting scalable solutions.\",
-    technologies: [\"React\", \"TypeScript\", \"Node.js\", \"AWS\", \"PostgreSQL\", \"Docker\"],
+    description: "Leading development of enterprise web applications using React, Node.js, and cloud technologies. Mentoring junior developers and architecting scalable solutions.",
+    technologies: ["React", "TypeScript", "Node.js", "AWS", "PostgreSQL", "Docker"],
     achievements: [
-      \"Led team of 5 developers on major platform migration\",
-      \"Reduced application load time by 50%\",
-      \"Implemented CI/CD pipeline reducing deployment time by 80%\",
-      \"Mentored 3 junior developers to mid-level positions\"
+      "Led team of 5 developers on major platform migration",
+      "Reduced application load time by 50%",
+      "Implemented CI/CD pipeline reducing deployment time by 80%",
+      "Mentored 3 junior developers to mid-level positions"
     ],
-    location: \"San Francisco, CA\",
-    employmentType: \"full-time\",
-    companySize: \"large\",
-    industry: \"Technology\"
+    location: "San Francisco, CA",
+    employmentType: "full-time",
+    companySize: "large",
+    industry: "Technology"
   },
   {
-    company: \"StartupXYZ\",
-    position: \"Frontend Developer\",
-    startDate: \"2020-03-15\",
-    endDate: \"2022-05-30\",
+    company: "StartupXYZ",
+    position: "Frontend Developer",
+    startDate: "2020-03-15",
+    endDate: "2022-05-30",
     current: false,
-    description: \"Developed user-facing features for B2B SaaS platform. Collaborated with design team to implement responsive interfaces and improve user experience.\",
-    technologies: [\"React\", \"JavaScript\", \"SASS\", \"Redux\", \"Jest\"],
+    description: "Developed user-facing features for B2B SaaS platform. Collaborated with design team to implement responsive interfaces and improve user experience.",
+    technologies: ["React", "JavaScript", "SASS", "Redux", "Jest"],
     achievements: [
-      \"Built responsive dashboard used by 10K+ users\",
-      \"Improved user engagement by 35%\",
-      \"Reduced bug reports by 60% through comprehensive testing\",
-      \"Implemented accessibility standards (WCAG 2.1)\"
+      "Built responsive dashboard used by 10K+ users",
+      "Improved user engagement by 35%",
+      "Reduced bug reports by 60% through comprehensive testing",
+      "Implemented accessibility standards (WCAG 2.1)"
     ],
-    location: \"Remote\",
-    employmentType: \"full-time\",
-    companySize: \"startup\",
-    industry: \"SaaS\"
+    location: "Remote",
+    employmentType: "full-time",
+    companySize: "startup",
+    industry: "SaaS"
   },
   {
-    company: \"Digital Agency Pro\",
-    position: \"Web Developer\",
-    startDate: \"2018-09-01\",
-    endDate: \"2020-02-28\",
+    company: "Digital Agency Pro",
+    position: "Web Developer",
+    startDate: "2018-09-01",
+    endDate: "2020-02-28",
     current: false,
-    description: \"Developed custom websites and web applications for various clients across different industries. Worked with WordPress, custom PHP solutions, and modern JavaScript frameworks.\",
-    technologies: [\"WordPress\", \"PHP\", \"JavaScript\", \"MySQL\", \"HTML/CSS\"],
+    description: "Developed custom websites and web applications for various clients across different industries. Worked with WordPress, custom PHP solutions, and modern JavaScript frameworks.",
+    technologies: ["WordPress", "PHP", "JavaScript", "MySQL", "HTML/CSS"],
     achievements: [
-      \"Delivered 25+ client projects on time and budget\",
-      \"Increased client satisfaction rate to 98%\",
-      \"Reduced website loading times by average 45%\",
-      \"Built reusable component library for agency\"
+      "Delivered 25+ client projects on time and budget",
+      "Increased client satisfaction rate to 98%",
+      "Reduced website loading times by average 45%",
+      "Built reusable component library for agency"
     ],
-    location: \"New York, NY\",
-    employmentType: \"full-time\",
-    companySize: \"small\",
-    industry: \"Digital Marketing\"
+    location: "New York, NY",
+    employmentType: "full-time",
+    companySize: "small",
+    industry: "Digital Marketing"
   }
 ];
 
 const PORTFOLIO_CONFIG: PortfolioConfig = {
-  version: \"2.0.0\",
+  version: "2.0.0",
   lastUpdated: new Date(),
   owner: {
-    name: \"Mounir Abderrahmani\",
-    title: \"Senior Full-Stack Developer & Software Engineer\",
-    email: \"mounir.abderrahmani@example.com\",
-    linkedin: \"https://linkedin.com/in/mounirabderrahmani\",
-    github: \"https://github.com/mounirab\",
-    website: \"https://mounir1.github.io\"
+    name: "Mounir Abderrahmani",
+    title: "Senior Full-Stack Developer & Software Engineer",
+    email: "mounir.abderrahmani@example.com",
+    linkedin: "https://linkedin.com/in/mounirabderrahmani",
+    github: "https://github.com/mounirab",
+    website: "https://mounir1.github.io"
   },
   theme: {
-    primaryColor: \"#4361ee\",
-    accentColor: \"#7209b7\",
-    mode: \"auto\"
+    primaryColor: "#4361ee",
+    accentColor: "#7209b7",
+    mode: "auto"
   },
   features: {
     analytics: true,
