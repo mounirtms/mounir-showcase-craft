@@ -3,7 +3,6 @@
  */
 
 export { AdminAuth } from './AdminAuth';
-export { AdminWithAuth as AdminAuthIntegration } from './AdminAuthIntegration';
 export { AuthGuard } from './AuthGuard';
 export { LoginForm } from './LoginForm';
 

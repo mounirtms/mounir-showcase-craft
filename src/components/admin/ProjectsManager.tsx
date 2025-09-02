@@ -479,14 +479,10 @@ export function ProjectsManager() {
         return;
       }
       
-      const batch = writeBatch(db);
-      
-      projectsToDelete.forEach((project) => {
-        const projectRef = doc(db, PROJECTS_COLLECTION, project.id);
-        batch.delete(projectRef);
-      });
+      for (const project of projectsToDelete) {
+        await deleteDoc(doc(db, PROJECTS_COLLECTION, project.id));
+      }
 
-      await batch.commit();
       setBulkDeleteOpen(false);
       setProjectsToDelete([]);
       

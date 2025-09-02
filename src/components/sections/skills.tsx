@@ -30,24 +30,24 @@ const SkillProgress = ({ name, level, index = 0 }: { name: string; level: number
   return (
     <motion.div 
       ref={ref} 
-      className="space-y-3"
+      className="space-y-2 sm:space-y-3"
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: (index * 50) / 1000 }}
     >
       <div className="flex justify-between items-center text-sm">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <motion.div 
-            className="w-6 h-6 flex items-center justify-center p-1 bg-primary/10 rounded-md"
+            className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center p-1 bg-primary/10 rounded-md"
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             {getSkillIcon(name)}
           </motion.div>
-          <span className="font-medium text-foreground">{name}</span>
+          <span className="font-medium text-foreground text-sm sm:text-base">{name}</span>
         </div>
         <motion.span 
-          className="text-muted-foreground font-semibold text-xs px-2 py-1 bg-secondary/30 rounded-full"
+          className="text-muted-foreground font-semibold text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 bg-secondary/30 rounded-full"
           initial={{ scale: 0 }}
           animate={isInView ? { scale: 1 } : {}}
           transition={{ duration: 0.3, delay: (index * 80) / 1000 }}
@@ -55,7 +55,7 @@ const SkillProgress = ({ name, level, index = 0 }: { name: string; level: number
           {level}%
         </motion.span>
       </div>
-      <div className="relative h-2.5 bg-secondary/30 rounded-full overflow-hidden">
+      <div className="relative h-2 sm:h-2.5 bg-secondary/30 rounded-full overflow-hidden">
         <motion.div
           className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/80 rounded-full shadow-sm"
           initial={{ width: "0%", opacity: 0.7 }}
@@ -88,6 +88,7 @@ export const Skills = () => {
       sectionRef.current.style.scrollMarginTop = '80px';
     }
   }, [isInView]);
+  
   const skillCategories = [
     {
       icon: Code,
@@ -96,7 +97,8 @@ export const Skills = () => {
         { name: "React/Next.js", level: 95 },
         { name: "TypeScript", level: 90 },
         { name: "JavaScript ES6+", level: 95 },
-        { name: "HTML5/CSS3", level: 90 }
+        { name: "HTML5/CSS3", level: 90 },
+        { name: "Tailwind CSS", level: 85 }
       ]
     },
     {
@@ -106,7 +108,8 @@ export const Skills = () => {
         { name: "Node.js", level: 85 },
         { name: "PHP", level: 80 },
         { name: "Python", level: 75 },
-        { name: "Java", level: 70 }
+        { name: "Java", level: 70 },
+        { name: "RESTful APIs", level: 90 }
       ]
     },
     {
@@ -116,7 +119,8 @@ export const Skills = () => {
         { name: "AWS", level: 80 },
         { name: "Docker", level: 75 },
         { name: "GitLab CI/CD", level: 85 },
-        { name: "Git", level: 90 }
+        { name: "Git", level: 90 },
+        { name: "Terraform", level: 70 }
       ]
     },
     {
@@ -126,7 +130,8 @@ export const Skills = () => {
         { name: "API Development", level: 90 },
         { name: "ETL Pipelines", level: 85 },
         { name: "Machine Learning", level: 70 },
-        { name: "ERP/CRM Systems", level: 85 }
+        { name: "ERP/CRM Systems", level: 85 },
+        { name: "MongoDB", level: 80 }
       ]
     }
   ];
@@ -143,7 +148,8 @@ export const Skills = () => {
   const technologies = [
     "React", "Node.js", "TypeScript", "AWS", "Docker", "Magento 2",
     "ExtJS", "Angular", "Next.js", "Python", "PHP", "MongoDB",
-    "PostgreSQL", "GitLab CI/CD", "JIRA", "Cegid ERP"
+    "PostgreSQL", "GitLab CI/CD", "JIRA", "Cegid ERP", "Tailwind CSS",
+    "REST APIs", "Terraform", "Kubernetes"
   ];
 
   return (

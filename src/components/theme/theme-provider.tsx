@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 
 type Theme = "dark" | "light" | "system"
 
@@ -58,13 +58,24 @@ export function ThemeProvider({
   const [systemTheme, setSystemTheme] = React.useState<"dark" | "light">("light");
   const [isTransitioning, setIsTransitioning] = React.useState(false);
 
-  // Initialize system theme detection
+  // Initialize system theme detection and setup listener
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const currentSystemTheme = mediaQuery.matches ? "dark" : "light";
     setSystemTheme(currentSystemTheme);
+    
+    // Listen for system theme changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? "dark" : "light");
+      if (theme === "system") {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    };
+    
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   // Apply theme changes with smooth transitions
@@ -85,6 +96,8 @@ export function ThemeProvider({
       setTimeout(() => {
         root.classList.remove('theme-transitioning');
         setIsTransitioning(false);
+        // Reset transition duration
+        root.style.setProperty('--theme-transition-duration', '0ms');
       }, 300);
     }
 
@@ -96,15 +109,13 @@ export function ThemeProvider({
     
     // Update color scheme meta tag for system integration
     if (enableColorSchemeChange) {
-      const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
-      if (metaColorScheme) {
-        metaColorScheme.setAttribute('content', newTheme);
-      } else {
-        const meta = document.createElement('meta');
-        meta.name = 'color-scheme';
-        meta.content = newTheme;
-        document.head.appendChild(meta);
+      let metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+      if (!metaColorScheme) {
+        metaColorScheme = document.createElement('meta');
+        metaColorScheme.name = 'color-scheme';
+        document.head.appendChild(metaColorScheme);
       }
+      metaColorScheme.setAttribute('content', newTheme);
     }
 
     // Update theme-color meta tag for mobile browsers
@@ -122,16 +133,10 @@ export function ThemeProvider({
     setActualTheme(newTheme);
   }, [disableTransitionOnChange, enableColorSchemeChange]);
 
-  // Main theme effect
+  // Update actual theme when theme or systemTheme changes
   useEffect(() => {
-    let resolvedTheme: "dark" | "light" = "light";
-    
-    if (theme === "system") {
-      resolvedTheme = systemTheme;
-    } else {
-      resolvedTheme = theme;
-    }
-
+    const resolvedTheme = theme === "system" ? systemTheme : theme;
+    setActualTheme(resolvedTheme);
     applyTheme(resolvedTheme);
   }, [theme, systemTheme, applyTheme]);
 
@@ -162,16 +167,12 @@ export function ThemeProvider({
     setTheme(newTheme);
   }, [storageKey]);
 
-  // Toggle between light and dark (skips system)
   const toggleTheme = useCallback(() => {
-    if (theme === "system") {
-      // If currently system, toggle to opposite of current system theme
-      handleSetTheme(systemTheme === "dark" ? "light" : "dark");
-    } else {
-      // Toggle between light and dark
-      handleSetTheme(theme === "dark" ? "light" : "dark");
-    }
-  }, [theme, systemTheme, handleSetTheme]);
+    const themes: Theme[] = ["light", "dark"];
+    const currentIndex = themes.indexOf(actualTheme as "light" | "dark");
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  }, [actualTheme]);
 
   const value = {
     theme,

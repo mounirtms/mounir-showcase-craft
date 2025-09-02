@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Toaster, Sonner, TooltipProvider } from "@/components/ui";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/shared";
@@ -7,16 +7,18 @@ import { ThemeTransition } from "@/components/theme/theme-transition";
 import { AccessibilityProvider } from "@/contexts";
 import { RUMProvider } from "@/components";
 
-// Import the HomePage component
-import HomePage from "./pages/HomePage";
-// Import other pages
-import AdminPage from "./pages/Admin";
-import NotFoundPage from "./pages/NotFound";
+// Lazy load pages for better performance
+const HomePage = lazy(() => import("./pages/HomePage"));
+const AdminPage = lazy(() => import("./pages/Admin"));
+const NotFoundPage = lazy(() => import("./pages/NotFound"));
 
-// Loading component for Suspense
+// Enhanced loading component with better UX
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <p className="text-muted-foreground text-sm">Loading...</p>
+    </div>
   </div>
 );
 
@@ -48,34 +50,22 @@ export default function App() {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                  <React.Suspense fallback={<LoadingFallback />}>
+                  <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       <Route 
                         path="/" 
-                        element={
-                          <ErrorBoundary>
-                            <HomePage />
-                          </ErrorBoundary>
-                        } 
+                        element={<HomePage />} 
                       />
                       <Route 
                         path="/admin/*" 
-                        element={
-                          <ErrorBoundary>
-                            <AdminPage />
-                          </ErrorBoundary>
-                        } 
+                        element={<AdminPage />} 
                       />
                       <Route 
                         path="*" 
-                        element={
-                          <ErrorBoundary>
-                            <NotFoundPage />
-                          </ErrorBoundary>
-                        } 
+                        element={<NotFoundPage />} 
                       />
                     </Routes>
-                  </React.Suspense>
+                  </Suspense>
                 </BrowserRouter>
               </ThemeTransition>
             </TooltipProvider>

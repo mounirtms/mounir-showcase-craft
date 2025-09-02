@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { useThemeToggle } from "@/lib/shared/ui-utils";
 import { 
   Home, 
   Zap, 
@@ -10,7 +11,7 @@ import {
   Sun, 
   Moon 
 } from "lucide-react";
-import { useTheme } from "@/components/theme/theme-provider";
+import { useTheme } from "@/components/theme/use-theme";
 
 export function AdminNavigation() {
   const { theme, setTheme, actualTheme } = useTheme();
@@ -23,9 +24,7 @@ export function AdminNavigation() {
     { icon: Mail, label: "Contact" },
   ];
 
-  const toggleTheme = () => {
-    setTheme("light");
-  };
+  const toggleTheme = useThemeToggle();
 
   return (
     <nav className="fixed top-4 right-4 z-40 bg-background/95 backdrop-blur-sm border rounded-lg p-2 shadow-lg dark:bg-slate-900/95">

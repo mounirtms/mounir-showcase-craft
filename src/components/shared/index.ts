@@ -7,42 +7,35 @@
 export * from './BaseComponents';
 
 // Enhanced components (consolidated)
-export { LoadingState } from './BaseComponents';
-export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+// export { LoadingState } from './BaseComponents'; // Already exported via * from './BaseComponents'
+export { ErrorBoundary } from './ErrorBoundary';
 export { EmptyStates } from './EmptyStates';
+
+// Higher-order components
+export { withErrorBoundary, SimpleErrorBoundary, withSimpleErrorBoundary } from './ErrorBoundary.hoc';
 
 // Specialized components
 export * from './ConfirmDialog';
-export * from './FormBuilder';
-export * from './FormFields';
-export * from './AdvancedTable';
-export * from './VirtualScroll';
+// export * from './FormBuilder'; // Commented out since FormBuilder doesn't exist
+// export * from './FormFields'; // Commented out since FormFields doesn't exist
+// export * from './VirtualScroll'; // Commented out since VirtualScroll doesn't exist
 export * from './LazyLoading';
 export * from './ResponsiveDesign';
 export * from './MobileOptimized';
 export * from './AccessibleComponents';
-export * from './AnalyticsCharts';
+// export * from './AnalyticsCharts'; // Commented out since AnalyticsCharts doesn't exist
 
 // Performance components
 export * from './PerformanceMonitor';
-export * from './PerformanceOptimizations';
+// export * from './PerformanceOptimizations'; // Commented out since PerformanceOptimizations doesn't exist
 
 // Default export with commonly used components
+import { ErrorBoundary } from './ErrorBoundary';
+import { EmptyStates } from './EmptyStates';
+import * as BaseComponents from './BaseComponents';
+
 export default {
-  // Base components
-  BaseCard: () => import('./BaseComponents').then(m => m.BaseCard),
-  EnhancedCard: () => import('./BaseComponents').then(m => m.EnhancedCard),
-  BaseButton: () => import('./BaseComponents').then(m => m.BaseButton),
-  StatusBadge: () => import('./BaseComponents').then(m => m.StatusBadge),
-  EmptyState: () => import('./BaseComponents').then(m => m.EmptyState),
-  LoadingState: () => import('./BaseComponents').then(m => m.LoadingState),
-  ErrorState: () => import('./BaseComponents').then(m => m.ErrorState),
-  AsyncContent: () => import('./BaseComponents').then(m => m.AsyncContent),
-  Section: () => import('./BaseComponents').then(m => m.Section),
-  
-  // Other components
-  ErrorBoundary: () => import('./ErrorBoundary').then(m => m.ErrorBoundary),
-  ConfirmDialog: () => import('./ConfirmDialog'),
-  FormBuilder: () => import('./FormBuilder'),
-  AdvancedTable: () => import('./AdvancedTable'),
+  ErrorBoundary,
+  EmptyStates,
+  ...BaseComponents
 };

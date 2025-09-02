@@ -5,7 +5,7 @@ import { Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { useSkills } from "@/hooks/useSkills";
 import { useProjects } from "@/hooks/useProjects";
 import { toast } from "@/hooks/use-toast";
-import { useTheme } from "@/components/theme/theme-provider";
+import { useTheme } from "@/components/theme/use-theme";
 
 interface DataExportManagerProps {
   onExportComplete?: () => void;

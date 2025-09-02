@@ -25,20 +25,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ChevronDown,
-  ChevronUp,
-  Search,
-  Filter,
-  Download,
-  MoreHorizontal,
-  ArrowUpDown,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  X
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  Search, 
+  Filter, 
+  Download, 
+  MoreHorizontal, 
+  ArrowUpDown, 
+  Eye, 
+  EyeOff, 
+  RefreshCw, 
+  X 
 } from "lucide-react";
-import { VirtualScroll } from "@/components/shared/VirtualScroll";
+// import { VirtualScroll } from "@/components/shared/VirtualScroll"; // Commented out since VirtualScroll doesn't exist
 import { LoadingState } from "@/components/shared/BaseComponents";
 import { EmptyStates } from "@/components/shared/EmptyStates";
 

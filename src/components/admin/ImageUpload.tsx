@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { uploadImageAutoPath, validateImageFile } from "@/lib/image-upload";
-import { useTheme } from "@/components/theme/theme-provider";
+import { useTheme } from "@/components/theme/use-theme";
 
 interface ImageUploadProps {
   onUploadComplete: (url: string, path: string) => void;

@@ -14,7 +14,7 @@ import {
   Palette,
   Zap
 } from "lucide-react";
-import { useReducedMotion } from "@/hooks/useAccessibility";
+import { CompactSkillsSection } from "./CompactSkillsSection";
 
 // Particle system interfaces
 interface Particle {
@@ -306,7 +306,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section 
       className={cn(
-        "relative min-h-screen flex items-center justify-center overflow-hidden",
+        "relative min-h-[120vh] flex items-center justify-center overflow-hidden",
         `bg-gradient-to-br ${backgroundGradient}`,
         className
       )}
@@ -315,8 +315,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <ParticleSystem enabled={enableParticles && !prefersReducedMotion} />
 
       {/* Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <div className="grid grid-cols-1 gap-12 items-center">
           
           {/* Text Content */}
           <div className={cn(
@@ -361,25 +361,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
             )}
 
-            {/* Skills */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                Specializing in
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {skills.slice(0, 6).map((skill, index) => (
-                  <Badge 
-                    key={skill} 
-                    variant="secondary"
-                    className={cn(
-                      "transition-all duration-300 hover:scale-105",
-                      !prefersReducedMotion && `animation-delay-${index * 100}`
-                    )}
-                  >
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
+            {/* Skills Section */}
+            <div className="mt-8">
+              <CompactSkillsSection showHeader={false} />
             </div>
 
             {/* CTA Buttons */}

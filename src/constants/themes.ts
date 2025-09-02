@@ -27,32 +27,4 @@ export const themes = {
       frameworks: "#6610F2",
     },
   },
-  forest: {
-    primary: "#228B22",
-    secondary: "#556B2F",
-    background: "#F0FFF0",
-    text: "#000000",
-    categories: {
-      frontend: "#228B22",
-      backend: "#8B4513",
-      design: "#FFD700",
-      tools: "#4682B4",
-      languages: "#CD5C5C",
-      frameworks: "#8A2BE2",
-    },
-  },
-  ocean: {
-    primary: "#1E90FF",
-    secondary: "#4682B4",
-    background: "#F0F8FF",
-    text: "#000000",
-    categories: {
-      frontend: "#1E90FF",
-      backend: "#20B2AA",
-      design: "#FFD700",
-      tools: "#ADD8E6",
-      languages: "#FFA07A",
-      frameworks: "#7B68EE",
-    },
-  },
 };

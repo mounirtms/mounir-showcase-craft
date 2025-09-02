@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { ALIGN_CLASSES } from '@/lib/shared/ui-utils';
 import { BaseFormProps } from '@/lib/shared/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -206,11 +207,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
   align = 'right',
   className
 }) => {
-  const alignClasses = {
-    left: 'justify-start',
-    center: 'justify-center',
-    right: 'justify-end'
-  };
+  const alignClasses = ALIGN_CLASSES;
 
   return (
     <div className={cn('flex gap-3', alignClasses[align], className)}>

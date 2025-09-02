@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { ALIGN_CLASSES } from '@/lib/shared/ui-utils';
 import { BaseCardProps } from '@/lib/shared/types';
 
 const cardVariants = {
@@ -132,11 +133,7 @@ export const CardActions: React.FC<CardActionsProps> = ({
   className,
   ...props
 }) => {
-  const alignClasses = {
-    left: 'justify-start',
-    center: 'justify-center',
-    right: 'justify-end'
-  };
+  const alignClasses = ALIGN_CLASSES;
 
   return (
     <div 

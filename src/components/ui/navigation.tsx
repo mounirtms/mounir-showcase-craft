@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackButtonClick } from "@/utils/analytics";
@@ -67,6 +68,7 @@ export const Navigation = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
             ))}
+            <ThemeToggle />
             <Button 
               size="sm" 
               className="shadow-glow hover:shadow-medium transition-all duration-300" 

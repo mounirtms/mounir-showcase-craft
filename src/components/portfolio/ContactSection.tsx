@@ -70,15 +70,15 @@ interface AvailabilityStatus {
 
 interface ContactSectionProps {
   className?: string;
-  contactInfo: {
+  contactInfo?: {
     email: string;
     phone?: string;
     location: string;
     resumeUrl?: string;
   };
-  socialLinks: SocialLink[];
-  availability: AvailabilityStatus;
-  onSubmit: (data: ContactFormData) => Promise<void>;
+  socialLinks?: SocialLink[];
+  availability?: AvailabilityStatus;
+  onSubmit?: (data: ContactFormData) => Promise<void>;
 }
 
 // Floating label input component
@@ -574,10 +574,51 @@ const SocialLinksCard: React.FC<{ socialLinks: SocialLink[] }> = ({ socialLinks 
 // Main contact section component
 export const ContactSection: React.FC<ContactSectionProps> = ({
   className,
-  contactInfo,
-  socialLinks,
-  availability,
-  onSubmit
+  contactInfo = {
+    email: "mounir.a@gmail.com",
+    phone: "+213 555 123 456",
+    location: "Algiers, Algeria",
+    resumeUrl: "/resume.pdf"
+  },
+  socialLinks = [
+    {
+      platform: "GitHub",
+      url: "https://github.com/mounir",
+      icon: Github,
+      username: "mounir"
+    },
+    {
+      platform: "LinkedIn",
+      url: "https://linkedin.com/in/mounir",
+      icon: Linkedin,
+      username: "mounir"
+    },
+    {
+      platform: "Twitter",
+      url: "https://twitter.com/mounir",
+      icon: Twitter,
+      username: "mounir"
+    }
+  ],
+  availability = {
+    available: true,
+    status: 'available',
+    message: "Currently available for new opportunities",
+    responseTime: "Within 2 hours",
+    workingHours: {
+      timezone: "CET",
+      start: "09:00",
+      end: "18:00",
+      days: ["Mon-Fri"]
+    }
+  },
+  onSubmit = async (data: ContactFormData) => {
+    console.log("Contact form submitted:", data);
+    // Simulate API call
+    return new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1000);
+    });
+  }
 }) => {
   return (
     <section className={cn('py-16', className)}>

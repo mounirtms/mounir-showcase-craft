@@ -42,6 +42,7 @@ import {
   CardTitle, 
   CardDescription 
 } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -83,11 +84,35 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { DataExportManager } from "@/components/admin/DataExportManager";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+
+// Skill categories array
+const SKILL_CATEGORIES = [
+  "Frontend Development",
+  "Backend Development", 
+  "Database",
+  "Cloud & DevOps",
+  "Mobile Development",
+  "Machine Learning",
+  "Design",
+  "Project Management",
+  "Languages",
+  "Tools",
+  "Other"
+];
+
+// Function to get level label based on level value
+const getLevelLabel = (level: number) => {
+  if (level >= 1 && level <= 2) return "Beginner";
+  if (level >= 3 && level <= 4) return "Intermediate";
+  if (level === 5) return "Expert";
+  return "Beginner";
+};
 
 // Map of category to icon
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -145,6 +170,22 @@ export function SkillsManager() {
     },
   });
 
+  // Reset form
+  const resetForm = useCallback(() => {
+    form.reset({
+      name: "",
+      category: "Frontend Development",
+      level: 50,
+      yearsOfExperience: 0,
+      description: "",
+      featured: false,
+      disabled: false,
+      priority: 50,
+      icon: "",
+      color: "",
+    });
+  }, [form]);
+
   // Handle add skill
   const handleAddSkill = useCallback(() => {
     setSkillToEdit(null);
@@ -152,7 +193,7 @@ export function SkillsManager() {
     setIconUrl("");
     setIconPath("");
     setIsFormOpen(true);
-  }, []);
+  }, [resetForm]); // Added resetForm to the dependency array
 
   // Handle form submission with enhanced validation and error handling
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -254,22 +295,6 @@ export function SkillsManager() {
     }
   };
 
-  // Reset form
-  const resetForm = useCallback(() => {
-    form.reset({
-      name: "",
-      category: "Frontend Development",
-      level: 50,
-      yearsOfExperience: 0,
-      description: "",
-      featured: false,
-      disabled: false,
-      priority: 50,
-      icon: "",
-      color: "",
-    });
-  }, [form]);
-
   // Handle edit skill
   const handleEditSkill = useCallback((skill: Skill) => {
     setSkillToEdit(skill);
@@ -282,11 +307,10 @@ export function SkillsManager() {
       featured: skill.featured,
       disabled: skill.disabled,
       priority: skill.priority,
-      icon: skill.icon,
+      icon: skill.icon || "",
       color: skill.color,
     });
-    setIconUrl(skill.icon);
-    setIsFormOpen(true);
+    setIconUrl(skill.icon || ""); // Fix: handle undefined values
   }, [form]);
 
   // Handle delete skill
@@ -364,8 +388,10 @@ export function SkillsManager() {
       });
 
       deletableSkills.forEach((skill) => {
-        const skillRef = doc(db, "skills", skill.id);
-        batch.delete(skillRef);
+        if (db) { // Add check for db
+          const skillRef = doc(db, "skills", skill.id);
+          batch.delete(skillRef);
+        }
       });
 
       await batch.commit();
@@ -531,7 +557,14 @@ export function SkillsManager() {
       </Card>
 
       {/* Skill Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={(open) => {
+        setIsFormOpen(open);
+        if (!open && form.formState.isDirty) {
+          resetForm();
+          setIconUrl("");
+          setIconPath("");
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background text-foreground">
           <DialogHeader>
             <DialogTitle>{skillToEdit ? "Edit Skill" : "Add Skill"}</DialogTitle>
@@ -545,7 +578,7 @@ export function SkillsManager() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Use div instead of ScrollArea to maintain scroll position when form is long */}
-              <div className="max-h-[60vh] pr-4 overflow-y-auto">
+              <ScrollArea className="max-h-[60vh] pr-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -577,20 +610,13 @@ export function SkillsManager() {
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="bg-background text-foreground border-input">
-                            <SelectValue placeholder="Select a category" />
+                            <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-popover text-popover-foreground border-border">
-                          {Object.keys(CATEGORY_ICONS).map((category) => (
-                            <SelectItem 
-                              key={category} 
-                              value={category}
-                              className="focus:bg-accent focus:text-accent-foreground"
-                            >
-                              <div className="flex items-center gap-2">
-                                {CATEGORY_ICONS[category]}
-                                {category}
-                              </div>
+                        <SelectContent>
+                          {SKILL_CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -610,25 +636,22 @@ export function SkillsManager() {
                     <FormItem>
                       <FormLabel>Proficiency Level</FormLabel>
                       <FormControl>
-                        <div className="space-y-2">
-                          <Slider
-                            min={1}
-                            max={100}
-                            step={1}
-                            value={[field.value]}
-                            onValueChange={(vals) => field.onChange(vals[0])}
-                            className="w-full"
-                          />
-                          <div className="flex justify-between text-sm">
-                            <span>Beginner</span>
-                            <span className="font-medium">{field.value}%</span>
-                            <span>Expert</span>
-                          </div>
-                        </div>
+                        <Slider
+                          min={1}
+                          max={5}
+                          step={1}
+                          value={[field.value]}
+                          onValueChange={(vals) => field.onChange(vals[0])}
+                          className="py-2"
+                        />
                       </FormControl>
-                      <FormDescription>
-                        Your proficiency level (1-100%)
-                      </FormDescription>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Beginner</span>
+                        <span className="font-medium">
+                          {field.value} - {getLevelLabel(field.value)}
+                        </span>
+                        <span>Expert</span>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -643,14 +666,15 @@ export function SkillsManager() {
                       <FormControl>
                         <Input 
                           type="number" 
-                          min="0" 
+                          min="0"
+                          max="20"
                           {...field} 
                           onChange={(e) => field.onChange(Number(e.target.value))}
                           className="bg-background text-foreground border-input"
                         />
                       </FormControl>
                       <FormDescription>
-                        Your years of experience with this skill
+                        How many years have you been using this skill?
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -659,132 +683,43 @@ export function SkillsManager() {
                 
                 <FormField
                   control={form.control}
-                  name="priority"
+                  name="icon"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Priority</FormLabel>
+                      <FormLabel>Icon</FormLabel>
                       <FormControl>
                         <Input 
-                          type="number" 
-                          min="1" 
-                          max="100" 
+                          placeholder="e.g., code, database" 
                           {...field} 
-                          onChange={(e) => field.onChange(Number(e.target.value))}
                           className="bg-background text-foreground border-input"
                         />
                       </FormControl>
                       <FormDescription>
-                        Display priority (1-100, higher means more prominent)
+                        Icon name from Lucide Icons (optional)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 
-                <div className="flex items-end gap-4">
-                  <FormField
-                    control={form.control}
-                    name="icon"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Icon</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g., ⚛️, 🟢" 
-                            {...field} 
-                            className="bg-background text-foreground border-input"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Emoji or text icon representing the skill
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="color"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color</FormLabel>
-                        <div className="flex items-center gap-2">
-                          <FormControl>
-                            <Input 
-                              type="color" 
-                              {...field} 
-                              className="w-12 h-10 p-1 border-input"
-                            />
-                          </FormControl>
-                          <div 
-                            className="w-8 h-8 rounded border" 
-                            style={{ backgroundColor: field.value || "#000000" }}
-                          />
-                        </div>
-                        <FormDescription>
-                          Color associated with this skill
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe your experience with this skill..."
-                        className="min-h-[100px] bg-background text-foreground border-input"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      A brief description of your experience and expertise
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex flex-col md:flex-row gap-6 pt-4">
-                <ImageUpload
-                  onUploadComplete={(url, path) => {
-                    setIconUrl(url);
-                    setIconPath(path);
-                    form.setValue("icon", url);
-                  }}
-                  currentImageUrl={iconUrl}
-                  folder="skill-icons"
-                  label="Skill Icon"
-                />
-              </div>
-              
-              <div className="flex items-center gap-6 pt-4">
                 <FormField
                   control={form.control}
                   name="featured"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-background text-foreground border-input">
                       <FormControl>
-                        <Switch
+                        <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                          className="border-input"
                         />
                       </FormControl>
-                      <FormLabel className="font-normal">
-                        Featured Skill
-                      </FormLabel>
-                      <FormDescription>
-                        Display this skill prominently
-                      </FormDescription>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Featured</FormLabel>
+                        <FormDescription>
+                          Show this skill in the featured section
+                        </FormDescription>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -793,26 +728,25 @@ export function SkillsManager() {
                   control={form.control}
                   name="disabled"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-background text-foreground border-input">
                       <FormControl>
-                        <Switch
+                        <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                          className="border-input"
                         />
                       </FormControl>
-                      <FormLabel className="font-normal">
-                        Disable Skill
-                      </FormLabel>
-                      <FormDescription>
-                        Hide this skill from display
-                      </FormDescription>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Disabled</FormLabel>
+                        <FormDescription>
+                          Hide this skill from public view
+                        </FormDescription>
+                      </div>
                     </FormItem>
                   )}
                 />
               </div>
-              
-              </div>
+              </ScrollArea>
               
               <DialogFooter className="gap-2 pt-4">
                 <Button
@@ -889,7 +823,12 @@ export function SkillsManager() {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => {
+        setBulkDeleteOpen(open);
+        if (!open) {
+          setSkillsToDelete([]);
+        }
+      }}>
         <AlertDialogContent className="bg-background text-foreground">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Multiple Skills</AlertDialogTitle>

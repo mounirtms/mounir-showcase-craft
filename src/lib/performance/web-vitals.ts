@@ -434,5 +434,3 @@ export const PerformanceMonitor: React.FC<{
     </div>
   );
 };
-
-import React from 'react';

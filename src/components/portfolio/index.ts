@@ -48,8 +48,6 @@ export { LazyPortfolioLoader } from "./LazyPortfolioLoader";
 export { PerformanceMonitor } from "./PerformanceMonitor";
 export { ThemeToggle, ThemeCustomization } from "./ThemeToggle";
 
-// Enhanced integration
-export { EnhancedPortfolioIntegration } from "./EnhancedPortfolioIntegration";
 
 // Types
 export type { 
@@ -95,7 +93,6 @@ export type {
 
 export type { ProfessionalAvatarProps } from "./ProfessionalAvatar";
 export type { DynamicTypingEffectProps } from "./DynamicTypingEffect";
-export type { EnhancedPortfolioIntegrationProps } from "./EnhancedPortfolioIntegration";
 
 export type {
   AnimationType,
