@@ -4,32 +4,78 @@ import { Progress } from "@/components/ui/progress";
 import { getSkillIcon } from "@/lib/skill-icons";
 import { Code, Server, Cloud, Database, Globe, Users } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { useInView, motion } from "framer-motion";
+import { useInView, motion, useAnimation } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const SkillProgress = ({ name, level }: { name: string; level: number }) => {
+const SkillProgress = ({ name, level, index = 0 }: { name: string; level: number; index?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px 0px -50px 0px" });
+  const controls = useAnimation();
+  const isInView = useInView(ref, { once: true, margin: "-80px 0px -80px 0px" });
+
+  useEffect(() => {
+    if (isInView) {
+      const delay = index * 100; // Stagger animations
+      controls.start({
+        width: `${level}%`,
+        opacity: 1,
+        transition: {
+          duration: 1.2,
+          delay: delay / 1000,
+          ease: [0.23, 1, 0.320, 1] // Custom easing for smoother animation
+        }
+      });
+    }
+  }, [isInView, level, controls, index]);
 
   return (
-    <div ref={ref} className="space-y-2">
+    <motion.div 
+      ref={ref} 
+      className="space-y-3"
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: (index * 50) / 1000 }}
+    >
       <div className="flex justify-between items-center text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <motion.div 
+            className="w-6 h-6 flex items-center justify-center p-1 bg-primary/10 rounded-md"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
             {getSkillIcon(name)}
-          </div>
-          <span className="font-medium">{name}</span>
+          </motion.div>
+          <span className="font-medium text-foreground">{name}</span>
         </div>
-        <span className="text-muted-foreground font-medium">{level}%</span>
+        <motion.span 
+          className="text-muted-foreground font-semibold text-xs px-2 py-1 bg-secondary/30 rounded-full"
+          initial={{ scale: 0 }}
+          animate={isInView ? { scale: 1 } : {}}
+          transition={{ duration: 0.3, delay: (index * 80) / 1000 }}
+        >
+          {level}%
+        </motion.span>
       </div>
-      <Progress 
-        value={isInView ? level : 0} 
-        className="h-2 bg-secondary/20 transition-all duration-1000 ease-out"
-        style={{
-          '--progress-color': `hsl(var(--primary))`,
-        } as React.CSSProperties}
-      />
-    </div>
+      <div className="relative h-2.5 bg-secondary/30 rounded-full overflow-hidden">
+        <motion.div
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/80 rounded-full shadow-sm"
+          initial={{ width: "0%", opacity: 0.7 }}
+          animate={controls}
+          style={{
+            boxShadow: "0 0 10px hsla(var(--primary), 0.3)"
+          }}
+        />
+        <motion.div
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-white/20 to-transparent rounded-full"
+          initial={{ width: "0%" }}
+          animate={isInView ? { width: `${level}%` } : {}}
+          transition={{ 
+            duration: 1.2, 
+            delay: (index * 100) / 1000 + 0.2,
+            ease: [0.23, 1, 0.320, 1]
+          }}
+        />
+      </div>
+    </motion.div>
   );
 };
 
@@ -105,19 +151,40 @@ export const Skills = () => {
       ref={sectionRef}
       id="skills" 
       className={cn(
-        "py-16 md:py-24 px-4 sm:px-6 scroll-mt-20 transition-opacity duration-700",
-        isInView ? "opacity-100" : "opacity-0 translate-y-8"
+        "py-16 md:py-24 px-4 sm:px-6 scroll-mt-20 relative",
+        "bg-gradient-to-br from-background via-background to-muted/20"
       )}
     >
       <div className="max-w-6xl mx-auto space-y-12 md:space-y-20">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        <motion.div 
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <motion.h2 
+            className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             Technical <span className="text-primary">Expertise</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p 
+            className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             A comprehensive toolkit built through years of hands-on experience and continuous learning
-          </p>
-        </div>
+          </motion.p>
+          <motion.div
+            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 rounded-full"
+            initial={{ scaleX: 0 }}
+            animate={isInView ? { scaleX: 1 } : {}}
+            transition={{ duration: 1, delay: 0.6 }}
+          />
+        </motion.div>
 
         {/* Core Skills */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -131,18 +198,24 @@ export const Skills = () => {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: delay / 1000 }}
               >
-                <Card className="group h-full hover:shadow-glow transition-all duration-300 hover:shadow-lg border-0 shadow-sm bg-card/50 backdrop-blur-sm">
+                <Card className="group h-full modern-card hover:shadow-glow transition-all duration-500 hover:scale-[1.02] border border-border/20 bg-card/80 backdrop-blur-md">
                   <CardHeader className="pb-4">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <CardTitle className="text-lg font-bold">{category.title}</CardTitle>
+                      <motion.div 
+                        className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300 shadow-sm"
+                        whileHover={{ scale: 1.05, rotate: 3 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      >
+                        <Icon className="h-5 w-5 text-primary drop-shadow-sm" />
+                      </motion.div>
+                      <CardTitle className="text-lg font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                        {category.title}
+                      </CardTitle>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-5">
                     {category.skills.map((skill, skillIndex) => (
-                      <SkillProgress key={skillIndex} name={skill.name} level={skill.level} />
+                      <SkillProgress key={skillIndex} name={skill.name} level={skill.level} index={skillIndex} />
                     ))}
                   </CardContent>
                 </Card>
