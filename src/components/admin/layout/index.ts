@@ -7,12 +7,7 @@ export { AdminHeader } from './AdminHeader';
 export { AdminSidebar } from './AdminSidebar';
 export { AdminBreadcrumb } from './AdminBreadcrumb';
 
-export type {
-  AdminLayoutProps,
-  AdminHeaderProps,
-  AdminSidebarProps,
-  AdminBreadcrumbProps,
-} from './types';
+// Type exports will be added when types file exists
 
 export default {
   AdminLayout: () => import('./AdminLayout'),

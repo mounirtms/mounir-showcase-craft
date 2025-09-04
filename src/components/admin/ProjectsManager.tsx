@@ -601,7 +601,16 @@ export function ProjectsManager() {
                 Manage your portfolio projects
               </CardDescription>
             </div>
-            <Button onClick={() => setIsFormOpen(true)} className="shadow-glow">
+            <Button onClick={() => {
+              console.log('Add Project button clicked'); // Debug log
+              setProjectToEdit(null);
+              resetForm();
+              setImageUrl("");
+              setImagePath("");
+              setLogoUrl("");
+              setLogoPath("");
+              setIsFormOpen(true);
+            }} className="shadow-glow">
               <Plus className="h-4 w-4 mr-2" />
               Add Project
             </Button>
@@ -628,7 +637,16 @@ export function ProjectsManager() {
             ]}
             onRefresh={refetch}
             onDelete={handleBulkDelete}
-            onAdd={() => setIsFormOpen(true)}
+            onAdd={() => {
+              console.log('AdminDataTable Add button clicked'); // Debug log
+              setProjectToEdit(null);
+              resetForm();
+              setImageUrl("");
+              setImagePath("");
+              setLogoUrl("");
+              setLogoPath("");
+              setIsFormOpen(true);
+            }}
           />
         </CardContent>
       </Card>

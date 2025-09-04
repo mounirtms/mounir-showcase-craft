@@ -7,9 +7,7 @@
 export { initialProjects } from './initial-projects';
 export { initialSkills } from './initial-skills';
 
-// Types
-export type { InitialProject } from './initial-projects';
-export type { InitialSkill } from './initial-skills';
+// Note: Type exports removed as these interfaces don't exist
 
 // Default exports for lazy loading
 export default {

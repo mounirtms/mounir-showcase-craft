@@ -449,7 +449,7 @@ export const AdvancedTable = <T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="space-y-4">
-        <LoadingStates variant="skeleton" message="Loading table data..." />
+        <LoadingState variant="skeleton" loadingText="Loading table data..." />
       </div>
     );
   }
@@ -621,73 +621,7 @@ export const AdvancedTable = <T extends Record<string, any>>({
       )}
 
       {/* Table */}
-      {virtualScrolling ? (
-        <VirtualScroll
-          items={paginatedData}
-          height={containerHeight}
-          itemHeight={estimatedRowHeight}
-          renderItem={(row, index) => (
-            <div
-              key={getRowId(row, index)}
-              className={`flex items-center border-b ${
-                rowClassName ? rowClassName(row, index) : ""
-              } ${onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}`}
-              onClick={() => onRowClick?.(row, index)}
-              onDoubleClick={() => onRowDoubleClick?.(row, index)}
-            >
-              {selectable && (
-                <div className="p-2">
-                  <Checkbox
-                    checked={selectedRows.has(getRowId(row, index))}
-                    onCheckedChange={() => handleSelectRow(getRowId(row, index))}
-                  />
-                </div>
-              )}
-              {displayColumns.map((column) => (
-                <div
-                  key={column.id}
-                  className="p-2 flex-1"
-                  style={{ width: column.width, minWidth: column.minWidth }}
-                >
-                  {renderCellContent(column, row, index)}
-                </div>
-              ))}
-              {actions.length > 0 && (
-                <div className="p-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {actions
-                        .filter(action => !action.visible || action.visible(row, index))
-                        .map((action, actionIndex) => (
-                          <DropdownMenuItem
-                            key={actionIndex}
-                            onClick={() => action.onClick(row, index)}
-                          >
-                            {action.icon}
-                            {action.label}
-                          </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
-            </div>
-          )}
-          emptyComponent={
-            <EmptyStates
-              variant="no-data"
-              title="No data"
-              description={emptyMessage}
-            />
-          }
-        />
-      ) : (
-        <div ref={tableRef} className="border rounded-lg overflow-hidden">
+      <div ref={tableRef} className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -803,7 +737,6 @@ export const AdvancedTable = <T extends Record<string, any>>({
             </TableBody>
           </Table>
         </div>
-      )}
 
       {/* Pagination */}
       {pagination && (

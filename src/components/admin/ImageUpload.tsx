@@ -41,7 +41,7 @@ export function ImageUpload({
     // Validate file
     const validation = validateImageFile(file, maxSizeMB);
     if (!validation.valid) {
-      setError(validation.error);
+      setError(validation.error || 'Invalid file');
       toast({
         title: "Invalid File",
         description: validation.error,

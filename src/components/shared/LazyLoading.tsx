@@ -35,10 +35,10 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   errorBoundary = true
 }) => {
   const defaultFallback = (
-    <LoadingStates 
+    <LoadingState 
       variant="spinner" 
       size="lg" 
-      message={loadingMessage}
+      loadingText={loadingMessage}
     />
   );
 

@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SkipLinks } from "@/components/shared/AccessibleComponents";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { AccessibilitySettings } from "@/components/admin/AccessibilitySettings";
+// Removed accessibility components to fix provider errors
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,8 +23,7 @@ import { SkillsTab } from "@/components/admin/skills";
 import { ThemeToggle } from "@/components/theme";
 import { DashboardOverview } from "@/components/admin/dashboard";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { ProfessionalAdminDashboard } from "@/components/admin/ProfessionalAdminDashboard";
 import { AdminLoading, DataLoading } from "@/components/ui/loading";
 import { FirebaseConfigChecker } from "@/components/FirebaseConfigChecker";
 import { 
@@ -87,14 +84,6 @@ export default function Admin() {
   const [operationLoading, setOperationLoading] = useState(false);
   const [operationError, setOperationError] = useState<string | null>(null);
   const { projects, loading, refetch } = useProjects();
-  const { skipLinks } = useAccessibility();
-
-  // Define skip links for admin navigation
-  const adminSkipLinks = [
-    { id: 'admin-header', label: 'Skip to Header', target: 'admin-header' },
-    { id: 'admin-main', label: 'Skip to Main Content', target: 'admin-main' },
-    { id: 'admin-tabs', label: 'Skip to Navigation Tabs', target: 'admin-tabs' }
-  ];
 
   useEffect(() => {
     if (!auth) return;
@@ -654,7 +643,7 @@ export default function Admin() {
         </div>
         
         {canUseAdmin ? (
-          <AdminDashboard />
+          <ProfessionalAdminDashboard user={user} />
         ) : (
           <Card className="border-0 shadow-medium">
             <CardHeader>

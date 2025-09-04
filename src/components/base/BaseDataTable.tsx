@@ -114,7 +114,7 @@ export const BaseDataTable = <T extends TableRowData>({
   ...restProps
 }: BaseDataTableProps<T>) => {
   // Internal state
-  const [internalState, setInternalState] = React.useState<TableState<T>>(() => ({
+  const [internalState, setInternalState] = React.useState<TableState>(() => ({
     pagination: { 
       page: 0, 
       pageSize, 
@@ -131,11 +131,11 @@ export const BaseDataTable = <T extends TableRowData>({
 
   // Update internal state when external state changes
   React.useEffect(() => {
-    setInternalState(prev => ({ ...prev, ...state }));
+    setInternalState((prev: TableState) => ({ ...prev, ...state }));
   }, [state]);
 
   // Notify parent of state changes
-  const updateState = React.useCallback((newState: Partial<TableState<T>>) => {
+  const updateState = React.useCallback((newState: Partial<TableState>) => {
     const updatedState = { ...internalState, ...newState };
     setInternalState(updatedState);
     onStateChange?.(updatedState);
@@ -160,7 +160,7 @@ export const BaseDataTable = <T extends TableRowData>({
     }
 
     // Apply filters
-    internalState.filtering.forEach(filter => {
+    internalState.filtering.forEach((filter: TableFiltering) => {
       result = result.filter(item => {
         const value = item[filter.column];
         switch (filter.operator) {
@@ -190,9 +190,9 @@ export const BaseDataTable = <T extends TableRowData>({
           const aValue = a[columnKey];
           const bValue = b[columnKey];
           
-          if (aValue === undefined || bValue === undefined) return 0;
-          if (aValue < bValue) return sort.direction === 'asc' ? -1 : 1;
-          if (aValue > bValue) return sort.direction === 'asc' ? 1 : -1;
+          if (aValue === undefined || bValue === undefined || aValue === null || bValue === null) return 0;
+          if (aValue! < bValue!) return sort.direction === 'asc' ? -1 : 1;
+          if (aValue! > bValue!) return sort.direction === 'asc' ? 1 : -1;
         }
         return 0;
       });
@@ -268,7 +268,7 @@ export const BaseDataTable = <T extends TableRowData>({
     if (!selectable) return;
     
     const newSelection = internalState.selection.includes(id)
-      ? internalState.selection.filter(selectedId => selectedId !== id)
+      ? internalState.selection.filter((selectedId: string) => selectedId !== id)
       : [...internalState.selection, id];
     
     updateState({ selection: newSelection });
@@ -382,7 +382,7 @@ export const BaseDataTable = <T extends TableRowData>({
               size="sm"
               onClick={() => action.onClick(internalState.selection)}
             >
-              {action.icon && <action.icon className="h-4 w-4 mr-2" />}
+              {action.icon && React.createElement(action.icon as any, { className: "h-4 w-4 mr-2" })}
               {action.label}
             </Button>
           ))}
@@ -466,9 +466,9 @@ export const BaseDataTable = <T extends TableRowData>({
                   {columns.map((column) => (
                     <TableCell key={column.id} className={cn(compact && 'py-2')}>
                       {column.cell
-                        ? column.cell(column.accessorKey ? row[column.accessorKey] : row, row)
+                        ? String(column.cell(column.accessorKey ? row[column.accessorKey] : row, row) || '')
                         : column.accessorKey
-                        ? row[column.accessorKey]
+                        ? String(row[column.accessorKey] || '')
                         : ''
                       }
                     </TableCell>

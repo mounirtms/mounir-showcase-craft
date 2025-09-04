@@ -34,11 +34,7 @@ export * from './dashboard';
 export * from './projects';
 export * from './skills';
 
-// Types
-export type {
-  AdminComponentProps,
-  AdminSectionProps
-} from './layout';
+// Types will be added when available
 
 // Default exports for lazy loading
 export default {

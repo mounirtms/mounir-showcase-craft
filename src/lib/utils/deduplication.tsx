@@ -124,7 +124,7 @@ export const componentPatterns = {
 // Common hooks patterns
 export const commonHooks = {
   // Debounced value hook
-  useDebounce: <T>(value: T, delay: number): T => {
+  useDebounce: function<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
     React.useEffect(() => {
@@ -141,7 +141,7 @@ export const commonHooks = {
   },
   
   // Local storage hook
-  useLocalStorage: <T>(key: string, initialValue: T): [T, (value: T) => void] => {
+  useLocalStorage: function<T>(key: string, initialValue: T): [T, (value: T) => void] {
     const [storedValue, setStoredValue] = React.useState<T>(() => {
       try {
         const item = window.localStorage.getItem(key);
@@ -164,7 +164,7 @@ export const commonHooks = {
   },
   
   // Previous value hook
-  usePrevious: <T>(value: T): T | undefined => {
+  usePrevious: function<T>(value: T): T | undefined {
     const ref = React.useRef<T>();
     React.useEffect(() => {
       ref.current = value;

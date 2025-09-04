@@ -11,30 +11,18 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "bundler",
+    "ignoreDeprecations": "5.0",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["vite/client", "node"],
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+      "@/*": ["src/*"]
+    }
   },
-  "include": [
-    "src",
-    "index.html",
-    "vite.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.spec.tsx",
-    "**/*.test.tsx"
-  ]
+  "include": ["src"],
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

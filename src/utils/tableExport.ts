@@ -117,7 +117,7 @@ export function exportToXLSX(
     filename = `export-${new Date().toISOString().split('T')[0]}.xlsx`
   } = options;
 
-  console.warn('XLSX export not fully implemented. Exporting as CSV instead.');
+  // Note: XLSX export not fully implemented. Exporting as CSV instead.
   exportToCSV(data, columns, { ...options, filename: filename.replace('.xlsx', '.csv') });
 }
 

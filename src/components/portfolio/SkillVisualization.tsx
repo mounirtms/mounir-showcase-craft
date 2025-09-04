@@ -387,7 +387,7 @@ export const SkillVisualization: React.FC<SkillVisualizationProps> = ({
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(skill => 
         skill.name.toLowerCase().includes(searchLower) ||
-        skill.description.toLowerCase().includes(searchLower) ||
+        skill.description?.toLowerCase().includes(searchLower) ||
         skill.category.toLowerCase().includes(searchLower)
       );
     }

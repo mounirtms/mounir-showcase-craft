@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Download, Sparkles } from "lucide-react";
 import { trackButtonClick } from "@/utils/analytics";

@@ -1,9 +1,9 @@
+import React, { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getSkillIcon } from "@/lib/skill-icons";
 import { Code, Server, Cloud, Database, Globe, Users } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { useInView, motion, useAnimation } from "framer-motion";
 import { cn } from "@/lib/utils";
 

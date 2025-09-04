@@ -4,7 +4,7 @@
  */
 
 // Main pages
-export { default as HomePage } from './Index';
+export { default as HomePage } from './HomePage';
 export { default as AdminPage } from './Admin';
 export { default as NotFoundPage } from './NotFound';
 
@@ -15,7 +15,7 @@ export interface PageProps {
 
 // Default exports for lazy loading
 export default {
-  Home: () => import('./Index'),
+  Home: () => import('./HomePage'),
   Admin: () => import('./Admin'),
   NotFound: () => import('./NotFound'),
 };

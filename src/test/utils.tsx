@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 
 // Custom render function that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {

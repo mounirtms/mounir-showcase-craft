@@ -13,5 +13,7 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "codium.codeCompletion.enable": false
+    "codium.codeCompletion.enable": false,
+    "trae.tab.enableRename": false,
+    "trae.tab.enableAutoImport": false
 }

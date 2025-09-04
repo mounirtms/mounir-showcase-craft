@@ -9,7 +9,7 @@ import {
   validateSkillCreate,
   validateProjectsBulk,
 } from './validators';
-import { legacyProjectTransformer, legacySkillTransformer } from './transformers';
+import { legacyProjectTransformer } from './transformers';
 import { MigrationUtils } from './migrations';
 import { ProjectCategory, ProjectStatus, SkillCategory, SkillLevel } from './types';
 
@@ -32,15 +32,7 @@ export function exampleBasicProjectValidation() {
     updatedAt: Date.now(),
   };
 
-  const result = validateProject(projectData);
-  
-  if (result.success) {
-    console.log('✅ Project validation successful:', result.data);
-  } else {
-    console.log('❌ Project validation failed:', result.errors);
-  }
-
-  return result;
+  return validateProject(projectData);
 }
 
 /**
@@ -77,16 +69,7 @@ export function exampleCreateProject() {
     ],
   };
 
-  const result = validateProjectCreate(newProjectData);
-  
-  if (result.success) {
-    console.log('✅ New project created successfully:', result.data);
-    // Here you would save to database
-  } else {
-    console.log('❌ Project creation failed:', result.errors);
-  }
-
-  return result;
+  return validateProjectCreate(newProjectData);
 }
 
 /**
@@ -141,15 +124,7 @@ export function exampleSkillValidation() {
     updatedAt: Date.now(),
   };
 
-  const result = validateSkill(skillData);
-  
-  if (result.success) {
-    console.log('✅ Skill validation successful:', result.data);
-  } else {
-    console.log('❌ Skill validation failed:', result.errors);
-  }
-
-  return result;
+  return validateSkill(skillData);
 }
 
 /**
@@ -179,41 +154,24 @@ export function exampleBulkValidation() {
     },
     {
       title: 'Invalid Project',
-      // Missing required fields - this will fail validation
       description: 'Short',
     },
   ];
 
-  const result = validateProjectsBulk(projects);
-  
-  console.log(`📊 Bulk validation results:`);
-  console.log(`  Total: ${result.summary.total}`);
-  console.log(`  Valid: ${result.summary.validCount}`);
-  console.log(`  Invalid: ${result.summary.invalidCount}`);
-  console.log(`  Processing time: ${result.summary.processingTime.toFixed(2)}ms`);
-  
-  if (result.invalid.length > 0) {
-    console.log('❌ Invalid items:');
-    result.invalid.forEach(item => {
-      console.log(`  Item ${item.index}:`, item.errors.map(e => e.message));
-    });
-  }
-
-  return result;
+  return validateProjectsBulk(projects);
 }
 
 /**
  * Example 5: Legacy data transformation
  */
 export function exampleLegacyTransformation() {
-  // Simulate old project format
   const legacyProject = {
     title: 'Old Project Format',
     description: 'This project uses the old data structure that needs to be migrated.',
-    category: 'Web Application', // Old string format
+    category: 'Web Application',
     status: 'completed',
     technologies: ['React', 'Express'],
-    image: 'https://example.com/old-image.jpg', // Single image field
+    image: 'https://example.com/old-image.jpg',
     liveUrl: 'https://example.com/live',
     githubUrl: 'https://github.com/user/old-project',
     featured: true,
@@ -221,30 +179,16 @@ export function exampleLegacyTransformation() {
     startDate: '2022-01-01',
     endDate: '2022-06-01',
     role: 'Full-Stack Developer',
-    createdAt: 1640995200000, // Timestamp
+    createdAt: 1640995200000,
     updatedAt: 1656633600000,
   };
 
-  console.log('🔄 Transforming legacy project data...');
-  
   try {
     const transformedProject = legacyProjectTransformer.transform(legacyProject);
     const validationResult = validateProject(transformedProject);
-    
-    if (validationResult.success) {
-      console.log('✅ Legacy project transformed and validated successfully');
-      console.log('📋 Transformed structure:');
-      console.log('  Images:', transformedProject.images?.length || 0);
-      console.log('  Links:', transformedProject.links?.length || 0);
-      console.log('  Schema version:', transformedProject.schemaVersion);
-    } else {
-      console.log('❌ Transformed project failed validation:', validationResult.errors);
-    }
-    
     return { transformedProject, validationResult };
   } catch (error) {
-    console.log('❌ Transformation failed:', error);
-    return null;
+    return { error };
   }
 }
 
@@ -260,42 +204,25 @@ export async function exampleAutoMigration() {
     image: 'https://example.com/legacy.jpg',
     liveUrl: 'https://example.com/legacy-live',
     featured: false,
-    createdAt: 1577836800000, // 2020-01-01
+    createdAt: 1577836800000,
   };
 
-  console.log('🔍 Detecting data version...');
   const detectedVersion = MigrationUtils.detectDataVersion(oldProjectData, 'project');
-  console.log(`📅 Detected version: ${detectedVersion}`);
-
-  console.log('🚀 Starting auto-migration...');
   const migrationResult = await MigrationUtils.autoMigrate(oldProjectData, 'project', '1.0.0');
   
   if (migrationResult.success) {
-    console.log('✅ Migration successful!');
-    console.log(`📈 Migrated from ${migrationResult.fromVersion} to ${migrationResult.toVersion}`);
-    
-    // Validate the migrated data
     const validationResult = validateProject(migrationResult.migratedData);
-    if (validationResult.success) {
-      console.log('✅ Migrated data passes validation');
-    } else {
-      console.log('❌ Migrated data failed validation:', validationResult.errors);
-    }
-  } else {
-    console.log('❌ Migration failed:', migrationResult.errors);
+    return { ...migrationResult, validationResult, detectedVersion };
   }
 
-  return migrationResult;
+  return { ...migrationResult, detectedVersion };
 }
 
 /**
- * Example 7: Field-level validation for forms
+ * Example 7: Field-level validation test cases
  */
 export function exampleFieldValidation() {
-  console.log('🔍 Testing field-level validation...');
-
-  // Test various field validations
-  const testCases = [
+  return [
     { field: 'title', value: 'Valid Project Title', shouldPass: true },
     { field: 'title', value: '', shouldPass: false },
     { field: 'description', value: 'This is a sufficiently long description for the project', shouldPass: true },
@@ -305,11 +232,6 @@ export function exampleFieldValidation() {
     { field: 'teamSize', value: 5, shouldPass: true },
     { field: 'teamSize', value: 0, shouldPass: false },
   ];
-
-  testCases.forEach(({ field, value, shouldPass }) => {
-    // Note: This is a simplified example. In practice, you'd use the validateProjectField function
-    console.log(`  ${field}: ${JSON.stringify(value)} - Expected: ${shouldPass ? 'PASS' : 'FAIL'}`);
-  });
 }
 
 /**
@@ -317,21 +239,18 @@ export function exampleFieldValidation() {
  */
 export function exampleErrorHandling() {
   const invalidProject = {
-    title: '', // Invalid: empty
-    description: 'Short', // Invalid: too short
-    category: 'InvalidCategory', // Invalid: not in enum
-    technologies: [], // Invalid: empty array
-    teamSize: -1, // Invalid: negative
+    title: '',
+    description: 'Short',
+    category: 'InvalidCategory',
+    technologies: [],
+    teamSize: -1,
     startDate: new Date('2023-12-31'),
-    endDate: new Date('2023-01-01'), // Invalid: before start date
+    endDate: new Date('2023-01-01'),
   };
 
   const result = validateProject(invalidProject);
   
   if (!result.success && result.errors) {
-    console.log('📋 Validation errors found:');
-    
-    // Group errors by field for better user experience
     const errorsByField = result.errors.reduce((acc, error) => {
       if (!acc[error.field]) {
         acc[error.field] = [];
@@ -340,59 +259,31 @@ export function exampleErrorHandling() {
       return acc;
     }, {} as Record<string, string[]>);
 
-    Object.entries(errorsByField).forEach(([field, messages]) => {
-      console.log(`  ${field}:`);
-      messages.forEach(message => {
-        console.log(`    - ${message}`);
-      });
-    });
-
-    // Generate user-friendly error summary
     const errorCount = result.errors.length;
     const fieldCount = Object.keys(errorsByField).length;
-    console.log(`\n📊 Summary: ${errorCount} errors across ${fieldCount} fields`);
+    
+    return {
+      ...result,
+      errorsByField,
+      summary: { errorCount, fieldCount }
+    };
   }
 
   return result;
 }
 
 /**
- * Run all examples
+ * Run all examples and return results
  */
 export function runAllExamples() {
-  console.log('🚀 Running Schema Validation Examples\n');
-
-  console.log('1️⃣ Basic Project Validation');
-  exampleBasicProjectValidation();
-  console.log('\n');
-
-  console.log('2️⃣ Create New Project');
-  exampleCreateProject();
-  console.log('\n');
-
-  console.log('3️⃣ Skill Validation');
-  exampleSkillValidation();
-  console.log('\n');
-
-  console.log('4️⃣ Bulk Validation');
-  exampleBulkValidation();
-  console.log('\n');
-
-  console.log('5️⃣ Legacy Data Transformation');
-  exampleLegacyTransformation();
-  console.log('\n');
-
-  console.log('6️⃣ Auto Migration');
-  exampleAutoMigration();
-  console.log('\n');
-
-  console.log('7️⃣ Field Validation');
-  exampleFieldValidation();
-  console.log('\n');
-
-  console.log('8️⃣ Error Handling');
-  exampleErrorHandling();
-  console.log('\n');
-
-  console.log('✅ All examples completed!');
+  return {
+    basicValidation: exampleBasicProjectValidation(),
+    createProject: exampleCreateProject(),
+    skillValidation: exampleSkillValidation(),
+    bulkValidation: exampleBulkValidation(),
+    legacyTransformation: exampleLegacyTransformation(),
+    autoMigration: exampleAutoMigration(),
+    fieldValidation: exampleFieldValidation(),
+    errorHandling: exampleErrorHandling(),
+  };
 }

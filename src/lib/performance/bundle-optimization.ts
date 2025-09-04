@@ -113,7 +113,15 @@ export const modernFeatures = {
   checkSupport: () => {
     const features = {
       esModules: 'noModule' in HTMLScriptElement.prototype,
-      dynamicImport: typeof import !== 'undefined',
+      dynamicImport: (() => {
+        try {
+          // This will throw if dynamic imports are not supported
+          new Function('import("")');
+          return true;
+        } catch {
+          return false;
+        }
+      })(),
       asyncAwait: (async () => {})().constructor === (async function() {}).constructor,
       optionalChaining: (() => {
         try {

@@ -15,6 +15,7 @@ import {
   Zap
 } from "lucide-react";
 import { CompactSkillsSection } from "./CompactSkillsSection";
+import { useReducedMotion } from "@/hooks/useAccessibility";
 
 // Particle system interfaces
 interface Particle {

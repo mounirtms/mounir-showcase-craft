@@ -3,7 +3,7 @@
  * Consolidates duplicate functions and common UI patterns
  */
 
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme/use-theme";
 
 // Theme utilities
 export const createThemeToggle = (setTheme: (theme: string) => void) => {

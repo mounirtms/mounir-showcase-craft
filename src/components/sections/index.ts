@@ -8,11 +8,7 @@ export { Skills as SkillsSection } from './skills';
 export { Projects as ProjectsSection } from './projects';
 export { Experience as ExperienceSection } from './experience';
 
-// Types
-export type { HeroProps as HeroSectionProps } from './hero';
-// Note: The Skills component does not have props, so no type is exported.
-export type { ProjectsProps as ProjectsSectionProps } from './projects';
-export type { ExperienceProps as ExperienceSectionProps } from './experience';
+// Note: Type exports removed as these props interfaces don't exist in the components
 
 // Default exports for lazy loading, now compatible with React.lazy
 export default {

@@ -1,13 +1,14 @@
-/* Import modern fonts - MUST be first */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@100..800&display=swap');
+/* Professional font imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Professional Portfolio Design System by Mounir Abderrahmani
+ * Modern, accessible, and performant CSS architecture
+ * All colors use HSL for better manipulation
+ */
 
 @layer base {
   :root {
@@ -102,36 +103,164 @@ All colors MUST be HSL.
     color-scheme: dark;
   }
 
-  /* Selection styles */
-  ::selection {
-    @apply bg-primary/20 text-primary-foreground;
+  /* Full width layout improvements */
+  .container {
+    @apply w-full max-w-full px-4;
   }
   
-  /* Focus styles */
-  :focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  @media (min-width: 640px) {
+    .container {
+      @apply px-6;
+    }
   }
-}
+  
+  @media (min-width: 1024px) {
+    .container {
+      @apply px-8;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .container {
+      @apply px-10;
+    }
+  }
+  
+  @media (min-width: 1536px) {
+    .container {
+      @apply px-12;
+    }
+  }
+  
+  /* Enhanced responsive grid */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .grid-col-full {
+    grid-column: 1 / -1;
+  }
+  
+  .grid-col-main {
+    grid-column: 1 / -1;
+  }
+  
+  .grid-col-sidebar {
+    grid-column: 1 / -1;
+  }
+  
+  /* Responsive adjustments for larger screens */
+  @media (min-width: 1024px) {
+    .grid-col-main {
+      grid-column: 1 / span 8;
+    }
+    
+    .grid-col-sidebar {
+      grid-column: 9 / -1;
+    }
+  }
+} /* End of base layer */
 
 @layer components {
-  /* Glass morphism components */
+  /* Professional glass morphism */
   .glass {
-    @apply backdrop-blur-md bg-white/80 dark:bg-black/80 border border-white/20 dark:border-white/10;
+    @apply backdrop-blur-lg bg-white/90 dark:bg-gray-900/90 border border-white/30 dark:border-white/10 shadow-xl;
   }
   
   .glass-card {
-    @apply glass rounded-2xl p-6;
+    @apply glass rounded-xl p-6 transition-all duration-300 hover:bg-white/95 dark:hover:bg-gray-900/95;
   }
   
-  /* Modern buttons */
+  /* Professional buttons */
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground;
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Professional signature */
+  .signature {
+    @apply text-xs text-muted-foreground font-mono tracking-wider opacity-70 hover:opacity-100 transition-opacity;
   }
   
   /* Modern cards */
   .modern-card {
     @apply bg-card backdrop-blur-md border border-border/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  /* Contact form improvements */
+  .contact-form-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .contact-form-expanded {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .contact-form-collapsed {
+    display: none;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Admin dashboard full width */
+  .admin-dashboard {
+    width: 100vw;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .admin-card-full {
+    grid-column: 1 / -1;
+  }
+  
+  .admin-card-half {
+    grid-column: 1 / -1;
+  }
+  
+  .admin-card-third {
+    grid-column: 1 / -1;
+  }
+  
+  /* Responsive adjustments for admin dashboard */
+  @media (min-width: 768px) {
+    .admin-card-half {
+      grid-column: 1 / span 6;
+    }
+    
+    .admin-card-third {
+      grid-column: 1 / span 4;
+    }
+    
+    .admin-dashboard-grid {
+      padding: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .admin-card-half {
+      grid-column: 1 / span 6;
+    }
+    
+    .admin-card-third {
+      grid-column: 1 / span 4;
+    }
   }
 }
 
@@ -145,4 +274,21 @@ All colors MUST be HSL.
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 640px) {
+  .grid-container {
+    gap: 0.75rem;
+  }
+  
+  .admin-dashboard-grid {
+    gap: 1rem;
+    padding: 0.75rem;
+  }
+}
+
+/* DataLayer event tracking helper classes */
+.track-click {
+  cursor: pointer;
 }

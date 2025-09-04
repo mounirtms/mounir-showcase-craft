@@ -52,7 +52,7 @@ export const AdminBreadcrumb: React.FC<AdminBreadcrumbProps> = ({
                 onClick={item.onClick}
                 className={cn(
                   "h-auto p-1 font-normal hover:bg-transparent hover:text-foreground",
-                  item.active && "text-foreground font-medium"
+                  (item as BreadcrumbItem).active && "text-foreground font-medium"
                 )}
               >
                 {item.icon && (
@@ -63,7 +63,7 @@ export const AdminBreadcrumb: React.FC<AdminBreadcrumbProps> = ({
             ) : (
               <span className={cn(
                 "flex items-center px-1",
-                item.active && "text-foreground font-medium"
+                 (item as BreadcrumbItem).active && "text-foreground font-medium"
               )}>
                 {item.icon && (
                   <item.icon className="h-4 w-4 mr-1" />

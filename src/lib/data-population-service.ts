@@ -1,9 +1,10 @@
 import { projectService, skillService, experienceService, dataService } from './firebase-data-service';
-import type { ProjectInput } from '@/components/admin/projects/types';
+import type { ProjectInput } from '@/types/project';
 import type { SkillInput } from '@/components/admin/skills/types';
 
 // Create ExperienceInput type based on Experience interface
 interface ExperienceInput {
+  title: string;
   company: string;
   position: string;
   description: string;
@@ -48,92 +49,65 @@ const SAMPLE_PROJECTS: ProjectInput[] = [
   {
     title: "Advanced React Dashboard",
     description: "A comprehensive dashboard built with React, TypeScript, and modern UI libraries featuring real-time data visualization, advanced filtering, and responsive design.",
-    longDescription: "This project showcases my expertise in modern React development, featuring a sophisticated dashboard with real-time data updates, interactive charts, advanced search and filtering capabilities, and a fully responsive design that works seamlessly across all devices.",
     category: "Web Application",
+    role: "Lead Frontend Developer",
     status: "completed",
+    technologies: ["React", "TypeScript", "Tailwind CSS", "Zustand", "React Query", "Chart.js"],
+    images: ["/projects/react-dashboard.jpg"],
     achievements: [
       "Improved data loading performance by 60%",
       "Implemented real-time updates with WebSocket",
       "Created reusable component library",
       "Achieved 98% test coverage"
     ],
-    technologies: ["React", "TypeScript", "Tailwind CSS", "Zustand", "React Query", "Chart.js"],
-    tags: ["dashboard", "real-time", "responsive", "typescript"],
-    image: "/projects/react-dashboard.jpg",
+    challenges: ["Real-time data synchronization", "Complex state management", "Performance optimization"],
+    lessons: ["WebSocket reconnection patterns", "State management optimization", "Component architecture design"],
     liveUrl: "https://dashboard.example.com",
     githubUrl: "https://github.com/mounirab/react-dashboard",
     featured: true,
-    priority: 95,
-    startDate: "2024-01-15",
-    endDate: "2024-06-30",
-    duration: "5.5 months",
-    teamSize: 3,
-    role: "Lead Frontend Developer",
-    challenges: ["Real-time data synchronization", "Complex state management", "Performance optimization"],
-    solutions: ["Implemented WebSocket with reconnection logic", "Used Zustand for efficient state management", "Applied code splitting and lazy loading"],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    version: 1
+    priority: 95
   },
   {
     title: "E-commerce Platform",
     description: "Full-stack e-commerce solution with Next.js, Stripe integration, and advanced inventory management.",
-    longDescription: "A complete e-commerce platform featuring product catalog, shopping cart, secure payment processing, order management, inventory tracking, and admin dashboard. Built with modern technologies and optimized for performance and SEO.",
     category: "E-commerce",
+    role: "Full-Stack Developer",
     status: "completed",
+    technologies: ["Next.js", "Node.js", "PostgreSQL", "Stripe", "Prisma", "Tailwind CSS"],
+    images: ["/projects/ecommerce-platform.jpg"],
     achievements: [
       "Processed $100K+ in transactions",
       "Achieved 99.9% uptime",
       "Reduced page load time by 40%",
       "Integrated 5+ payment methods"
     ],
-    technologies: ["Next.js", "Node.js", "PostgreSQL", "Stripe", "Prisma", "Tailwind CSS"],
-    tags: ["e-commerce", "payments", "full-stack", "nextjs"],
-    image: "/projects/ecommerce-platform.jpg",
+    challenges: ["Payment security", "Inventory synchronization", "SEO optimization"],
+    lessons: ["PCI compliance implementation", "Real-time inventory management", "Next.js optimization strategies"],
     liveUrl: "https://shop.example.com",
     githubUrl: "https://github.com/mounirab/ecommerce-platform",
     featured: true,
-    priority: 90,
-    startDate: "2023-08-01",
-    endDate: "2024-02-15",
-    duration: "6.5 months",
-    teamSize: 4,
-    role: "Full-Stack Developer",
-    challenges: ["Payment security", "Inventory synchronization", "SEO optimization"],
-    solutions: ["Implemented PCI-compliant payment flow", "Created real-time inventory system", "Applied Next.js SSG/SSR strategies"],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    version: 1
+    priority: 90
   },
   {
     title: "Mobile App - TaskFlow",
     description: "Cross-platform productivity app built with React Native, featuring offline support and cloud synchronization.",
-    longDescription: "TaskFlow is a comprehensive productivity application that helps users manage tasks, projects, and deadlines efficiently. Features include offline functionality, real-time collaboration, push notifications, and seamless cloud synchronization across all devices.",
     category: "Mobile Application",
+    role: "Mobile Developer",
     status: "completed",
+    technologies: ["React Native", "Expo", "Firebase", "Redux Toolkit", "AsyncStorage"],
+    images: ["/projects/taskflow-app.jpg"],
     achievements: [
       "10K+ active users",
       "4.8/5 App Store rating",
       "Featured in App Store",
       "99% crash-free rate"
     ],
-    technologies: ["React Native", "Expo", "Firebase", "Redux Toolkit", "AsyncStorage"],
-    tags: ["mobile", "productivity", "react-native", "offline"],
-    image: "/projects/taskflow-app.jpg",
+    challenges: ["Offline data management", "Cross-platform compatibility", "Performance optimization"],
+    lessons: ["SQLite sync patterns", "Platform-specific optimization", "Mobile UX best practices"],
     liveUrl: "https://taskflow.app",
     githubUrl: "https://github.com/mounirab/taskflow-app",
     featured: true,
-    priority: 85,
-    startDate: "2023-03-01",
-    endDate: "2023-09-30",
-    duration: "7 months",
-    teamSize: 2,
-    role: "Mobile Developer",
-    challenges: ["Offline data management", "Cross-platform compatibility", "Performance optimization"],
-    solutions: ["Implemented SQLite with sync mechanism", "Used platform-specific components", "Applied code optimization techniques"],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    version: 1
+    priority: 85
   }
 ];
 
@@ -141,11 +115,9 @@ const SAMPLE_SKILLS: SkillInput[] = [
   {
     name: "React",
     category: "Frontend Development",
-    level: 95,
-    yearsOfExperience: 4,
+    level: "expert",
     description: "Expert in React ecosystem including hooks, context, and advanced patterns",
     featured: true,
-    priority: 95,
     tags: ["javascript", "frontend", "spa"],
     relatedSkills: ["JavaScript", "TypeScript", "Next.js"],
     createdAt: Date.now(),
@@ -154,11 +126,9 @@ const SAMPLE_SKILLS: SkillInput[] = [
   {
     name: "TypeScript",
     category: "Frontend Development",
-    level: 90,
-    yearsOfExperience: 3,
+    level: "expert",
     description: "Strong typing and advanced TypeScript patterns for scalable applications",
     featured: true,
-    priority: 90,
     tags: ["javascript", "typing", "scalability"],
     relatedSkills: ["JavaScript", "React", "Node.js"],
     createdAt: Date.now(),
@@ -167,11 +137,9 @@ const SAMPLE_SKILLS: SkillInput[] = [
   {
     name: "Node.js",
     category: "Backend Development",
-    level: 88,
-    yearsOfExperience: 4,
+    level: "advanced",
     description: "Backend development with Express, NestJS, and microservices architecture",
     featured: true,
-    priority: 88,
     tags: ["backend", "javascript", "api"],
     relatedSkills: ["Express.js", "MongoDB", "PostgreSQL"],
     createdAt: Date.now(),
@@ -180,11 +148,9 @@ const SAMPLE_SKILLS: SkillInput[] = [
   {
     name: "Python",
     category: "Backend Development",
-    level: 85,
-    yearsOfExperience: 3,
+    level: "advanced",
     description: "Django, FastAPI, and data science libraries for web and AI applications",
     featured: true,
-    priority: 85,
     tags: ["backend", "ai", "data-science"],
     relatedSkills: ["Django", "FastAPI", "TensorFlow"],
     createdAt: Date.now(),
@@ -193,11 +159,9 @@ const SAMPLE_SKILLS: SkillInput[] = [
   {
     name: "AWS",
     category: "Cloud & DevOps",
-    level: 82,
-    yearsOfExperience: 2.5,
+    level: "advanced",
     description: "Cloud infrastructure, serverless, and containerization with AWS services",
     featured: false,
-    priority: 82,
     tags: ["cloud", "devops", "infrastructure"],
     relatedSkills: ["Docker", "Kubernetes", "Terraform"],
     createdAt: Date.now(),
@@ -207,6 +171,7 @@ const SAMPLE_SKILLS: SkillInput[] = [
 
 const SAMPLE_EXPERIENCES: ExperienceInput[] = [
   {
+    title: "Senior Full-Stack Developer",
     company: "TechCorp Solutions",
     position: "Senior Full-Stack Developer",
     startDate: "2022-06-01",
@@ -225,6 +190,7 @@ const SAMPLE_EXPERIENCES: ExperienceInput[] = [
     industry: "Technology"
   },
   {
+    title: "Frontend Developer",
     company: "StartupXYZ",
     position: "Frontend Developer",
     startDate: "2020-03-15",
@@ -244,6 +210,7 @@ const SAMPLE_EXPERIENCES: ExperienceInput[] = [
     industry: "SaaS"
   },
   {
+    title: "Web Developer",
     company: "Digital Agency Pro",
     position: "Web Developer",
     startDate: "2018-09-01",

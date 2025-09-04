@@ -3,6 +3,8 @@
  * Tracks Core Web Vitals and provides performance insights
  */
 
+import React from 'react';
+
 // Web Vitals metrics interface
 export interface WebVitalsMetrics {
   FCP: number; // First Contentful Paint

@@ -33,87 +33,30 @@ export interface ProjectMetrics {
   customMetrics?: Record<string, string | number>;
 }
 
-export interface ProjectInput {
-  title: string;
-  description: string;
-  longDescription?: string;
-  category: ProjectCategory;
-  status: ProjectStatus;
-  achievements: string[];
-  technologies: string[];
-  tags: string[];
-  image?: string;
-  logo?: string;
-  icon?: string;
-  liveUrl?: string;
-  githubUrl?: string;
-  demoUrl?: string;
-  caseStudyUrl?: string;
-  featured: boolean;
-  disabled: boolean;
-  priority: number;
-  startDate?: string;
-  endDate?: string;
-  duration?: string;
-  clientInfo?: ClientInfo;
-  metrics?: ProjectMetrics;
-  challenges?: string[];
-  solutions?: string[];
-  teamSize?: number;
-  role?: string;
-  createdAt: number;
-  updatedAt: number;
-  version?: number;
-}
+// Import types from main type file to avoid conflicts
+import type { Project as MainProject, ProjectInput as MainProjectInput } from '@/types/project';
 
-export interface Project extends ProjectInput {
-  id: string;
-}
+export type Project = MainProject;
+export type ProjectInput = MainProjectInput;
 
 export const PROJECTS_COLLECTION = "projects";
 
-// Default project template
+// Default project template matching main Project interface
 export const DEFAULT_PROJECT: Omit<ProjectInput, 'title' | 'description' | 'category'> = {
-  longDescription: "",
-  status: "completed",
-  achievements: [],
+  role: "Full-Stack Developer",
   technologies: [],
-  tags: [],
-  image: "",
-  logo: "",
-  icon: "",
-  liveUrl: "",
-  githubUrl: "",
-  demoUrl: "",
-  caseStudyUrl: "",
-  featured: false,
-  disabled: false,
+  status: "completed",
   priority: 50,
   startDate: "",
   endDate: "",
-  duration: "",
-  clientInfo: {
-    name: "",
-    industry: "",
-    size: "medium",
-    location: "",
-    website: "",
-    isPublic: true
-  },
-  metrics: {
-    usersReached: 0,
-    performanceImprovement: "",
-    revenueImpact: "",
-    uptime: "",
-    customMetrics: {}
-  },
+  githubUrl: "",
+  liveUrl: "",
+  images: [],
+  achievements: [],
   challenges: [],
-  solutions: [],
-  teamSize: 1,
-  role: "Full-Stack Developer",
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-  version: 1
+  lessons: [],
+  collaborators: [],
+  featured: false
 };
 
 export function useProjects() {

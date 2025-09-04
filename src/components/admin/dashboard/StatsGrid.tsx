@@ -1,20 +1,23 @@
-import React, { useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Database, 
-  Star, 
-  CheckCircle2, 
-  Layers, 
-  TrendingUp, 
-  Clock, 
-  Target, 
-  Activity,
+import React, { useMemo } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import type { AdminStats } from '@/hooks/useAdminStats'
+import {
+  FolderOpen,
   Award,
-  Users
-} from 'lucide-react';
-import { useProjects } from '@/hooks/useProjects';
-import { useSkills } from '@/hooks/useSkills';
+  Activity,
+  BarChart3,
+  Code2,
+  Star,
+  Layers,
+  Target,
+  Clock,
+  TrendingUp,
+  Database,
+  CheckCircle2
+} from 'lucide-react'
+import { useProjects } from '@/hooks/useProjects'
+import { useSkills } from '@/hooks/useSkills'
+import { cn } from '@/lib/utils'
 
 interface StatCardProps {
   title: string;
@@ -103,7 +106,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
       total: skills.length,
       featured: skills.filter(s => s.featured).length,
       categories: [...new Set(skills.map(s => s.category))].length,
-      averageLevel: skills.length > 0 ? Math.round(skills.reduce((acc, s) => acc + s.level, 0) / skills.length) : 0
+      averageLevel: skills.length > 0 ? Math.round(skills.reduce((acc: number, s: any) => acc + s.level, 0) / skills.length) : 0
     };
 
     return {

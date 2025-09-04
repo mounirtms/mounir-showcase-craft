@@ -1,14 +1,12 @@
 /**
- * Manual test to verify the schema validation system works
+ * Test data and validation examples for the schema system
+ * Used for testing and development purposes
  */
 
 import { validateProject, validateSkill } from './validators';
 import { ProjectCategory, ProjectStatus, SkillCategory, SkillLevel } from './types';
 import { legacyProjectTransformer } from './transformers';
 import { MigrationUtils } from './migrations';
-
-// Test basic project validation
-console.log('🧪 Testing Project Validation...');
 
 const testProject = {
   title: 'Test E-commerce Platform',
@@ -25,15 +23,6 @@ const testProject = {
   updatedAt: Date.now(),
 };
 
-const projectResult = validateProject(testProject);
-console.log('✅ Project validation result:', projectResult.success ? 'PASSED' : 'FAILED');
-if (!projectResult.success) {
-  console.log('❌ Errors:', projectResult.errors?.map(e => `${e.field}: ${e.message}`));
-}
-
-// Test basic skill validation
-console.log('\n🧪 Testing Skill Validation...');
-
 const testSkill = {
   name: 'React',
   category: SkillCategory.FRONTEND_DEVELOPMENT,
@@ -49,22 +38,13 @@ const testSkill = {
   updatedAt: Date.now(),
 };
 
-const skillResult = validateSkill(testSkill);
-console.log('✅ Skill validation result:', skillResult.success ? 'PASSED' : 'FAILED');
-if (!skillResult.success) {
-  console.log('❌ Errors:', skillResult.errors?.map(e => `${e.field}: ${e.message}`));
-}
-
-// Test legacy transformation
-console.log('\n🧪 Testing Legacy Transformation...');
-
 const legacyProject = {
   title: 'Legacy Project',
   description: 'This project uses the old data structure that needs to be migrated to the new schema format.',
-  category: 'Web Application', // Old string format
+  category: 'Web Application',
   status: 'completed',
   technologies: ['React', 'Express'],
-  image: 'https://example.com/old-image.jpg', // Single image field
+  image: 'https://example.com/old-image.jpg',
   liveUrl: 'https://example.com/live',
   githubUrl: 'https://github.com/user/old-project',
   featured: true,
@@ -76,53 +56,57 @@ const legacyProject = {
   updatedAt: 1656633600000,
 };
 
-try {
-  const transformedProject = legacyProjectTransformer.transform(legacyProject);
-  const transformedResult = validateProject(transformedProject);
-  console.log('✅ Legacy transformation result:', transformedResult.success ? 'PASSED' : 'FAILED');
-  if (transformedResult.success) {
-    console.log('📋 Transformed features:');
-    console.log('  - Images array:', transformedProject.images?.length || 0);
-    console.log('  - Links array:', transformedProject.links?.length || 0);
-    console.log('  - Schema version:', transformedProject.schemaVersion);
-  } else {
-    console.log('❌ Transformation errors:', transformedResult.errors?.map(e => `${e.field}: ${e.message}`));
-  }
-} catch (error) {
-  console.log('❌ Transformation failed:', error);
+/**
+ * Validates the test project data
+ */
+export function validateTestProject() {
+  return validateProject(testProject);
 }
 
-// Test migration
-console.log('\n🧪 Testing Auto Migration...');
+/**
+ * Validates the test skill data
+ */
+export function validateTestSkill() {
+  return validateSkill(testSkill);
+}
 
-const oldData = {
-  title: 'Migration Test Project',
-  description: 'This project will be auto-migrated to the latest schema version.',
-  category: 'Web Application',
-  technologies: ['jQuery', 'PHP'],
-  image: 'https://example.com/legacy.jpg',
-  liveUrl: 'https://example.com/legacy-live',
-  featured: false,
-  createdAt: 1577836800000, // 2020-01-01
-};
+/**
+ * Tests legacy project transformation
+ */
+export function testLegacyTransformation() {
+  try {
+    const transformedProject = legacyProjectTransformer.transform(legacyProject);
+    return validateProject(transformedProject);
+  } catch (error) {
+    return { success: false, error };
+  }
+}
 
-MigrationUtils.autoMigrate(oldData, 'project', '1.0.0')
-  .then(migrationResult => {
-    console.log('✅ Auto migration result:', migrationResult.success ? 'PASSED' : 'FAILED');
+/**
+ * Tests auto migration functionality
+ */
+export async function testAutoMigration() {
+  const oldData = {
+    title: 'Migration Test Project',
+    description: 'This project will be auto-migrated to the latest schema version.',
+    category: 'Web Application',
+    technologies: ['jQuery', 'PHP'],
+    image: 'https://example.com/legacy.jpg',
+    liveUrl: 'https://example.com/legacy-live',
+    featured: false,
+    createdAt: 1577836800000,
+  };
+
+  try {
+    const migrationResult = await MigrationUtils.autoMigrate(oldData, 'project', '1.0.0');
     if (migrationResult.success) {
-      console.log(`📈 Migrated from ${migrationResult.fromVersion} to ${migrationResult.toVersion}`);
-      
-      // Validate migrated data
       const validationResult = validateProject(migrationResult.migratedData);
-      console.log('✅ Migrated data validation:', validationResult.success ? 'PASSED' : 'FAILED');
-    } else {
-      console.log('❌ Migration errors:', migrationResult.errors);
+      return { ...migrationResult, validationResult };
     }
-  })
-  .catch(error => {
-    console.log('❌ Migration failed:', error);
-  });
-
-console.log('\n🎉 Schema validation system test completed!');
+    return migrationResult;
+  } catch (error) {
+    return { success: false, error };
+  }
+}
 
 export { testProject, testSkill, legacyProject };

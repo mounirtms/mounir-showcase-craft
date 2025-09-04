@@ -109,7 +109,7 @@ export function ProjectBulkActions({ projects, onComplete, onCancel }: ProjectBu
       const batch = writeBatch(db);
       
       projects.forEach((project) => {
-        const projectRef = doc(db, PROJECTS_COLLECTION, project.id);
+        const projectRef = doc(db!, PROJECTS_COLLECTION, project.id);
         const updates: Partial<Project> = {
           updatedAt: Date.now(),
         };
@@ -153,7 +153,7 @@ export function ProjectBulkActions({ projects, onComplete, onCancel }: ProjectBu
       const batch = writeBatch(db);
       
       projects.forEach((project) => {
-        const projectRef = doc(db, PROJECTS_COLLECTION, project.id);
+        const projectRef = doc(db!, PROJECTS_COLLECTION, project.id);
         batch.delete(projectRef);
       });
 

@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-import { type Project, type ProjectInput, DEFAULT_PROJECT, PROJECTS_COLLECTION } from "@/hooks/useProjects";
+import { useProjects, PROJECTS_COLLECTION, DEFAULT_PROJECT, type ProjectInput, type ProjectCategory, type ProjectStatus } from "@/hooks/useProjects";
+import type { Project } from "@/types/project";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -51,33 +52,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Form validation schema
+// Form validation schema - aligned with Project interface
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title must be less than 100 characters"),
   description: z.string().min(1, "Description is required").max(500, "Description must be less than 500 characters"),
-  longDescription: z.string().optional(),
   category: z.string().min(1, "Category is required"),
-  status: z.enum(["completed", "in-progress", "maintenance", "archived"]),
+  role: z.string().min(1, "Role is required"),
+  status: z.string().min(1, "Status is required"),
   technologies: z.array(z.string()).min(1, "At least one technology is required"),
-  tags: z.array(z.string()),
-  achievements: z.array(z.string()),
-  image: z.string().optional(),
-  logo: z.string().optional(),
-  icon: z.string().optional(),
+  achievements: z.array(z.string()).default([]),
+  challenges: z.array(z.string()).default([]),
+  lessons: z.array(z.string()).default([]),
+  collaborators: z.array(z.string()).default([]),
   liveUrl: z.string().url().optional().or(z.literal("")),
   githubUrl: z.string().url().optional().or(z.literal("")),
-  demoUrl: z.string().url().optional().or(z.literal("")),
-  caseStudyUrl: z.string().url().optional().or(z.literal("")),
-  featured: z.boolean(),
-  disabled: z.boolean(),
-  priority: z.number().min(0).max(100),
+  images: z.array(z.string()).default([]),
+  featured: z.boolean().default(false),
+  disabled: z.boolean().default(false),
+  priority: z.number().min(0).max(100).default(50),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  duration: z.string().optional(),
-  teamSize: z.number().min(1).max(50).optional(),
-  role: z.string().optional(),
-  challenges: z.array(z.string()),
-  solutions: z.array(z.string()),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -129,7 +123,7 @@ const formSections: FormSection[] = [
   {
     id: "insights",
     title: "Project Insights",
-    description: "Challenges faced, solutions implemented, and key learnings",
+    description: "Challenges faced, lessons learned, and collaborators",
     icon: Target,
     defaultExpanded: false,
   },
@@ -154,39 +148,41 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
     defaultValues: project ? {
       title: project.title,
       description: project.description,
-      longDescription: project.longDescription || "",
       category: project.category,
+      role: project.role,
       status: project.status,
       technologies: project.technologies,
-      tags: project.tags,
-      achievements: project.achievements,
-      image: project.image || "",
-      logo: project.logo || "",
-      icon: project.icon || "",
+      achievements: project.achievements || [],
+      challenges: project.challenges || [],
+      lessons: project.lessons || [],
+      collaborators: project.collaborators || [],
       liveUrl: project.liveUrl || "",
       githubUrl: project.githubUrl || "",
-      demoUrl: project.demoUrl || "",
-      caseStudyUrl: project.caseStudyUrl || "",
-      featured: project.featured,
-      disabled: project.disabled,
+      images: project.images || [],
+      featured: project.featured || false,
+      disabled: project.disabled || false,
       priority: project.priority,
       startDate: project.startDate || "",
       endDate: project.endDate || "",
-      duration: project.duration || "",
-      teamSize: project.teamSize || 1,
-      role: project.role || "",
-      challenges: project.challenges || [],
-      solutions: project.solutions || [],
     } : {
-      ...DEFAULT_PROJECT,
       title: "",
       description: "",
       category: "",
+      role: "",
+      status: "",
       technologies: [],
-      tags: [],
       achievements: [],
       challenges: [],
-      solutions: [],
+      lessons: [],
+      collaborators: [],
+      liveUrl: "",
+      githubUrl: "",
+      images: [],
+      featured: false,
+      disabled: false,
+      priority: 50,
+      startDate: "",
+      endDate: "",
     },
   });
 
@@ -215,11 +211,11 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
     setIsSubmitting(true);
 
     try {
-      const projectData: ProjectInput = {
+      const projectData = {
         ...data,
+        id: project?.id || "", // Will be set by Firestore if creating
         createdAt: project?.createdAt || Date.now(),
         updatedAt: Date.now(),
-        version: (project?.version || 0) + 1,
       };
 
       if (mode === "edit" && project) {
@@ -363,26 +359,6 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="longDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Detailed Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Detailed project description for the project page"
-                              className="min-h-[120px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Comprehensive description shown on the project detail page
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     <FormField
                       control={form.control}
@@ -451,44 +427,6 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                       </div>
                     </div>
 
-                    <div>
-                      <Label>Tags</Label>
-                      <div className="flex flex-wrap gap-2 mt-2 mb-2">
-                        {form.watch("tags").map((tag, index) => (
-                          <Badge key={index} variant="outline" className="gap-1">
-                            {tag}
-                            <X
-                              className="h-3 w-3 cursor-pointer"
-                              onClick={() => removeArrayItem("tags", index)}
-                            />
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Add tag (e.g., responsive, real-time)"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              const input = e.target as HTMLInputElement;
-                              addArrayItem("tags", input.value);
-                              input.value = "";
-                            }
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={(e) => {
-                            const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
-                            addArrayItem("tags", input.value);
-                            input.value = "";
-                          }}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                    </div>
 
                     <div>
                       <Label>Key Achievements</Label>
@@ -561,61 +499,6 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="demoUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Demo URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://demo.example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="caseStudyUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Case Study URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://casestudy.example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="image"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Project Image URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://example.com/image.jpg" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="logo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Logo URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://example.com/logo.png" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 )}
 
@@ -649,46 +532,13 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="duration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Duration</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 3 months, 6 weeks" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="teamSize"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Team Size</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="1"
-                              max="50"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     <FormField
                       control={form.control}
                       name="role"
                       render={({ field }) => (
                         <FormItem className="md:col-span-2">
-                          <FormLabel>Your Role</FormLabel>
+                          <FormLabel>Your Role *</FormLabel>
                           <FormControl>
                             <Input placeholder="e.g., Full-Stack Developer, Team Lead" {...field} />
                           </FormControl>
@@ -742,27 +592,27 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                     </div>
 
                     <div>
-                      <Label>Solutions Implemented</Label>
+                      <Label>Lessons Learned</Label>
                       <div className="space-y-2 mt-2 mb-2">
-                        {form.watch("solutions").map((solution, index) => (
+                        {form.watch("lessons").map((lesson, index) => (
                           <div key={index} className="flex items-start gap-2 p-2 bg-muted rounded">
-                            <span className="flex-1 text-sm">{solution}</span>
+                            <span className="flex-1 text-sm">{lesson}</span>
                             <X
                               className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive mt-0.5"
-                              onClick={() => removeArrayItem("solutions", index)}
+                              onClick={() => removeArrayItem("lessons", index)}
                             />
                           </div>
                         ))}
                       </div>
                       <div className="flex gap-2">
                         <Textarea
-                          placeholder="Describe how you solved a challenge or implemented a solution"
+                          placeholder="Describe key lessons learned from this project"
                           className="min-h-[60px]"
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && e.ctrlKey) {
                               e.preventDefault();
                               const textarea = e.target as HTMLTextAreaElement;
-                              addArrayItem("solutions", textarea.value);
+                              addArrayItem("lessons", textarea.value);
                               textarea.value = "";
                             }
                           }}
@@ -772,8 +622,47 @@ export function ProjectForm({ project, onSubmit, onCancel, mode }: ProjectFormPr
                           variant="outline"
                           onClick={(e) => {
                             const textarea = (e.target as HTMLElement).previousElementSibling as HTMLTextAreaElement;
-                            addArrayItem("solutions", textarea.value);
+                            addArrayItem("lessons", textarea.value);
                             textarea.value = "";
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Collaborators</Label>
+                      <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                        {form.watch("collaborators").map((collaborator, index) => (
+                          <Badge key={index} variant="secondary" className="gap-1">
+                            {collaborator}
+                            <X
+                              className="h-3 w-3 cursor-pointer"
+                              onClick={() => removeArrayItem("collaborators", index)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add collaborator (e.g., Jane Doe, John Smith)"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const input = e.target as HTMLInputElement;
+                              addArrayItem("collaborators", input.value);
+                              input.value = "";
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={(e) => {
+                            const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
+                            addArrayItem("collaborators", input.value);
+                            input.value = "";
                           }}
                         >
                           Add

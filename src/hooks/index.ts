@@ -19,16 +19,24 @@ export { useProjects } from './useProjects';
 export { useSkills } from './useSkills';
 
 // Utility hooks
-export { useAccessibility } from './useAccessibility';
+export {
+  useFocusManagement,
+  useKeyboardNavigation,
+  useScreenReader,
+  useAriaAttributes,
+  useSkipLinks,
+  useReducedMotion,
+  useHighContrast,
+  useColorScheme,
+  useRovingTabIndex,
+} from './useAccessibility';
+export { default as useAccessibility } from './useAccessibility';
 export { useAutoSave } from './useAutoSave';
 export { usePerformanceMonitoring } from './usePerformanceMonitoring';
 export { useUserTracking } from './useUserTracking';
 
 // Types
 export type { ToastProps } from './use-toast';
-export type { AdminAuthState } from './useAdminAuth';
-export type { ProjectsState } from './useProjects';
-export type { SkillsState } from './useSkills';
 
 // Default exports for lazy loading
 export default {
